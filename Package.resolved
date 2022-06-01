@@ -1,0 +1,23 @@
+{
+  "pins" : [
+    {
+      "identity" : "collectionkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/GeneralD/CollectionKit",
+      "state" : {
+        "branch" : "master",
+        "revision" : "48e7170e9bcca842f31546ca18bc8ee26fad0bfd"
+      }
+    },
+    {
+      "identity" : "files",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/JohnSundell/Files",
+      "state" : {
+        "revision" : "d273b5b7025d386feef79ef6bad7de762e106eaf",
+        "version" : "4.2.0"
+      }
+    }
+  ],
+  "version" : 2
+}

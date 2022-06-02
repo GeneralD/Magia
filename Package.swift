@@ -11,11 +11,12 @@ let package = Package(
     dependencies: [
 		.package(url: "https://github.com/GeneralD/CollectionKit", branch: "master"),
 		.package(url: "https://github.com/JohnSundell/Files", from: "4.2.0"),
+		.package(url: "https://github.com/jakeheis/SwiftCLI", from: "6.0.3"),
     ],
     targets: [
         .executableTarget(
             name: "NFT Holic",
-			dependencies: ["CollectionKit", "Files"]),
+			dependencies: ["CollectionKit", "Files", "SwiftCLI"]),
         .testTarget(
             name: "NFT HolicTests",
             dependencies: ["NFT Holic"]),

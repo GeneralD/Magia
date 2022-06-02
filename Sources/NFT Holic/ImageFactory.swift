@@ -6,12 +6,18 @@ struct ImageFactory {
 	let input: InputData
 
 	@discardableResult
+	/// Generate an animated image.
+	/// - Parameters:
+	///   - folder: location to save generated image
+	///   - fileName: file name without path and extension
+	///   - isPng: to create animated png instead of gif
+	/// - Returns: if success
 	func generateImage(saveIn folder: Folder, as fileName: String, isPng: Bool = false) -> Bool {
-		let frames = (0..<input.numberOfFrames)
+		let frames = (0..<numberOfFrames)
 			.compactMap(generateImage(for:))
-			.compactMap(cgImage(from:))
+			.compactMap(\.cgImage)
 
-		let saveUrl = NSURL(fileURLWithPath: "\(folder.path)/\(fileName)")
+		let saveUrl = NSURL(fileURLWithPath: "\(folder.path)/\(fileName).\(isPng ? "png" : "gif")")
 		guard let destimation = CGImageDestinationCreateWithURL(
 			saveUrl,
 			isPng ? kUTTypePNG : kUTTypeGIF,
@@ -36,11 +42,13 @@ struct ImageFactory {
 
 		return true
 	}
+}
 
-	private func generateImage(for frame: Int) -> CIImage? {
-		let imageFiles = input.layerImages(frame: frame)
+private extension ImageFactory {
+	func generateImage(for frame: Int) -> CIImage? {
+		let imageFiles = layerImages(frame: frame)
 		let compositedImage = imageFiles
-			.compactMap(image(from:))
+			.compactMap(\.ciImage)
 			.splat
 			.map { head, tail in
 				tail.reduce(head) { accum, image in
@@ -50,13 +58,17 @@ struct ImageFactory {
 		return compositedImage
 	}
 
-	private func image(from file: File) -> CIImage? {
-		.init(contentsOf: .init(fileURLWithPath: file.path))
+	var numberOfFrames: Int {
+		input.layers.map(\.framesFolder.files.array.count).max() ?? 0
 	}
 
-	private let ciContext = CIContext()
-
-	private func cgImage(from ciImage: CIImage) -> CGImage? {
-		ciContext.createCGImage(ciImage, from: ciImage.extent)
+	func layerImages(frame: Int) -> [File] {
+		input.layers
+			.map(\.framesFolder)
+			.filter { !$0.isEmpty(includingHidden: false) }
+			.map { layerFolder in
+				let sorted = layerFolder.files.array.sorted(at: \.name, by: <)
+				return sorted[safe: frame] ?? sorted.last!
+			}
 	}
 }

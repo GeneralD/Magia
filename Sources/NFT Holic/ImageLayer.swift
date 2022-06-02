@@ -7,6 +7,8 @@ struct InputData {
 
 	struct ImageLayer {
 		let framesFolder: Folder
+		let layer: String
+		let name: String
 	}
 
 	var numberOfFrames: Int {

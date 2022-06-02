@@ -13,7 +13,7 @@ let layers = root.subfolders.array
 	.sorted(at: \.name, by: <)
 	.reduce(into: [InputData.ImageLayer]()) { accum, folder in
 		guard let selected = folder.subfolders.array.randomElement() else { return }
-		accum.append(.init(framesFolder: selected))
+		accum.append(.init(framesFolder: selected, layer: folder.name, name: selected.name))
 	}
 
 let input = InputData(layers: layers, animationDuration: animationDuration)
@@ -21,6 +21,8 @@ let factory = ImageFactory(input: input)
 
 guard let outputPath = Folder.documents else { throw Errors.invalidOutputPath }
 
-guard factory.generateImage(saveIn: outputPath, as: "test.jpg", isPng: false) else { throw Errors.generatingImageFailed }
+guard factory.generateImage(saveIn: outputPath, as: "test.gif", isPng: false) else { throw Errors.generatingImageFailed }
 
 print("Finish gracefully!")
+
+print(input.layers.map(\.name).joined(separator: ", "))

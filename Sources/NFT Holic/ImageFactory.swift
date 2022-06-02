@@ -9,7 +9,7 @@ struct ImageFactory {
 	func generateImage(saveIn folder: Folder, as fileName: String, isPng: Bool = false) -> Bool {
 		let frames = (0..<input.numberOfFrames)
 			.compactMap(generateImage(for:))
-			.compactMap(\.cgImage)
+			.compactMap(cgImage(from:))
 
 		let saveUrl = NSURL(fileURLWithPath: "\(folder.path)/\(fileName)")
 		guard let destimation = CGImageDestinationCreateWithURL(
@@ -43,15 +43,20 @@ struct ImageFactory {
 			.compactMap(image(from:))
 			.splat
 			.map { head, tail in
-				tail.reduce(head, { accum, image in
-					// TODO: maybe this may be bad
+				tail.reduce(head) { accum, image in
 					image.composited(over: accum)
-				})
+				}
 			}
 		return compositedImage
 	}
 
 	private func image(from file: File) -> CIImage? {
 		.init(contentsOf: .init(fileURLWithPath: file.path))
+	}
+
+	private let ciContext = CIContext()
+
+	private func cgImage(from ciImage: CIImage) -> CGImage? {
+		ciContext.createCGImage(ciImage, from: ciImage.extent)
 	}
 }

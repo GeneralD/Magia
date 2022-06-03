@@ -46,8 +46,10 @@ class Tool: Command {
 		let results = try generate()
 		logging(results: results)
 	}
+}
 
-	private func generate() throws -> [Bool] {
+private extension Tool {
+	func generate() throws -> [Bool] {
 		// measure time
 		let startDate = Date()
 		defer { stdout <<< "Generating many images take \(Date().timeIntervalSince(startDate)) seconds." }
@@ -80,7 +82,7 @@ class Tool: Command {
 
 
 	/// Indices of images to create. They start from 1, not 0.
-	private var indices: Set<Int> {
+	var indices: Set<Int> {
 		let skips = forceOverwrite
 		? []
 		: outputFolder.files
@@ -94,14 +96,15 @@ class Tool: Command {
 		return Set(start..<end).subtracting(skips)
 	}
 
-	private func logging(results: [Bool]) {
+	func logging(results: [Bool]) {
 		let successCount = results.filter { $0 }.count
-		let failureCount = results.filter(!).count
 		stdout <<< "\(successCount) images have been generated!"
-		if (failureCount > 0) {
-			stderr <<< "Failed to generate \(failureCount) images..."
-		} else {
+
+		let failureCount = results.filter(!).count
+		guard failureCount > 0 else {
 			stdout <<< "Finish gracefully!"
+			return
 		}
+		stderr <<< "Failed to generate \(failureCount) images..."
 	}
 }

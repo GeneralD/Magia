@@ -60,8 +60,7 @@ private extension ImageFactory {
 	}
 
 	func generateImage(for frame: Int) -> CIImage? {
-		let imageFiles = layerImages(frame: frame)
-		let compositedImage = imageFiles
+		layerImages(frame: frame)
 			.compactMap(\.ciImage)
 			.splat
 			.map { head, tail in
@@ -69,7 +68,6 @@ private extension ImageFactory {
 					image.composited(over: accum)
 				}
 			}
-		return compositedImage
 	}
 
 	var numberOfFrames: Int {
@@ -78,10 +76,10 @@ private extension ImageFactory {
 
 	func layerImages(frame: Int) -> [File] {
 		input.layers
-			.map(\.framesFolder)
-			.filter { !$0.isEmpty(includingHidden: false) }
-			.map { layerFolder in
-				let sorted = layerFolder.files.array.sorted(at: \.name, by: <)
+			.map(\.framesFolder.files.array)
+			.filter(\.isEmpty.not)
+			.map { files in
+				let sorted = files.sorted(at: \.name, by: <)
 				return sorted[safe: frame] ?? sorted.last!
 			}
 	}

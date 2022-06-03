@@ -1,5 +1,7 @@
 import CoreImage
 import Files
+import UniformTypeIdentifiers
+import AppKit
 
 struct ImageFactory {
 
@@ -12,14 +14,14 @@ struct ImageFactory {
 	///   - fileName: file name without path and extension
 	///   - isPng: to create animated png instead of gif
 	/// - Returns: if success
-	func generateImage(saveIn folder: Folder, as fileName: String, isPng: Bool = false) -> Bool {
-		let frames = generateAllFrameImages(queueIdentification: fileName)
+	func generateImage(saveIn folder: Folder, serial: Int, isPng: Bool = false) -> Bool {
+		let frames = generateAllFrameImages(queueIdentification: serial.description, serial: serial)
 			.compactMap(\.cgImage)
 
-		let saveUrl = NSURL(fileURLWithPath: "\(folder.path)/\(fileName).\(isPng ? "png" : "gif")")
+		let saveUrl = NSURL(fileURLWithPath: "\(folder.path)/\(serial).\(isPng ? "png" : "gif")")
 		guard let destimation = CGImageDestinationCreateWithURL(
 			saveUrl,
-			isPng ? kUTTypePNG : kUTTypeGIF,
+			(isPng ? UTType.png : UTType.gif).identifier as CFString,
 			frames.count,
 			nil) else { return false }
 
@@ -44,15 +46,20 @@ struct ImageFactory {
 }
 
 private extension ImageFactory {
-	func generateAllFrameImages(queueIdentification: String) -> [CIImage] {
+	func generateAllFrameImages(queueIdentification: String, serial: Int) -> [CIImage] {
 		@Atomic var frames = [Int: CIImage?]()
 		let group = DispatchGroup()
 		for frame in 0..<numberOfFrames {
 			group.enter()
 			let dispatch = DispatchQueue(label: "\(queueIdentification).\(frame)", qos: .utility, attributes: .concurrent)
 			dispatch.async(group: group) {
-				frames[frame] = generateImage(for: frame)
-				group.leave()
+				defer { group.leave() }
+				guard let serialText = input.serialText else {
+					frames[frame] = generateImage(for: frame)
+					return
+				}
+				let text = serialText.formatText.replaced(text: .init(format: serialText.formatText.string, serial))
+				frames[frame] = generateImage(for: frame)?.draw(text: text)
 			}
 		}
 		group.wait()
@@ -82,5 +89,11 @@ private extension ImageFactory {
 				let sorted = files.sorted(at: \.name, by: <)
 				return sorted[safe: frame] ?? sorted.last!
 			}
+	}
+}
+
+extension NSAttributedString {
+	func replaced(text: String) -> Self {
+		.init(string: text, attributes: attributes(at: 0, effectiveRange: nil))
 	}
 }

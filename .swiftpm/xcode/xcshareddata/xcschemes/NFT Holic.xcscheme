@@ -88,7 +88,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-q 100"
+            argument = "-q 1"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

@@ -2,6 +2,7 @@ import CollectionKit
 import Files
 import Foundation
 import SwiftCLI
+import AppKit
 
 class Tool: Command {
 	var name = "nftholic"
@@ -21,10 +22,6 @@ class Tool: Command {
 
 	@Key("-d", "--anim-duration", description: "Animation duration in seconds (default is 2.0000)", completion: .none, validation: [.greaterThan(0)])
 	var animationDuration: Double?
-
-	// TODO: use and implement
-	@Key("-c", "--concurrent", description: "Number of parallel processes (default is 4)", completion: .none, validation: [.greaterThan(0)])
-	var concurrent: Int?
 
 	@Flag("-p", "--png", description: "Make animated png instead of gif")
 	var isPng: Bool
@@ -67,10 +64,10 @@ private extension Tool {
 					accum.append(.init(framesFolder: selected, layer: folder.name, name: selected.name))
 				}
 
-			let input = InputData(layers: layers, animationDuration: animationDuration ?? 2)
+			let input = InputData(layers: layers, animationDuration: animationDuration ?? 2, serialText: serialText)
 			let factory = ImageFactory(input: input)
 
-			guard factory.generateImage(saveIn: outputFolder, as: "\(index)", isPng: isPng) else {
+			guard factory.generateImage(saveIn: outputFolder, serial: index, isPng: isPng) else {
 				stdout <<< "Generating image was failed..."
 				return false
 			}
@@ -79,7 +76,6 @@ private extension Tool {
 
 		return results
 	}
-
 
 	/// Indices of images to create. They start from 1, not 0.
 	var indices: Set<Int> {
@@ -106,5 +102,11 @@ private extension Tool {
 			return
 		}
 		stderr <<< "Failed to generate \(failureCount) images..."
+	}
+
+	var serialText: InputData.SerialText? {
+		// TODO: read from JSON
+		guard let font = NSFont(name: "M+ 1p black", size: 14) else { return nil }
+		return .init(formatText: .init(string: "#%05d", attributes: [.font: font, .foregroundColor: NSColor.black]))
 	}
 }

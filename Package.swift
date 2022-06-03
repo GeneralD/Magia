@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "NFT Holic",
 	platforms: [
-		.macOS(.v10_15),
+		.macOS(.v12),
 	],
     dependencies: [
 		.package(url: "https://github.com/GeneralD/CollectionKit", branch: "master"),

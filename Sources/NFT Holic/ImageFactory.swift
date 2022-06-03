@@ -45,11 +45,11 @@ struct ImageFactory {
 
 private extension ImageFactory {
 	func generateAllFrameImages(queueIdentification: String) -> [CIImage] {
+		@Atomic var frames = [Int: CIImage?]()
 		let group = DispatchGroup()
-		var frames = [Int: CIImage?]()
 		for frame in 0..<numberOfFrames {
 			group.enter()
-			let dispatch = DispatchQueue(label: "\(queueIdentification).\(frame)", attributes: .concurrent)
+			let dispatch = DispatchQueue(label: "\(queueIdentification).\(frame)", qos: .utility, attributes: .concurrent)
 			dispatch.async(group: group) {
 				frames[frame] = generateImage(for: frame)
 				group.leave()

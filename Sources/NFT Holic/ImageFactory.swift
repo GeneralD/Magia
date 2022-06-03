@@ -13,8 +13,7 @@ struct ImageFactory {
 	///   - isPng: to create animated png instead of gif
 	/// - Returns: if success
 	func generateImage(saveIn folder: Folder, as fileName: String, isPng: Bool = false) -> Bool {
-		let frames = (0..<numberOfFrames)
-			.compactMap(generateImage(for:))
+		let frames = generateAllFrameImages(queueIdentification: fileName)
 			.compactMap(\.cgImage)
 
 		let saveUrl = NSURL(fileURLWithPath: "\(folder.path)/\(fileName).\(isPng ? "png" : "gif")")
@@ -45,6 +44,21 @@ struct ImageFactory {
 }
 
 private extension ImageFactory {
+	func generateAllFrameImages(queueIdentification: String) -> [CIImage] {
+		let group = DispatchGroup()
+		var frames = [Int: CIImage?]()
+		for frame in 0..<numberOfFrames {
+			group.enter()
+			let dispatch = DispatchQueue(label: "\(queueIdentification).\(frame)", attributes: .concurrent)
+			dispatch.async(group: group) {
+				frames[frame] = generateImage(for: frame)
+				group.leave()
+			}
+		}
+		group.wait()
+		return frames.sorted(at: \.key, by: <).compactMap(\.value)
+	}
+
 	func generateImage(for frame: Int) -> CIImage? {
 		let imageFiles = layerImages(frame: frame)
 		let compositedImage = imageFiles

@@ -13,7 +13,7 @@ class Tool: Command {
 	@Key("-o", "--output-dir", description: "Output destination is required", completion: .filename)
 	var outputFolder: Folder!
 
-	@Key("-n", "--quantity", description: "Number of creation (default is 100)", completion: .none, validation: [.greaterThan(0)])
+	@Key("-q", "--quantity", description: "Number of creation (default is 100)", completion: .none, validation: [.greaterThan(0)])
 	var creationCount: Int?
 
 	@Key("-s", "--start-index", description: "Auto incremented index start from what? (default is 1)", completion: .none, validation: [.greaterThan(0)])
@@ -22,11 +22,19 @@ class Tool: Command {
 	@Key("-d", "--anim-duration", description: "Animation duration in seconds (default is 2.0000)", completion: .none, validation: [.greaterThan(0)])
 	var animationDuration: Double?
 
+	// TODO: use and implement
+	@Key("-c", "--concurrent", description: "Number of parallel processes (default is 4)", completion: .none, validation: [.greaterThan(0)])
+	var concurrent: Int?
+
 	@Flag("-p", "--png", description: "Make animated png instead of gif")
 	var isPng: Bool
 
 	@Flag("-f", "--overwrite", description: "Overwrite existing files")
 	var forceOverwrite: Bool
+
+	// TODO: use and implement
+	@Flag("-x", "--sample", description: "Generate image with watermark (Not for sales)")
+	var isSampleMode: Bool
 
 	func execute() throws {
 		// validate

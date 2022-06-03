@@ -106,7 +106,9 @@ private extension Tool {
 
 	var serialText: InputData.SerialText? {
 		// TODO: read from JSON
-		guard let font = NSFont(name: "M+ 1p black", size: 14) else { return nil }
-		return .init(formatText: .init(string: "#%05d", attributes: [.font: font, .foregroundColor: NSColor.black]))
+		guard let font = NSFont(name: "M+ 1p black", size: 48) else { return nil }
+		return .init(
+			formatText: .init(string: "#%05d", attributes: [.font: font, .foregroundColor: NSColor.black]),
+			transform: .init(translationX: 40, y: 10))
 	}
 }

@@ -58,8 +58,8 @@ private extension ImageFactory {
 					frames[frame] = generateImage(for: frame)
 					return
 				}
-				let text = serialText.formatText.replaced(text: .init(format: serialText.formatText.string, serial))
-				frames[frame] = generateImage(for: frame)?.draw(text: text)
+				let text = serialText.formatText.format(serial)
+				frames[frame] = generateImage(for: frame)?.draw(text: text, transform: serialText.transform)
 			}
 		}
 		group.wait()
@@ -89,11 +89,5 @@ private extension ImageFactory {
 				let sorted = files.sorted(at: \.name, by: <)
 				return sorted[safe: frame] ?? sorted.last!
 			}
-	}
-}
-
-extension NSAttributedString {
-	func replaced(text: String) -> Self {
-		.init(string: text, attributes: attributes(at: 0, effectiveRange: nil))
 	}
 }

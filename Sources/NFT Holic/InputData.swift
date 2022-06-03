@@ -15,5 +15,6 @@ struct InputData {
 
 	struct SerialText {
 		let formatText: NSAttributedString
+		let transform: CGAffineTransform
 	}
 }

@@ -7,11 +7,20 @@ class Tool: Command {
 	var name = "nftholic"
 	var shortDescription = "A NFT generator for NFT holic"
 
-	@Param var inputFolder: Folder
-	@Key("-o", "--output-dir", description: "Output destination is required") var outputFolder: Folder!
-	@Key("-n", description: "Number of creation (default is 100)", validation: [.greaterThan(0)]) var creationCount: Int?
-	@Key("-d", "--anim-duration", description: "Animation duration in seconds (default is 2.0000)", validation: [.greaterThan(0)]) var animationDuration: Double?
-	@Flag("-p", "--png", description: "Make animated png instead of gif") var isPng: Bool
+	@Param(completion: .filename)
+	var inputFolder: Folder
+
+	@Key("-o", "--output-dir", description: "Output destination is required", completion: .filename)
+	var outputFolder: Folder!
+
+	@Key("-n", "--quantity", description: "Number of creation (default is 100)", completion: .none, validation: [.greaterThan(0)])
+	var creationCount: Int?
+
+	@Key("-d", "--anim-duration", description: "Animation duration in seconds (default is 2.0000)", completion: .none, validation: [.greaterThan(0)])
+	var animationDuration: Double?
+
+	@Flag("-p", "--png", description: "Make animated png instead of gif")
+	var isPng: Bool
 
 	func execute() throws {
 		// validate

@@ -1,9 +1,9 @@
 import CoreImage
 
-extension CIImage {
-	private static let ciContext = CIContext()
+private let ciContext = CIContext()
 
+extension CIImage {
 	var cgImage: CGImage? {
-		type(of: self).ciContext.createCGImage(self, from: extent)
+		ciContext.createCGImage(self, from: extent)
 	}
 }

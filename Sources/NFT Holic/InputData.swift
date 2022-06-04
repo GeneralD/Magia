@@ -6,6 +6,7 @@ struct InputData {
 	let layers: [ImageLayer]
 	let animationDuration: Double
 	let serialText: SerialText?
+	let isSampleMode: Bool
 
 	struct ImageLayer {
 		let framesFolder: Folder

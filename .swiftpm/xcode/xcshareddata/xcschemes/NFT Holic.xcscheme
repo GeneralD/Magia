@@ -80,6 +80,10 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "-x"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "-o ~/Downloads"
             isEnabled = "YES">
          </CommandLineArgument>
@@ -88,7 +92,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-q 1"
+            argument = "-q 10"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

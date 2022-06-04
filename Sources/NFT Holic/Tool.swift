@@ -1,9 +1,9 @@
+import AppKit
 import CollectionKit
 import Files
 import Foundation
 import SwiftCLI
 import SwiftHEXColors
-import AppKit
 
 class Tool: Command {
 	var name = "nftholic"
@@ -68,7 +68,7 @@ private extension Tool {
 				}
 
 			let serialText = serialText(drawSerial: config.drawSerial)
-			let input = InputData(layers: layers, animationDuration: animationDuration ?? 2, serialText: serialText)
+			let input = InputData(layers: layers, animationDuration: animationDuration ?? 2, serialText: serialText, isSampleMode: isSampleMode)
 			let factory = ImageFactory(input: input)
 
 			guard factory.generateImage(saveIn: outputFolder, serial: index, isPng: isPng) else {
@@ -134,19 +134,5 @@ private extension Tool {
 			return .init(drawSerial: nil)
 		}
 		return config
-	}
-}
-
-struct AssetConfig: Decodable {
-	let drawSerial: DrawSerial?
-
-	struct DrawSerial: Decodable {
-		let enabled: Bool?
-		let format: String?
-		let font: String?
-		let size: CGFloat?
-		let color: String?
-		let offsetX: CGFloat?
-		let offsetY: CGFloat?
 	}
 }

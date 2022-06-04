@@ -54,12 +54,15 @@ private extension ImageFactory {
 			let dispatch = DispatchQueue(label: "\(queueIdentification).\(frame)", qos: .utility, attributes: .concurrent)
 			dispatch.async(group: group) {
 				defer { group.leave() }
-				guard let serialText = input.serialText else {
-					frames[frame] = generateImage(for: frame)
-					return
+				var image = generateImage(for: frame)
+				if let serialText = input.serialText {
+					let text = serialText.formatText.format(serial)
+					image = image?.draw(text: text, transform: serialText.transform)
 				}
-				let text = serialText.formatText.format(serial)
-				frames[frame] = generateImage(for: frame)?.draw(text: text, transform: serialText.transform)
+				if input.isSampleMode {
+					image = image?.drawSample()
+				}
+				frames[frame] = image
 			}
 		}
 		group.wait()

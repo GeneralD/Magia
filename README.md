@@ -304,7 +304,7 @@ Example:
     {
       "target": {
         "layer": "02_body",
-        "name": "^(?=.*_Dear_).*$"
+        "name": "^(?=.*_dear_).*$"
       },
       "dependencies": [
         {
@@ -400,12 +400,12 @@ Example:
     {
       "target": {
         "layer": "02_body",
-        "name": "^(?=.*_reopard_).*$"
+        "name": "^(?=.*_leopard_).*$"
       },
       "dependencies": [
         {
           "layer": "09_ear",
-          "name": "^(?=.*_reopard_).*$"
+          "name": "^(?=.*_leopard_).*$"
         },
         {
           "layer": "01_backear",

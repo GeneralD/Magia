@@ -1,6 +1,6 @@
 import AppKit
-import CollectionKit
 import Files
+import SwiftHEXColors
 
 struct InputData {
 	let layers: [ImageLayer]

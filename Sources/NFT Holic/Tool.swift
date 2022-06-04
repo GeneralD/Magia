@@ -1,10 +1,8 @@
-import AppKit
 import CollectionKit
 import Files
 import Foundation
 import Regex
 import SwiftCLI
-import SwiftHEXColors
 
 class Tool: Command {
 	var name = "nftholic"

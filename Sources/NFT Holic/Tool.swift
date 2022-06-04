@@ -52,15 +52,14 @@ private extension Tool {
 
 		let config = loadAssetConfig()
 		let regexFactory = LayerStrictionRegexFactory(layerStrictions: config.combinations)
+		let layerFolders = sort(subjects: inputFolder.subfolders, where: \.name, order: config.order?.selection)
 
 		let results = indices.map { index -> Bool in
 			// measure time
 			let startDate = Date()
 			defer { stdout <<< "Generating an image takes \(Date().timeIntervalSince(startDate)) seconds." }
 
-			let layers = inputFolder.subfolders.array
-			// sort alphabetically and bigger comes fronter layer
-				.sorted(at: \.name, by: <)
+			let layers = layerFolders
 				.reduce(into: [InputData.ImageLayer]()) { layers, folder in
 					let limitRegex = regexFactory.validItemNameRegex(forLayer: folder.name, conditionLayers: layers)
 					guard let selected = folder.subfolders.filter({ subfolder in
@@ -70,8 +69,11 @@ private extension Tool {
 					layers.append(.init(framesFolder: selected, layer: folder.name, name: selected.name))
 				}
 
+			// arrange layers in the order of depth configured in json
+			let sortedLayers = sort(subjects: layers, where: \.layer, order: config.order?.layerDepth)
+
 			let serialText = InputData.SerialText(from: config.drawSerial)
-			let input = InputData(layers: layers, animationDuration: animationDuration ?? 2, serialText: serialText, isSampleMode: isSampleMode)
+			let input = InputData(layers: sortedLayers, animationDuration: animationDuration ?? 2, serialText: serialText, isSampleMode: isSampleMode)
 			let factory = ImageFactory(input: input)
 
 			guard factory.generateImage(saveIn: outputFolder, serial: index, isPng: isPng) else {
@@ -116,8 +118,25 @@ private extension Tool {
 			  let config = try? JSONDecoder().decode(AssetConfig.self, from: file.read()) else {
 			stderr <<< "No valid config.json"
 			stdout <<< "But still ok! We can continue processing..."
-			return .init(combinations: nil, drawSerial: nil)
+			return .init(order: nil, combinations: nil, drawSerial: nil)
 		}
 		return config
+	}
+
+	func sort<Subjects: Sequence>(subjects: Subjects, where: (Subjects.Element) -> String, order: [String]?) -> [Subjects.Element] {
+		let array = subjects.array
+		let sortedAlphabetically = array.sorted(at: `where`, by: <)
+		guard let order = order else { return sortedAlphabetically }
+		let result = order.compactMap { name in
+			return subjects.first { subject in
+				`where`(subject) == name
+			}
+		}
+		let notFoundInOrder = Set(subjects.map(`where`)).subtracting(order)
+		guard notFoundInOrder.isEmpty else {
+			stderr <<< "Not found in order config: \(notFoundInOrder.joined(separator: ", "))"
+			return result
+		}
+		return result
 	}
 }

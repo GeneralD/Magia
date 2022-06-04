@@ -1,6 +1,7 @@
 import CoreGraphics
 
 struct AssetConfig: Decodable {
+	let order: Order?
 	let combinations: [Combination]?
 	let drawSerial: DrawSerial?
 
@@ -22,5 +23,10 @@ struct AssetConfig: Decodable {
 		let color: String?
 		let offsetX: CGFloat?
 		let offsetY: CGFloat?
+	}
+
+	struct Order: Decodable {
+		let selection: [String]?
+		let layerDepth: [String]?
 	}
 }

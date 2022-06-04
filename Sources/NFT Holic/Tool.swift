@@ -2,6 +2,7 @@ import CollectionKit
 import Files
 import Foundation
 import SwiftCLI
+import SwiftHEXColors
 import AppKit
 
 class Tool: Command {
@@ -51,6 +52,8 @@ private extension Tool {
 		let startDate = Date()
 		defer { stdout <<< "Generating many images take \(Date().timeIntervalSince(startDate)) seconds." }
 
+		let config = loadAssetConfig()
+
 		let results = indices.map { index -> Bool in
 			// measure time
 			let startDate = Date()
@@ -64,6 +67,7 @@ private extension Tool {
 					accum.append(.init(framesFolder: selected, layer: folder.name, name: selected.name))
 				}
 
+			let serialText = serialText(drawSerial: config.drawSerial)
 			let input = InputData(layers: layers, animationDuration: animationDuration ?? 2, serialText: serialText)
 			let factory = ImageFactory(input: input)
 
@@ -104,11 +108,45 @@ private extension Tool {
 		stderr <<< "Failed to generate \(failureCount) images..."
 	}
 
-	var serialText: InputData.SerialText? {
-		// TODO: read from JSON
-		guard let font = NSFont(name: "M+ 1p black", size: 48) else { return nil }
+	func serialText(drawSerial: AssetConfig.DrawSerial?) -> InputData.SerialText? {
+		guard let config = drawSerial,
+			  config.enabled ?? true else { return nil }
+
+		let fontName = config.font ?? ""
+		let fontSize = config.size ?? 14
+		let font = NSFont(name: fontName, size: fontSize) ?? .systemFont(ofSize: fontSize)
+
+		let format = config.format ?? "%03d"
+		let offsetX = config.offsetX ?? 0
+		let offsetY = config.offsetY ?? 0
+		let color = config.color.flatMap { NSColor(hexString: $0) } ?? .black
+
 		return .init(
-			formatText: .init(string: "#%05d", attributes: [.font: font, .foregroundColor: NSColor.black]),
-			transform: .init(translationX: 40, y: 10))
+			formatText: .init(string: format, attributes: [.font: font, .foregroundColor: color]),
+			transform: .init(translationX: offsetX, y: offsetY))
+	}
+
+	func loadAssetConfig() -> AssetConfig {
+		guard let file = try? inputFolder.file(named: "config.json"),
+			  let config = try? JSONDecoder().decode(AssetConfig.self, from: file.read()) else {
+			stderr <<< "No valid config.json"
+			stdout <<< "But still ok! We can continue processing..."
+			return .init(drawSerial: nil)
+		}
+		return config
+	}
+}
+
+struct AssetConfig: Decodable {
+	let drawSerial: DrawSerial?
+
+	struct DrawSerial: Decodable {
+		let enabled: Bool?
+		let format: String?
+		let font: String?
+		let size: CGFloat?
+		let color: String?
+		let offsetX: CGFloat?
+		let offsetY: CGFloat?
 	}
 }

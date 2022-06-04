@@ -19,6 +19,15 @@
       }
     },
     {
+      "identity" : "regex",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/crossroadlabs/Regex",
+      "state" : {
+        "revision" : "166728756082a9cac6e4aed3ebbce8e41cb3a945",
+        "version" : "1.2.0"
+      }
+    },
+    {
       "identity" : "swiftcli",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/jakeheis/SwiftCLI",

@@ -2,6 +2,7 @@ import AppKit
 import CollectionKit
 import Files
 import Foundation
+import Regex
 import SwiftCLI
 import SwiftHEXColors
 
@@ -30,7 +31,6 @@ class Tool: Command {
 	@Flag("-f", "--overwrite", description: "Overwrite existing files")
 	var forceOverwrite: Bool
 
-	// TODO: use and implement
 	@Flag("-x", "--sample", description: "Generate image with watermark (Not for sales)")
 	var isSampleMode: Bool
 
@@ -63,7 +63,11 @@ private extension Tool {
 			// sort alphabetically and bigger comes fronter layer
 				.sorted(at: \.name, by: <)
 				.reduce(into: [InputData.ImageLayer]()) { accum, folder in
-					guard let selected = folder.subfolders.array.randomElement() else { return }
+					let limitRegex = combinationLimitationRegex(forLayer: folder.name, conditionLayers: accum, combinations: config.combinations)
+					guard let selected = folder.subfolders.filter({ subfolder in
+							guard let regex = limitRegex else { return true } // no limitation
+							return subfolder.name =~ regex
+					}).randomElement() else { return }
 					accum.append(.init(framesFolder: selected, layer: folder.name, name: selected.name))
 				}
 
@@ -131,8 +135,28 @@ private extension Tool {
 			  let config = try? JSONDecoder().decode(AssetConfig.self, from: file.read()) else {
 			stderr <<< "No valid config.json"
 			stdout <<< "But still ok! We can continue processing..."
-			return .init(drawSerial: nil)
+			return .init(combinations: nil, drawSerial: nil)
 		}
 		return config
+	}
+
+	func combinationLimitationRegex(forLayer layer: String, conditionLayers: [InputData.ImageLayer], combinations: [AssetConfig.Combination]?) -> String? {
+		// check if no striction
+		guard let combinations = combinations else { return nil }
+
+		let names = conditionLayers
+		// pick up all related strictions with current layer selections
+			.flatMap { conditionLayer in
+				combinations.filter { combination in
+					combination.target.layer == conditionLayer.layer && conditionLayer.name =~ combination.target.name
+				}
+			}
+			.flatMap(\.dependencies)
+			.filter { dependency in
+				dependency.layer == layer
+			}
+			.map(\.name)
+		guard !names.isEmpty else { return nil }
+		return names.map { "(\($0))" }.joined(separator: "|")
 	}
 }

@@ -21,6 +21,6 @@ struct LayerStrictionRegexFactory {
 			}
 			.map(\.name)
 		guard !names.isEmpty else { return nil }
-		return names.map { "(\($0))" }.joined(separator: "|").r
+		return names.map { "(?=\($0))" }.joined().r
 	}
 }

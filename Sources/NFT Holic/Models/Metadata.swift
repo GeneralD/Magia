@@ -71,8 +71,8 @@ struct Metadata: Encodable {
 
 			case let .dateLabel(traitType, value):
 				try container.encode(traitType, forKey: .traitType)
-				try container.encode(Int(value.timeIntervalSince1970), forKey: .value)
 				try container.encode("date", forKey: .displayType)
+				try container.encode(Int(value.timeIntervalSince1970), forKey: .value)
 
 			case let .numberLabel(traitType, value):
 				try container.encode(traitType, forKey: .traitType)

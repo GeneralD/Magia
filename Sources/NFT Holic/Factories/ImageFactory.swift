@@ -55,10 +55,31 @@ struct ImageFactory {
 		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(serial).json") else { return false }
 
 		let attributes = input.layers.reduce([Metadata.Attribute]()) { accum, layer in
-			return accum +
-			(config.textLabels ?? [])
-				.filtered(by: layer)
-				.map { label in	Metadata.Attribute.textLabel(traitType: label.trait, value: label.value) }
+			let attrs: [[Metadata.Attribute]] = [
+				accum,
+				
+				config.texts.orEmpty
+					.filtered(by: layer)
+					.map(\.value)
+					.map(Metadata.Attribute.simple(value: )),
+
+				config.textLabels.orEmpty
+					.filtered(by: layer)
+					.map { label in	.textLabel(traitType: label.trait, value: label.value) },
+
+				config.dateLabels.orEmpty
+					.filtered(by: layer)
+					.map { label in .dateLabel(traitType: label.trait, value: label.value) },
+
+				config.intLabels.orEmpty
+					.filtered(by: layer)
+					.map { label in .numberLabel(traitType: label.trait, value: .int(label.value)) },
+
+				config.floatLabels.orEmpty
+					.filtered(by: layer)
+					.map { label in .numberLabel(traitType: label.trait, value: .float(label.value)) },
+			]
+			return attrs.flatten
 		}.unique(where: \.identity)
 
 		// image url is required field

@@ -40,7 +40,7 @@ struct AssetConfig: Decodable {
 		let defaultDescriptionFormat: String
 		let externalUrlFormat: String?
 		let backgroundColor: String?
-		let texts: [String]?
+		let texts: [Simple]?
 		let textLabels: [Label<String>]?
 		let dateLabels: [Label<Date>]?
 		let intLabels: [Label<Int>]?
@@ -49,6 +49,11 @@ struct AssetConfig: Decodable {
 		struct Label<ValueType: Decodable>: Decodable {
 			let trait: String
 			let value: ValueType
+			let conditions: [Subject]
+		}
+
+		struct Simple: Decodable {
+			let value: String
 			let conditions: [Subject]
 		}
 	}

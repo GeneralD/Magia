@@ -7,3 +7,9 @@ extension Sequence {
 		}).values.array
 	}
 }
+
+extension Optional where Wrapped: Sequence {
+	var orEmpty: [Wrapped.Element] {
+		self?.array ?? []
+	}
+}

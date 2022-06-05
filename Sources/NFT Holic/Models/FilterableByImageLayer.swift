@@ -19,6 +19,13 @@ extension AssetConfig.Metadata.Label: FilterableByImageLayer {
 	}
 }
 
+extension AssetConfig.Metadata.Simple: FilterableByImageLayer {
+	typealias Element = AssetConfig.Subject
+	var subjects: [AssetConfig.Subject] {
+		conditions
+	}
+}
+
 extension Sequence where Element: FilterableByImageLayer {
 	func filtered(by layer: ImageLayerSubject) -> [Element] {
 		filter { element in

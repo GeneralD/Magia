@@ -95,6 +95,25 @@ struct Metadata: Encodable {
 				try container.encode(value, forKey: .value)
 			}
 		}
+
+		var traitType: String? {
+			switch self {
+			case .simple(value: _):
+				return nil
+			case .textLabel(traitType: let traitType, value: _):
+				return traitType
+			case .dateLabel(traitType: let traitType, value: _):
+				return traitType
+			case .numberLabel(traitType: let traitType, value: _):
+				return traitType
+			case .boostNumber(traitType: let traitType, value: _, maxValue: _):
+				return traitType
+			case .boostPercentage(traitType: let traitType, value: _):
+				return traitType
+			case .rankedNumber(traitType: let traitType, value: _):
+				return traitType
+			}
+		}
 	}
 }
 

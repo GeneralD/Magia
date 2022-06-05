@@ -1,3 +1,4 @@
+import CollectionKit
 import CoreImage
 import Files
 import Regex
@@ -60,7 +61,8 @@ struct ImageFactory {
 			}.map { label in
 				Metadata.Attribute.textLabel(traitType: label.trait, value: label.value)
 			}
-		}
+		}.unique(where: \.traitType)
+
 		// TODO: put correct params
 		let metadata = Metadata(image: .init(string: "https://anim.jp")!, externalURL: .init(string: "https://anim.jp"), description: "", name: "", attributes: attributes, backgroundColor: "FFFF00")
 

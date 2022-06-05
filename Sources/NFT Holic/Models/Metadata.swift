@@ -102,7 +102,7 @@ struct Metadata: Encodable {
 			return value // use value instead
 		}
 
-		private var traitType: String? {
+		var traitType: String? {
 			switch self {
 			case .simple(value: _):
 				return nil

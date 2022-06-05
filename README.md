@@ -513,6 +513,12 @@ Example:
     "backgroundColor": "FFFF00",
     "defaultNameFormat": "ANIM.JP#%05d",
     "defaultDescriptionFormat": "First collections of ANIM.JP.\nEvery NFT is identified by serial number. The number of this is %05d.",
+    "order": {
+      "trait": [
+        "Family",
+        "Color"
+      ]
+    },
     "textLabels": [
       {
         "trait": "Family",

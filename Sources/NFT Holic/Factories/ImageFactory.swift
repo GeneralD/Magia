@@ -57,7 +57,7 @@ struct ImageFactory {
 		let attributes = input.layers.reduce([Metadata.Attribute]()) { accum, layer in
 			let attrs: [[Metadata.Attribute]] = [
 				accum,
-				
+
 				config.texts.orEmpty
 					.filtered(by: layer)
 					.map(\.value)
@@ -82,6 +82,12 @@ struct ImageFactory {
 			return attrs.flatten
 		}.unique(where: \.identity)
 
+		// sort attributes
+		guard let sortedAttribute = sort(attributes: attributes, traitOrder: config.order?.trait) else {
+			try? jsonFile.delete()
+			return false
+		}
+
 		// image url is required field
 		guard let imageURL = URL(string: .init(format: config.imageUrlFormat, serial)) else {
 			try? jsonFile.delete()
@@ -95,7 +101,7 @@ struct ImageFactory {
 		let externalURL = config.externalUrlFormat.map { String(format: $0, serial) }.flatMap(URL.init(string: ))
 		let backgroundColor = config.backgroundColor ?? "ffffff"
 
-		let metadata = Metadata(image: imageURL, externalURL: externalURL, description: description, name: name, attributes: attributes, backgroundColor: backgroundColor)
+		let metadata = Metadata(image: imageURL, externalURL: externalURL, description: description, name: name, attributes: sortedAttribute, backgroundColor: backgroundColor)
 
 		let encoder = JSONEncoder()
 		encoder.outputFormatting = .prettyPrinted
@@ -155,5 +161,11 @@ private extension ImageFactory {
 				let sorted = files.sorted(at: \.name, by: <)
 				return sorted[safe: frame] ?? sorted.last!
 			}
+	}
+
+	func sort(attributes: [Metadata.Attribute], traitOrder: [String]?) -> [Metadata.Attribute]? {
+		guard let order = traitOrder else { return attributes.sorted(at: { $0.traitType ?? "" }, by: <) } // just sort alphabetically
+		guard let sorted = attributes.sort(where: \.traitType, orderSample: order, shouldCover: true) else { return nil } // fail
+		return sorted // ok
 	}
 }

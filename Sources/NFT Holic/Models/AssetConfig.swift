@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 
 struct AssetConfig: Decodable {
 	static let empty: Self = .init(order: nil, combinations: nil, drawSerial: nil, metadata: nil)
@@ -39,7 +40,11 @@ struct AssetConfig: Decodable {
 		let defaultDescriptionFormat: String
 		let externalUrlFormat: String?
 		let backgroundColor: String?
+		let texts: [String]?
 		let textLabels: [Label<String>]?
+		let dateLabels: [Label<Date>]?
+		let intLabels: [Label<Int>]?
+		let floatLabels: [Label<Float>]?
 
 		struct Label<ValueType: Decodable>: Decodable {
 			let trait: String

@@ -12,7 +12,7 @@ struct LayerStrictionRegexFactory {
 		// pick up all related strictions with current layer selections
 			.flatMap { conditionLayer in
 				combinations.filter { combination in
-					combination.target.layer == conditionLayer.layer && conditionLayer.name =~ combination.target.name
+					conditionLayer =~ combination.target
 				}
 			}
 			.flatMap(\.dependencies)

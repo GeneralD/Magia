@@ -96,7 +96,13 @@ struct Metadata: Encodable {
 			}
 		}
 
-		var traitType: String? {
+		/// Userful to distinct attributes.
+		var identity: String {
+			guard case .simple(value: let value) = self else { return traitType ?? "" }
+			return value // use value instead
+		}
+
+		private var traitType: String? {
 			switch self {
 			case .simple(value: _):
 				return nil

@@ -56,14 +56,10 @@ struct ImageFactory {
 
 		let attributes = input.layers.reduce([Metadata.Attribute]()) { accum, layer in
 			return accum +
-			(config.textLabels ?? []).filter { label in
-				label.conditions.contains { condition in
-					condition.layer == layer.layer && layer.name =~ condition.name
-				}
-			}.map { label in
-				Metadata.Attribute.textLabel(traitType: label.trait, value: label.value)
-			}
-		}.unique(where: \.traitType)
+			(config.textLabels ?? [])
+				.filtered(by: layer)
+				.map { label in	Metadata.Attribute.textLabel(traitType: label.trait, value: label.value) }
+		}.unique(where: \.identity)
 
 		// image url is required field
 		guard let imageURL = URL(string: .init(format: config.imageUrlFormat, serial)) else {

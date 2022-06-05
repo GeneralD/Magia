@@ -12,6 +12,15 @@ Example:
 
 ```json
 {
+  "drawSerial": {
+    "enabled": true,
+    "format": "#%05d",
+    "font": "M+ 1p black",
+    "size": 48,
+    "color": "#000000",
+    "offsetX": 40,
+    "offsetY": 10
+  },
   "order": {
     "selection": [
       "00_BG",
@@ -304,12 +313,12 @@ Example:
     {
       "target": {
         "layer": "02_body",
-        "name": "^(?=.*_dear_).*$"
+        "name": "^(?=.*_deer_).*$"
       },
       "dependencies": [
         {
           "layer": "09_ear",
-          "name": "^(?=.*_dear_).*$"
+          "name": "^(?=.*_deer_).*$"
         },
         {
           "layer": "01_backear",
@@ -468,7 +477,7 @@ Example:
     {
       "target": {
         "layer": "02_body",
-        "name": "^(?=.*_Giraffe_).*$"
+        "name": "^(?=.*_giraffe_).*$"
       },
       "dependencies": [
         {
@@ -498,14 +507,174 @@ Example:
       ]
     }
   ],
-  "drawSerial": {
-    "enabled": true,
-    "format": "#%05d",
-    "font": "M+ 1p black",
-    "size": 48,
-    "color": "#000000",
-    "offsetX": 40,
-    "offsetY": 10
+  "metadata": {
+      "imageUrlFormat": "https://anim.jp/images/%d",
+      "externalUrlFormat": "https://anim.jp",
+      "backgroundColor": "FFFF00",
+      "defaultNameFormat": "ANIM.JP#%05d",
+      "defaultDescriptionFormat": "First collections of ANIM.JP.\nEvery NFT is identified by serial number. The number of this is %05d.",
+    "textLabels": [
+      {
+        "trait": "Family",
+        "value": "Ape",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_(dark)?ape_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Bear",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_bear_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Boar",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_boar_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Cat",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_(dark)?cat(pattern)?_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Crow",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_crow_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Dog",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_(dark)?dog_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Unknown",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_darkness_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Deer",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_deer_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Giraffe",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_giraffe_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Lion",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_lion_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Penguin",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_penguin_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Platypus",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_platypus_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Rabbit",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_rabbit_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Rat",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_(dark)?rat_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Leopard",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_leopard_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Family",
+        "value": "Tiger",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^(?=.*_tiger_).*$"
+          }
+        ]
+      }
+    ]
   }
 }
 ```

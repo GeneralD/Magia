@@ -34,6 +34,11 @@ struct AssetConfig: Decodable {
 	}
 
 	struct Metadata: Decodable {
+		let imageUrlFormat: String
+		let defaultNameFormat: String
+		let defaultDescriptionFormat: String
+		let externalUrlFormat: String?
+		let backgroundColor: String?
 		let textLabels: [Label<String>]?
 
 		struct Label<ValueType: Decodable>: Decodable {

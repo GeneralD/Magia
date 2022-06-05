@@ -52,6 +52,8 @@ struct ImageFactory {
 	///   - serial: will be file name (without path and extension)
 	/// - Returns: if success
 	func generateMetadata(saveIn folder: Folder, serial: Int, metadataConfig config: AssetConfig.Metadata) -> Bool {
+		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(serial).json") else { return false }
+
 		let attributes = input.layers.reduce([Metadata.Attribute]()) { accum, layer in
 			return accum +
 			(config.textLabels ?? []).filter { label in
@@ -63,13 +65,26 @@ struct ImageFactory {
 			}
 		}.unique(where: \.traitType)
 
-		// TODO: put correct params
-		let metadata = Metadata(image: .init(string: "https://anim.jp")!, externalURL: .init(string: "https://anim.jp"), description: "", name: "", attributes: attributes, backgroundColor: "FFFF00")
+		// image url is required field
+		guard let imageURL = URL(string: .init(format: config.imageUrlFormat, serial)) else {
+			try? jsonFile.delete()
+			return false
+		}
 
-		do {
-			let jsonFile = try folder.createFileIfNeeded(withName: "\(serial).json")
-			try jsonFile.write(JSONEncoder().encode(metadata))
-		} catch {
+		// TODO: override defaults values
+		let name = String(format: config.defaultNameFormat, serial)
+		let description = String(format: config.defaultDescriptionFormat, serial)
+
+		let externalURL = config.externalUrlFormat.map { String(format: $0, serial) }.flatMap(URL.init(string: ))
+		let backgroundColor = config.backgroundColor ?? "ffffff"
+
+		let metadata = Metadata(image: imageURL, externalURL: externalURL, description: description, name: name, attributes: attributes, backgroundColor: backgroundColor)
+
+		let encoder = JSONEncoder()
+		encoder.outputFormatting = .prettyPrinted
+
+		guard let _ = try? jsonFile.write(encoder.encode(metadata)) else {
+			try? jsonFile.delete()
 			return false
 		}
 		return true

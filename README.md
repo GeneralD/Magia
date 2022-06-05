@@ -508,11 +508,11 @@ Example:
     }
   ],
   "metadata": {
-      "imageUrlFormat": "https://anim.jp/images/%d",
-      "externalUrlFormat": "https://anim.jp",
-      "backgroundColor": "FFFF00",
-      "defaultNameFormat": "ANIM.JP#%05d",
-      "defaultDescriptionFormat": "First collections of ANIM.JP.\nEvery NFT is identified by serial number. The number of this is %05d.",
+    "imageUrlFormat": "https://anim.jp/images/%d",
+    "externalUrlFormat": "https://anim.jp",
+    "backgroundColor": "FFFF00",
+    "defaultNameFormat": "ANIM.JP#%05d",
+    "defaultDescriptionFormat": "First collections of ANIM.JP.\nEvery NFT is identified by serial number. The number of this is %05d.",
     "textLabels": [
       {
         "trait": "Family",
@@ -671,6 +671,106 @@ Example:
           {
             "layer": "02_body",
             "name": "^(?=.*_tiger_).*$"
+          }
+        ]
+      },
+      {
+        "trait": "Color",
+        "value": "Ash",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^.*01$"
+          }
+        ]
+      },
+      {
+        "trait": "Color",
+        "value": "Mocha",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^.*02$"
+          }
+        ]
+      },
+      {
+        "trait": "Color",
+        "value": "Snow",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^.*03$"
+          }
+        ]
+      },
+      {
+        "trait": "Color",
+        "value": "Onyx",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^.*04$"
+          }
+        ]
+      },
+      {
+        "trait": "Color",
+        "value": "Mustard",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^.*05$"
+          }
+        ]
+      },
+      {
+        "trait": "Color",
+        "value": "Crimson",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^.*06$"
+          }
+        ]
+      },
+      {
+        "trait": "Color",
+        "value": "Shadow",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^.*07$"
+          }
+        ]
+      },
+      {
+        "trait": "Color",
+        "value": "Cosmic",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^.*08$"
+          }
+        ]
+      },
+      {
+        "trait": "Color",
+        "value": "Chocolate",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^.*09$"
+          }
+        ]
+      },
+      {
+        "trait": "Color",
+        "value": "Desert",
+        "conditions": [
+          {
+            "layer": "02_body",
+            "name": "^.*10$"
           }
         ]
       }

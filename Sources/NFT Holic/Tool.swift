@@ -29,6 +29,9 @@ class Tool: Command {
 	@Flag("-f", "--overwrite", description: "Overwrite existing files")
 	var forceOverwrite: Bool
 
+	@Flag("-m", "--without-metadata", description: "Not to generate metadata")
+	var noMetadata: Bool
+
 	@Flag("-x", "--sample", description: "Generate image with watermark (Not for sales)")
 	var isSampleMode: Bool
 
@@ -76,8 +79,18 @@ private extension Tool {
 			let input = InputData(layers: sortedLayers, animationDuration: animationDuration ?? 2, serialText: serialText, isSampleMode: isSampleMode)
 			let factory = ImageFactory(input: input)
 
+			// generate image
 			guard factory.generateImage(saveIn: outputFolder, serial: index, isPng: isPng) else {
-				stdout <<< "Generating image was failed..."
+				stdout <<< "Generating image was failed at index \(index)"
+				return false
+			}
+
+			// generate metadata
+			guard !noMetadata,
+				  let metadataConfig = config.metadata,
+				  let metadataFolder = try? outputFolder.createSubfolderIfNeeded(withName: "Metadata"),
+				  factory.generateMetadata(saveIn: metadataFolder, serial: index, metadataConfig: metadataConfig) else {
+				stdout <<< "Generating metadata was failed at index: \(index)"
 				return false
 			}
 			return true
@@ -118,7 +131,7 @@ private extension Tool {
 			  let config = try? JSONDecoder().decode(AssetConfig.self, from: file.read()) else {
 			stderr <<< "No valid config.json"
 			stdout <<< "But still ok! We can continue processing..."
-			return .init(order: nil, combinations: nil, drawSerial: nil)
+			return .empty
 		}
 		return config
 	}

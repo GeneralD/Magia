@@ -1,5 +1,6 @@
 import CoreImage
 import Files
+import Regex
 import UniformTypeIdentifiers
 import AppKit
 
@@ -11,7 +12,7 @@ struct ImageFactory {
 	/// Generate an animated image.
 	/// - Parameters:
 	///   - folder: location to save generated image
-	///   - fileName: file name without path and extension
+	///   - serial: will be file name (without path and extension)
 	///   - isPng: to create animated png instead of gif
 	/// - Returns: if success
 	func generateImage(saveIn folder: Folder, serial: Int, isPng: Bool = false) -> Bool {
@@ -41,6 +42,34 @@ struct ImageFactory {
 
 		guard CGImageDestinationFinalize(destimation) else { return false }
 
+		return true
+	}
+
+	/// Generate a metadata json.
+	/// - Parameters:
+	///   - folder: location to save generated metadata
+	///   - serial: will be file name (without path and extension)
+	/// - Returns: if success
+	func generateMetadata(saveIn folder: Folder, serial: Int, metadataConfig config: AssetConfig.Metadata) -> Bool {
+		let attributes = input.layers.reduce([Metadata.Attribute]()) { accum, layer in
+			return accum +
+			(config.textLabels ?? []).filter { label in
+				label.conditions.contains { condition in
+					condition.layer == layer.layer && layer.name =~ condition.name
+				}
+			}.map { label in
+				Metadata.Attribute.textLabel(traitType: label.trait, value: label.value)
+			}
+		}
+		// TODO: put correct params
+		let metadata = Metadata(image: .init(string: "https://anim.jp")!, externalURL: .init(string: "https://anim.jp"), description: "", name: "", attributes: attributes, backgroundColor: "FFFF00")
+
+		do {
+			let jsonFile = try folder.createFileIfNeeded(withName: "\(serial).json")
+			try jsonFile.write(JSONEncoder().encode(metadata))
+		} catch {
+			return false
+		}
 		return true
 	}
 }

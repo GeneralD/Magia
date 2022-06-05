@@ -7,7 +7,7 @@ struct Metadata: Encodable {
 	let image: URL
 
 	///	This is the URL that will appear below the asset's image on OpenSea and will allow users to leave OpenSea and view the item on your site.
-	let externalURL: URL
+	let externalURL: URL?
 
 	/// A human readable description of the item. Markdown is supported.
 	let description: String
@@ -16,7 +16,7 @@ struct Metadata: Encodable {
 	let name: String
 
 	/// These are the attributes for the item, which will show up on the OpenSea page for the item.
-	let attributes: Attribute
+	let attributes: [Attribute]
 
 	/// Background color of the item on OpenSea. Must be a six-character hexadecimal without a pre-pended #.
 	let backgroundColor: String
@@ -33,7 +33,7 @@ struct Metadata: Encodable {
 	/// - SeeAlso: [Document](https://docs.opensea.io/docs/metadata-standards#attributes)
 	enum Attribute: Encodable {
 		case simple(value: String)
-		case stringLabel(traitType: String, value: String)
+		case textLabel(traitType: String, value: String)
 		case dateLabel(traitType: String, value: Date)
 		case numberLabel(traitType: String, value: NumericValue)
 		case boostNumber(traitType: String, value: NumericValue, maxValue: NumericValue)
@@ -65,7 +65,7 @@ struct Metadata: Encodable {
 			case let .simple(value):
 				try container.encode(value, forKey: .value)
 
-			case let .stringLabel(traitType, value):
+			case let .textLabel(traitType, value):
 				try container.encode(traitType, forKey: .traitType)
 				try container.encode(value, forKey: .value)
 
@@ -98,7 +98,7 @@ struct Metadata: Encodable {
 	}
 }
 
-extension KeyedEncodingContainer where Key == Metadata.Attribute.CodingKeys {
+private extension KeyedEncodingContainer where Key == Metadata.Attribute.CodingKeys {
 	mutating func encode(_ value: Metadata.Attribute.NumericValue, forKey key: Metadata.Attribute.CodingKeys) throws {
 		switch value {
 		case let .int(val):

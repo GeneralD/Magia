@@ -84,7 +84,7 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-o ~/Downloads"
+            argument = "-o ~/Downloads/Output"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

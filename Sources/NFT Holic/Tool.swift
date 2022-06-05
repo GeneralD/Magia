@@ -29,10 +29,10 @@ class Tool: Command {
 	@Flag("-f", "--overwrite", description: "Overwrite existing files")
 	var forceOverwrite: Bool
 
-	@Flag("-m", "--without-metadata", description: "Not to generate metadata")
+	@Flag("--without-metadata", description: "Not to generate metadata")
 	var noMetadata: Bool
 
-	@Flag("-x", "--sample", description: "Generate image with watermark (Not for sales)")
+	@Flag("--sample", description: "Generate image with watermark (Not for sales)")
 	var isSampleMode: Bool
 
 	func execute() throws {
@@ -66,8 +66,8 @@ private extension Tool {
 				.reduce(into: [InputData.ImageLayer]()) { layers, folder in
 					let limitRegex = regexFactory.validItemNameRegex(forLayer: folder.name, conditionLayers: layers)
 					guard let selected = folder.subfolders.filter({ subfolder in
-							guard let regex = limitRegex else { return true } // no limitation
-							return subfolder.name =~ regex
+						guard let regex = limitRegex else { return true } // no limitation
+						return subfolder.name =~ regex
 					}).randomElement() else { return }
 					layers.append(.init(framesFolder: selected, layer: folder.name, name: selected.name))
 				}
@@ -77,23 +77,9 @@ private extension Tool {
 
 			let serialText = InputData.SerialText(from: config.drawSerial)
 			let input = InputData(layers: sortedLayers, animationDuration: animationDuration ?? 2, serialText: serialText, isSampleMode: isSampleMode)
-			let factory = ImageFactory(input: input)
 
-			// generate image
-			guard factory.generateImage(saveIn: outputFolder, serial: index, isPng: isPng) else {
-				stdout <<< "Generating image was failed at index \(index)"
-				return false
-			}
-
-			// generate metadata
-			guard !noMetadata,
-				  let metadataConfig = config.metadata,
-				  let metadataFolder = try? outputFolder.createSubfolderIfNeeded(withName: "Metadata"),
-				  factory.generateMetadata(saveIn: metadataFolder, serial: index, metadataConfig: metadataConfig) else {
-				stdout <<< "Generating metadata was failed at index: \(index)"
-				return false
-			}
-			return true
+			return generateImage(input: input, index: index)
+			&& generateMetadata(input: input, index: index, config: config.metadata)
 		}
 
 		return results
@@ -134,6 +120,28 @@ private extension Tool {
 			return .empty
 		}
 		return config
+	}
+
+	@discardableResult
+	func generateImage(input: InputData, index: Int) -> Bool {
+		let imageFactory = ImageFactory(input: input)
+		guard imageFactory.generateImage(saveIn: outputFolder, serial: index, isPng: isPng) else {
+			stdout <<< "Generating image was failed at index \(index)"
+			return false
+		}
+		return true
+	}
+
+	@discardableResult
+	func generateMetadata(input: InputData, index: Int, config: AssetConfig.Metadata?) -> Bool {
+		guard !noMetadata, let metadataConfig = config else { return true }
+		let metadataFactory = MetadataFactory(input: input)
+		guard let metadataFolder = try? outputFolder.createSubfolderIfNeeded(withName: "Metadata"),
+			  metadataFactory.generateMetadata(saveIn: metadataFolder, serial: index, metadataConfig: metadataConfig) else {
+			stdout <<< "Generating metadata was failed at index: \(index)"
+			return false
+		}
+		return true
 	}
 
 	func sort<Subjects: Sequence>(subjects: Subjects, where: (Subjects.Element) -> String, order: [String]?) -> [Subjects.Element] {

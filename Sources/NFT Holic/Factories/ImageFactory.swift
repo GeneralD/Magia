@@ -15,34 +15,36 @@ struct ImageFactory {
 	///   - isPng: to create animated png instead of gif
 	/// - Returns: if success
 	@discardableResult
-	func generateImage(saveIn folder: Folder, serial: Int, isPng: Bool = false) -> Bool {
+	func generateImage(saveIn folder: Folder, serial: Int, isPng: Bool = false) -> Result<File, ImageFactoryError> {
 		let frames = generateAllFrameImages(queueIdentification: serial.description, serial: serial)
 			.compactMap(\.cgImage)
 
-		let saveUrl = NSURL(fileURLWithPath: "\(folder.path)/\(serial).\(isPng ? "png" : "gif")")
-		guard let destimation = CGImageDestinationCreateWithURL(
-			saveUrl,
-			(isPng ? UTType.png : UTType.gif).identifier as CFString,
-			frames.count,
-			nil) else { return false }
+		let utType: UTType = isPng ? .png : .gif
+		guard let file = try? folder.createFile(named: "\(serial).\(isPng ? "png" : "gif")"),
+			  let destination = CGImageDestinationCreateWithURL(file.url as CFURL, utType.identifier as CFString, frames.count, nil) else {
+			return .failure(.creatingFileFailed)
+		}
 
 		let dictionaryKey = (isPng ? kCGImagePropertyPNGDictionary : kCGImagePropertyGIFDictionary) as String
 		let loopCountKey = (isPng ? kCGImagePropertyAPNGLoopCount : kCGImagePropertyGIFLoopCount) as String
 		let delayTimeKey = (isPng ? kCGImagePropertyAPNGDelayTime : kCGImagePropertyGIFDelayTime) as String
 
 		let properties = [dictionaryKey: [loopCountKey: 0]] as? CFDictionary // 0 to loop infinity
-		CGImageDestinationSetProperties(destimation, properties)
+		CGImageDestinationSetProperties(destination, properties)
 
 		let durationPerFrame = input.animationDuration / Double(frames.count)
 
 		frames.forEach { frame in
 			let properties = [dictionaryKey: [delayTimeKey: durationPerFrame]] as? CFDictionary
-			CGImageDestinationAddImage(destimation, frame, properties)
+			CGImageDestinationAddImage(destination, frame, properties)
 		}
 
-		guard CGImageDestinationFinalize(destimation) else { return false }
+		guard CGImageDestinationFinalize(destination) else {
+			try? file.delete()
+			return .failure(.finalizeImageFailed)
+		}
 
-		return true
+		return .success(file)
 	}
 }
 
@@ -94,4 +96,9 @@ private extension ImageFactory {
 				return sorted[safe: frame] ?? sorted.last!
 			}
 	}
+}
+
+enum ImageFactoryError: Error {
+	case creatingFileFailed
+	case finalizeImageFailed
 }

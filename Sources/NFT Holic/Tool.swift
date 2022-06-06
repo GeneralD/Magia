@@ -51,7 +51,7 @@ private extension Tool {
 	func generate() throws -> [Bool] {
 		// measure time
 		let startDate = Date()
-		defer { stdout <<< "Generating many images take \(Date().timeIntervalSince(startDate)) seconds." }
+		defer { stdout <<< "Generating many images took \(Date().timeIntervalSince(startDate)) seconds." }
 
 		let config = loadAssetConfig()
 		let regexFactory = LayerStrictionRegexFactory(layerStrictions: config.combinations)
@@ -60,7 +60,7 @@ private extension Tool {
 		let results = indices.map { index -> Bool in
 			// measure time
 			let startDate = Date()
-			defer { stdout <<< "Generating an image takes \(Date().timeIntervalSince(startDate)) seconds." }
+			defer { stdout <<< "Generating an image took \(Date().timeIntervalSince(startDate)) seconds." }
 
 			let layers = layerFolders
 				.reduce(into: [InputData.ImageLayer]()) { layers, folder in
@@ -78,8 +78,7 @@ private extension Tool {
 			let serialText = InputData.SerialText(from: config.drawSerial)
 			let input = InputData(layers: sortedLayers, animationDuration: animationDuration ?? 2, serialText: serialText, isSampleMode: isSampleMode)
 
-			return generateImage(input: input, index: index)
-			&& generateMetadata(input: input, index: index, config: config.metadata)
+			return generateImage(input: input, index: index) && generateMetadata(input: input, index: index, config: config.metadata)
 		}
 
 		return results
@@ -125,23 +124,48 @@ private extension Tool {
 	@discardableResult
 	func generateImage(input: InputData, index: Int) -> Bool {
 		let imageFactory = ImageFactory(input: input)
-		guard imageFactory.generateImage(saveIn: outputFolder, serial: index, isPng: isPng) else {
-			stdout <<< "Generating image was failed at index \(index)"
+		switch imageFactory.generateImage(saveIn: outputFolder, serial: index, isPng: isPng) {
+		case let .success(file):
+			stdout <<< "Created: \(file.path)"
+			return true
+		case let .failure(error):
+			switch error {
+			case .creatingFileFailed:
+				stderr <<< "Couldn't create file to write image."
+			case .finalizeImageFailed:
+				stderr <<< "Couldn't finalize an image."
+			}
 			return false
 		}
-		return true
 	}
 
 	@discardableResult
 	func generateMetadata(input: InputData, index: Int, config: AssetConfig.Metadata?) -> Bool {
 		guard !noMetadata, let metadataConfig = config else { return true }
 		let metadataFactory = MetadataFactory(input: input)
-		guard let metadataFolder = try? outputFolder.createSubfolderIfNeeded(withName: "Metadata"),
-			  metadataFactory.generateMetadata(saveIn: metadataFolder, serial: index, metadataConfig: metadataConfig) else {
-			stdout <<< "Generating metadata was failed at index: \(index)"
+		guard let metadataFolder = try? outputFolder.createSubfolderIfNeeded(withName: "Metadata") else {
+			stderr <<< "Couldn't create root folder to store metadata"
 			return false
 		}
-		return true
+		switch metadataFactory.generateMetadata(saveIn: metadataFolder, serial: index, metadataConfig: metadataConfig) {
+		case let .success(file):
+			stdout <<< "Created: \(file.path)"
+			return true
+		case let .failure(error):
+			switch error {
+			case .creatingFileFailed:
+				stderr <<< "Couldn't create file to write metadata."
+			case .imageUrlFormatIsRequired:
+				stderr <<< "imageUrlFormat is required field in JSON."
+			case .invalidMetadataSortConfig:
+				stderr <<< "Sorting metadata config should cover all trait you defined."
+			case .invalidBackgroundColorCode:
+				stderr <<< "backgroundColor in metadata should be 3 or 6 hex code without # prefix."
+			case .writingFileFailed:
+				stderr <<< "Writing metadata failed."
+			}
+			return false
+		}
 	}
 
 	func sort<Subjects: Sequence>(subjects: Subjects, where: (Subjects.Element) -> String, order: [String]?) -> [Subjects.Element] {

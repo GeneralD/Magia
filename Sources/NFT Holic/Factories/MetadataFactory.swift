@@ -12,8 +12,8 @@ struct MetadataFactory {
 	///   - serial: will be file name (without path and extension)
 	/// - Returns: if success
 	@discardableResult
-	func generateMetadata(saveIn folder: Folder, serial: Int, metadataConfig config: AssetConfig.Metadata) -> Bool {
-		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(serial).json") else { return false }
+	func generateMetadata(saveIn folder: Folder, serial: Int, metadataConfig config: AssetConfig.Metadata) -> Result<File, MetadataFactoryError> {
+		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(serial).json") else { return .failure(.creatingFileFailed) }
 
 		let attributes = input.layers.reduce([Metadata.Attribute]()) { accum, layer in
 			let attrs: [[Metadata.Attribute]] = [
@@ -46,13 +46,13 @@ struct MetadataFactory {
 		// sort attributes
 		guard let sortedAttribute = sort(attributes: attributes, traitOrder: config.order?.trait) else {
 			try? jsonFile.delete()
-			return false
+			return .failure(.invalidMetadataSortConfig)
 		}
 
 		// image url is required field
 		guard let imageURL = URL(string: .init(format: config.imageUrlFormat, serial)) else {
 			try? jsonFile.delete()
-			return false
+			return .failure(.imageUrlFormatIsRequired)
 		}
 
 		// TODO: override defaults values
@@ -61,6 +61,11 @@ struct MetadataFactory {
 
 		let externalURL = config.externalUrlFormat.map { String(format: $0, serial) }.flatMap(URL.init(string: ))
 		let backgroundColor = config.backgroundColor ?? "ffffff"
+		// validate
+		guard backgroundColor =~ #"^[\da-fA-F]{6}$|^[\da-fA-F]{3}$"#.r else {
+			try? jsonFile.delete()
+			return .failure(.invalidBackgroundColorCode)
+		}
 
 		let metadata = Metadata(image: imageURL, externalURL: externalURL, description: description, name: name, attributes: sortedAttribute, backgroundColor: backgroundColor)
 
@@ -69,9 +74,9 @@ struct MetadataFactory {
 
 		guard let _ = try? jsonFile.write(encoder.encode(metadata)) else {
 			try? jsonFile.delete()
-			return false
+			return .failure(.writingFileFailed)
 		}
-		return true
+		return .success(jsonFile)
 	}
 }
 
@@ -81,4 +86,12 @@ private extension MetadataFactory {
 		guard let sorted = attributes.sort(where: \.traitType, orderSample: order, shouldCover: true) else { return nil } // fail
 		return sorted // ok
 	}
+}
+
+enum MetadataFactoryError: Error {
+	case creatingFileFailed
+	case imageUrlFormatIsRequired
+	case invalidMetadataSortConfig
+	case invalidBackgroundColorCode
+	case writingFileFailed
 }

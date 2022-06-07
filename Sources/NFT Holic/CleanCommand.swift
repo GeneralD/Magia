@@ -14,6 +14,12 @@ class CleanCommand: Command {
 	var executeCleaning: Bool
 
 	func execute() throws {
+		defer {
+			if !executeCleaning {
+				stdout <<< "If you want to delete unneeded files actually, add an option -x"
+			}
+		}
+
 		let deleted = try inputFolder
 			.subfolders
 			.flatMap(\.subfolders)

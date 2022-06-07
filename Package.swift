@@ -9,8 +9,9 @@ let package = Package(
 		.macOS(.v12),
 	],
     dependencies: [
-		.package(url: "https://github.com/GeneralD/CollectionKit", branch: "master"),
+		.package(url: "https://github.com/generald/CollectionKit", branch: "master"),
 		.package(url: "https://github.com/JohnSundell/Files", from: "4.2.0"),
+		.package(url: "https://github.com/fromkk/HashKit.git", from: "1.1.0"),
 		.package(url: "https://github.com/crossroadlabs/Regex", from: "1.2.0"),
 		.package(url: "https://github.com/jakeheis/SwiftCLI", from: "6.0.3"),
 		.package(url: "https://github.com/thii/SwiftHEXColors.git", from: "1.4.1"),
@@ -19,7 +20,7 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "NFT Holic",
-			dependencies: ["CollectionKit", "Files", "Regex", "SwiftCLI", "SwiftHEXColors"]),
+			dependencies: ["CollectionKit", "Files", "HashKit", "Regex", "SwiftCLI", "SwiftHEXColors"]),
         .testTarget(
             name: "NFT HolicTests",
             dependencies: ["NFT Holic"]),

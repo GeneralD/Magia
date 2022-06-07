@@ -19,6 +19,15 @@
       }
     },
     {
+      "identity" : "hashkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/fromkk/hashkit.git",
+      "state" : {
+        "revision" : "8bf94c8d3e41b8ae372c46b78aec0ee711b45669",
+        "version" : "1.1.0"
+      }
+    },
+    {
       "identity" : "regex",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/crossroadlabs/Regex",

@@ -76,15 +76,19 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
+            argument = "gen"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "~/Downloads/ANIM_NFT"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-x"
-            isEnabled = "NO">
+            argument = "-o ~/Downloads/Output"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-o ~/Downloads/Output"
+            argument = "-q 100"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
@@ -92,8 +96,8 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-q 10"
-            isEnabled = "YES">
+            argument = "-x"
+            isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>

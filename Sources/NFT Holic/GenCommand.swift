@@ -4,9 +4,9 @@ import Foundation
 import Regex
 import SwiftCLI
 
-class Tool: Command {
-	var name = "nftholic"
-	var shortDescription = "A NFT generator for NFT holic"
+class GenCommand: Command {
+	let name = "gen"
+	let shortDescription = "Generate your animated NFT"
 
 	@Param(completion: .filename)
 	var inputFolder: Folder
@@ -47,7 +47,7 @@ class Tool: Command {
 	}
 }
 
-private extension Tool {
+private extension GenCommand {
 	func generate() throws -> [Bool] {
 		// measure time
 		let startDate = Date()

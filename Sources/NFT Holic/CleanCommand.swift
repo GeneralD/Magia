@@ -36,6 +36,7 @@ class CleanCommand: Command {
 					switch set.count {
 					case 1:
 						stdout <<< "All files contents in \(framesFolder.name) are same."
+						guard executeCleaning else { return [] }
 						let files = files.array.sorted(at: \.name, by: <)[1...] // leave first one
 						for file in files {
 							try file.delete()

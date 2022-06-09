@@ -533,7 +533,7 @@ Example:
 	{
 	  "target": {
 		"layer": "05_hair",
-		"name": "^hairwithitems_.*$"
+		"name": "^hair_.*$"
 	  },
 	  "dependencies": [
 		{
@@ -871,6 +871,5 @@ Example:
 	]
   }
 }
-
 ```
 

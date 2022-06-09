@@ -16,10 +16,10 @@ Example:
 	"enabled": true,
 	"format": "#%05d",
 	"font": "M+ 1p black",
-	"size": 48,
+	"size": 38,
 	"color": "000000",
 	"offsetX": 40,
-	"offsetY": 10
+	"offsetY": 14.5
   },
   "order": {
 	"selection": [

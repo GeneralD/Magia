@@ -17,6 +17,18 @@ struct AssetConfig: Decodable {
 	struct Subject: Decodable {
 		let layer: String
 		let name: String
+
+		enum CodingKeys: CodingKey {
+			case layer
+			case name // null ok in JSON
+		}
+
+		init(from decoder: Decoder) throws {
+			let container = try decoder.container(keyedBy: CodingKeys.self)
+			// if name is null in JSON, to be regex matches to nothing
+			layer = try container.decode(String.self, forKey: .layer)
+			name = try container.decodeIfPresent(String.self, forKey: .name) ?? "^(?!)$"
+		}
 	}
 
 	struct DrawSerial: Decodable {

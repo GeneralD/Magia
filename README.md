@@ -218,7 +218,7 @@ Example:
 	  "dependencies": [
 		{
 		  "layer": "09_ear",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -270,11 +270,11 @@ Example:
 	  "dependencies": [
 		{
 		  "layer": "09_ear",
-		  "name": "none"
+		  "name": null
 		},
 		{
 		  "layer": "01_backear",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -302,11 +302,11 @@ Example:
 	  "dependencies": [
 		{
 		  "layer": "09_ear",
-		  "name": "none"
+		  "name": null
 		},
 		{
 		  "layer": "01_backear",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -322,7 +322,7 @@ Example:
 		},
 		{
 		  "layer": "01_backear",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -338,7 +338,7 @@ Example:
 		},
 		{
 		  "layer": "01_backear",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -350,11 +350,11 @@ Example:
 	  "dependencies": [
 		{
 		  "layer": "09_ear",
-		  "name": "none"
+		  "name": null
 		},
 		{
 		  "layer": "01_backear",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -366,11 +366,11 @@ Example:
 	  "dependencies": [
 		{
 		  "layer": "09_ear",
-		  "name": "none"
+		  "name": null
 		},
 		{
 		  "layer": "01_backear",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -386,7 +386,7 @@ Example:
 		},
 		{
 		  "layer": "01_backear",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -418,7 +418,7 @@ Example:
 		},
 		{
 		  "layer": "01_backear",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -434,7 +434,7 @@ Example:
 		},
 		{
 		  "layer": "01_backear",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -470,7 +470,7 @@ Example:
 	  "dependencies": [
 		{
 		  "layer": "04_item",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -482,27 +482,27 @@ Example:
 	  "dependencies": [
 		{
 		  "layer": "05_hair",
-		  "name": "none"
+		  "name": null
 		},
 		{
 		  "layer": "06_eye",
-		  "name": "none"
+		  "name": null
 		},
 		{
 		  "layer": "07_faceitem",
-		  "name": "none"
+		  "name": null
 		},
 		{
 		  "layer": "08_headitem",
-		  "name": "none"
+		  "name": null
 		},
 		{
 		  "layer": "09_ear",
-		  "name": "none"
+		  "name": null
 		},
 		{
 		  "layer": "01_backear",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -514,7 +514,7 @@ Example:
 	  "dependencies": [
 		{
 		  "layer": "08_headitem",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -526,7 +526,7 @@ Example:
 	  "dependencies": [
 		{
 		  "layer": "08_headitem",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -538,7 +538,7 @@ Example:
 	  "dependencies": [
 		{
 		  "layer": "08_headitem",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -569,12 +569,12 @@ Example:
 	{
 	  "target": {
 		"layer": "03_hand",
-		"name": "^(?!hand_(draw|spinning)_\\d{2}$).+$"
+		"name": "^hand_(draw|spinning)_\\d{2}$"
 	  },
 	  "dependencies": [
 		{
 		  "layer": "04_item",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	},
@@ -590,7 +590,7 @@ Example:
 		},
 		{
 		  "layer": "08_headitem",
-		  "name": "none"
+		  "name": null
 		}
 	  ]
 	}
@@ -871,5 +871,6 @@ Example:
 	]
   }
 }
+
 ```
 

@@ -2,10 +2,11 @@ import CoreGraphics
 import Foundation
 
 struct AssetConfig: Decodable {
-	static let empty: Self = .init(order: nil, combinations: nil, drawSerial: nil, metadata: nil)
+	static let empty: Self = .init(order: nil, combinations: nil, randomization: nil, drawSerial: nil, metadata: nil)
 	
 	let order: Order?
 	let combinations: [Combination]?
+	let randomization: Randomization?
 	let drawSerial: DrawSerial?
 	let metadata: Metadata?
 
@@ -28,6 +29,16 @@ struct AssetConfig: Decodable {
 			// if name is null in JSON, to be regex matches to nothing
 			layer = try container.decode(String.self, forKey: .layer)
 			name = try container.decodeIfPresent(String.self, forKey: .name) ?? "^(?!)$"
+		}
+	}
+
+	struct Randomization: Decodable {
+		let probabilities: [Probability]
+
+		struct Probability: Decodable {
+			let target: Subject
+			let weight: Double
+			let divideByMatches: Bool?
 		}
 	}
 

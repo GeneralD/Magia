@@ -12,6 +12,7 @@ struct InputData {
 		let framesFolder: Folder
 		let layer: String
 		let name: String
+		let probability: Double
 	}
 
 	struct SerialText {

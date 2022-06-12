@@ -55,6 +55,7 @@ private extension GenCommand {
 
 		let config = loadAssetConfig()
 		let regexFactory = LayerStrictionRegexFactory(layerStrictions: config.combinations)
+		let randomManager = RamdomizationController(config: config.randomization)
 		let layerFolders = sort(subjects: inputFolder.subfolders, where: \.name, order: config.order?.selection)
 
 		let results = indices.map { index -> Bool in
@@ -63,13 +64,15 @@ private extension GenCommand {
 			defer { stdout <<< "Generating an image took \(Date().timeIntervalSince(startDate)) seconds." }
 
 			let layers = layerFolders
-				.reduce(into: [InputData.ImageLayer]()) { layers, folder in
-					let limitRegex = regexFactory.validItemNameRegex(forLayer: folder.name, conditionLayers: layers)
-					guard let selected = folder.subfolders.filter({ subfolder in
+				.reduce(into: [InputData.ImageLayer]()) { layers, layerFolder in
+					let limitRegex = regexFactory.validItemNameRegex(forLayer: layerFolder.name, conditionLayers: layers)
+					let candidates = layerFolder.subfolders.filter({ subfolder in
 						guard let regex = limitRegex else { return true } // no limitation
 						return subfolder.name =~ regex
-					}).randomElement() else { return }
-					layers.append(.init(framesFolder: selected, layer: folder.name, name: selected.name))
+					})
+					guard let elected = randomManager.elect(from: candidates, targetLayer: layerFolder.name) else { return }
+					let frameFolder = elected.element
+					layers.append(.init(framesFolder: frameFolder, layer: layerFolder.name, name: frameFolder.name, probability: elected.probability))
 				}
 
 			// arrange layers in the order of depth configured in json

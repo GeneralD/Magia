@@ -2,13 +2,15 @@
 
 A description of this package.
 
-## Writing configuration
+# Writing configuration
 
 In most case, you will want to configure some details about generating images.
 
 Yes, you can put your configuration file as `config.json` at the root of your input directory.
 
-Example:
+
+
+## Print serial number on your NFT
 
 ```json
 {
@@ -20,50 +22,44 @@ Example:
 		"color": "000000",
 		"offsetX": 40,
 		"offsetY": 14.5
-	},
+	}
+}
+```
+
+
+
+## Adjust probabilities of layered parts
+
+```json
+{
 	"randomization": {
-		"probabilities": [{
-			"target": {
-				"layer": "02_body",
-				"name": "^body_dark.*_07$"
-			},
-			"weight": 0.5,
-		}]
-	},
-	"order": {
-		"selection": [
-			"00_BG",
-			"02_body",
-			"03_hand",
-			"04_item",
-			"10_clothes",
-			"05_hair",
-			"06_eye",
-			"07_faceitem",
-			"08_headitem",
-			"09_ear",
-			"01_backear"
-		],
-		"layerDepth": [
-			"00_BG",
-			"01_backear",
-			"02_body",
-			"03_hand",
-			"04_item",
-			"05_hair",
-			"07_faceitem",
-			"08_headitem",
-			"06_eye",
-			"09_ear",
-			"10_clothes"
+		"probabilities": [
+			{
+				"target": {
+					"layer": "02_body",
+					"name": "^body_dark.*_07$"
+				},
+				"weight": 0.5
+			}
 		]
-	},
-	"combinations": [{
+	}
+}
+```
+
+
+
+## Strict layer combinations
+
+```json
+{
+	"combinations": [
+		{
 			"target": {
 				"layer": "02_body",
 				"name": "^.*01$"
 			},
-			"dependencies": [{
+			"dependencies": [
+				{
 					"layer": "03_hand",
 					"name": "^.*01$"
 				},
@@ -78,7 +74,8 @@ Example:
 				"layer": "02_body",
 				"name": "^.*02$"
 			},
-			"dependencies": [{
+			"dependencies": [
+				{
 					"layer": "03_hand",
 					"name": "^.*02$"
 				},
@@ -93,118 +90,14 @@ Example:
 				"layer": "02_body",
 				"name": "^.*03$"
 			},
-			"dependencies": [{
+			"dependencies": [
+				{
 					"layer": "03_hand",
 					"name": "^.*03$"
 				},
 				{
 					"layer": "09_ear",
 					"name": "^.*03$"
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^.*04$"
-			},
-			"dependencies": [{
-					"layer": "03_hand",
-					"name": "^.*04$"
-				},
-				{
-					"layer": "09_ear",
-					"name": "^.*04$"
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^.*05$"
-			},
-			"dependencies": [{
-					"layer": "03_hand",
-					"name": "^.*05$"
-				},
-				{
-					"layer": "09_ear",
-					"name": "^.*05$"
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^.*06$"
-			},
-			"dependencies": [{
-					"layer": "03_hand",
-					"name": "^.*06$"
-				},
-				{
-					"layer": "09_ear",
-					"name": "^.*06$"
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^.*07$"
-			},
-			"dependencies": [{
-					"layer": "03_hand",
-					"name": "^.*07$"
-				},
-				{
-					"layer": "09_ear",
-					"name": "^.*07$"
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^.*08$"
-			},
-			"dependencies": [{
-					"layer": "03_hand",
-					"name": "^.*08$"
-				},
-				{
-					"layer": "09_ear",
-					"name": "^.*08$"
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^.*09$"
-			},
-			"dependencies": [{
-					"layer": "03_hand",
-					"name": "^.*09$"
-				},
-				{
-					"layer": "09_ear",
-					"name": "^.*09$"
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^.*10$"
-			},
-			"dependencies": [{
-					"layer": "03_hand",
-					"name": "^.*10$"
-				},
-				{
-					"layer": "09_ear",
-					"name": "^.*10$"
 				}
 			]
 		},
@@ -213,37 +106,20 @@ Example:
 				"layer": "02_body",
 				"name": "^(?=.*_((dark)?ape|nihonzaru)_).*$"
 			},
-			"dependencies": [{
-				"layer": "09_ear",
-				"name": null
-			}]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^(?=.*_bear_).*$"
-			},
-			"dependencies": [{
-				"layer": "09_ear",
-				"name": "^(?=.*_bear_).*$"
-			}]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^(?=.*_boar_).*$"
-			},
-			"dependencies": [{
-				"layer": "09_ear",
-				"name": "^(?=.*_boar_).*$"
-			}]
+			"dependencies": [
+				{
+					"layer": "09_ear",
+					"name": null
+				}
+			]
 		},
 		{
 			"target": {
 				"layer": "02_body",
 				"name": "^(?=.*_(dark)?cat(pattern)?_).*$"
 			},
-			"dependencies": [{
+			"dependencies": [
+				{
 					"layer": "09_ear",
 					"name": "^(?=.*_cat_).*$"
 				},
@@ -256,24 +132,10 @@ Example:
 		{
 			"target": {
 				"layer": "02_body",
-				"name": "^(?=.*_crow_).*$"
-			},
-			"dependencies": [{
-					"layer": "09_ear",
-					"name": null
-				},
-				{
-					"layer": "01_backear",
-					"name": null
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
 				"name": "^(?=.*_(dark)?dog_).*$"
 			},
-			"dependencies": [{
+			"dependencies": [
+				{
 					"layer": "09_ear",
 					"name": "^(?=.*_dog_).*$"
 				},
@@ -286,174 +148,10 @@ Example:
 		{
 			"target": {
 				"layer": "02_body",
-				"name": "^(?=.*_darkness_).*$"
-			},
-			"dependencies": [{
-					"layer": "09_ear",
-					"name": null
-				},
-				{
-					"layer": "01_backear",
-					"name": null
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^(?=.*_deer_).*$"
-			},
-			"dependencies": [{
-					"layer": "09_ear",
-					"name": "^(?=.*_deer_).*$"
-				},
-				{
-					"layer": "01_backear",
-					"name": null
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^(?=.*_lion_).*$"
-			},
-			"dependencies": [{
-					"layer": "09_ear",
-					"name": "^(?=.*_lion_).*$"
-				},
-				{
-					"layer": "01_backear",
-					"name": null
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^(?=.*_penguin_).*$"
-			},
-			"dependencies": [{
-					"layer": "09_ear",
-					"name": null
-				},
-				{
-					"layer": "01_backear",
-					"name": null
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^(?=.*_platypus_).*$"
-			},
-			"dependencies": [{
-					"layer": "09_ear",
-					"name": null
-				},
-				{
-					"layer": "01_backear",
-					"name": null
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^(?=.*_rabbit_).*$"
-			},
-			"dependencies": [{
-					"layer": "09_ear",
-					"name": "^(?=.*_rabbit_).*$"
-				},
-				{
-					"layer": "01_backear",
-					"name": null
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^(?=.*_(dark)?rat_).*$"
-			},
-			"dependencies": [{
-					"layer": "09_ear",
-					"name": "^(?=.*_rat_).*$"
-				},
-				{
-					"layer": "01_backear",
-					"name": "^backear_rat$"
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^(?=.*_leopard_).*$"
-			},
-			"dependencies": [{
-					"layer": "09_ear",
-					"name": "^(?=.*_leopard_).*$"
-				},
-				{
-					"layer": "01_backear",
-					"name": null
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "02_body",
-				"name": "^(?=.*_tiger_).*$"
-			},
-			"dependencies": [{
-					"layer": "09_ear",
-					"name": "^(?=.*_tiger_).*$"
-				},
-				{
-					"layer": "01_backear",
-					"name": null
-				}
-			]
-		},
-		{
-			"target": {
-				"layer": "03_hand",
-				"name": "^hand_grap_\\d{2}$"
-			},
-			"dependencies": [{
-				"layer": "04_item",
-				"name": "^item_grap_.*$"
-			}]
-		},
-		{
-			"target": {
-				"layer": "03_hand",
-				"name": "^hand_pinch_\\d{2}$"
-			},
-			"dependencies": [{
-				"layer": "04_item",
-				"name": "^item_pinch_.*$"
-			}]
-		},
-		{
-			"target": {
-				"layer": "03_hand",
-				"name": "^(?!.*(pinch|grap)).*$"
-			},
-			"dependencies": [{
-				"layer": "04_item",
-				"name": null
-			}]
-		},
-		{
-			"target": {
-				"layer": "02_body",
 				"name": "^(?=.*_giraffe_).*$"
 			},
-			"dependencies": [{
+			"dependencies": [
+				{
 					"layer": "05_hair",
 					"name": null
 				},
@@ -481,299 +179,181 @@ Example:
 		},
 		{
 			"target": {
-				"layer": "07_faceitem",
-				"name": "^faceitem_skull(Black|Red)?$"
-			},
-			"dependencies": [{
-				"layer": "08_headitem",
-				"name": null
-			}]
-		},
-		{
-			"target": {
-				"layer": "07_faceitem",
-				"name": "^faceitem_MaskMeta$"
-			},
-			"dependencies": [{
-				"layer": "08_headitem",
-				"name": null
-			}]
-		},
-		{
-			"target": {
-				"layer": "05_hair",
-				"name": "^hair_.*$"
-			},
-			"dependencies": [{
-				"layer": "08_headitem",
-				"name": null
-			}]
-		},
-		{
-			"target": {
 				"layer": "02_body",
 				"name": "^.*_0[7-8]$"
 			},
-			"dependencies": [{
-				"layer": "06_eye",
-				"name": "^eye_(white|fireblue|firered|circleWhite)$"
-			}]
+			"dependencies": [
+				{
+					"layer": "06_eye",
+					"name": "^eye_(white|fireblue|firered|circleWhite)$"
+				}
+			]
 		},
 		{
 			"target": {
 				"layer": "02_body",
 				"name": "^(?!.*_0[7-8])+"
 			},
-			"dependencies": [{
-				"layer": "06_eye",
-				"name": "^eye_(?!(white$|circleWhite$)).*$"
-			}]
-		},
-		{
-			"target": {
-				"layer": "03_hand",
-				"name": "^hand_(draw|spinning)_\\d{2}$"
-			},
-			"dependencies": [{
-				"layer": "04_item",
-				"name": null
-			}]
-		},
-		{
-			"target": {
-				"layer": "10_clothes",
-				"name": "^clothes_I_\\d{2}$"
-			},
-			"dependencies": [{
-					"layer": "05_hair",
-					"name": "^hairwithitems_"
-				},
+			"dependencies": [
 				{
-					"layer": "08_headitem",
-					"name": null
+					"layer": "06_eye",
+					"name": "^eye_(?!(white$|circleWhite$)).*$"
 				}
 			]
 		}
-	],
+	]
+}
+
+```
+
+
+
+## Override orders
+
+```json
+{
+	"order": {
+		"selection": [
+			"00_BG",
+			"02_body",
+			"03_hand",
+			"04_item",
+			"10_clothes",
+			"05_hair",
+			"06_eye",
+			"07_faceitem",
+			"08_headitem",
+			"09_ear",
+			"01_backear"
+		],
+		"layerDepth": [
+			"00_BG",
+			"01_backear",
+			"02_body",
+			"03_hand",
+			"04_item",
+			"05_hair",
+			"07_faceitem",
+			"08_headitem",
+			"06_eye",
+			"09_ear",
+			"10_clothes"
+		]
+	}
+}
+```
+
+
+
+## Metadata Generation
+
+```json
+{
 	"metadata": {
 		"imageUrlFormat": "https://anim.jp/images/%d",
 		"externalUrlFormat": "https://anim.jp",
 		"backgroundColor": "f7cc1b",
-		"defaultNameFormat": "ANIM.JP#%05d",
-		"defaultDescriptionFormat": "First collections of ANIM.JP.\\nEvery NFT is identified by serial number. The number of this is %05d.",
+		"defaultNameFormat": "My NFT #%05d",
+		"defaultDescriptionFormat": "The serial number is %05d.",
 		"order": {
 			"trait": [
 				"Family",
-				"Color"
+				"Color",
+				"Face Gear",
+				"Face Gear Rarity"
 			]
 		},
-		"textLabels": [{
+		"rarityPercentages": [
+			{
+				"trait": "Face Gear Rarity",
+				"conditions": [
+					{
+						"layer": "07_faceitem",
+						"name": "^"
+					}
+				]
+			}
+		],
+		"textLabels": [
+			{
 				"trait": "Family",
 				"value": "Ape",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_((dark)?ape|nihonzaru)_).*$"
-				}]
-			},
-			{
-				"trait": "Family",
-				"value": "Bear",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_bear_).*$"
-				}]
-			},
-			{
-				"trait": "Family",
-				"value": "Boar",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_boar_).*$"
-				}]
+				"conditions": [
+					{
+						"layer": "02_body",
+						"name": "^(?=.*_((dark)?ape|nihonzaru)_).*$"
+					}
+				]
 			},
 			{
 				"trait": "Family",
 				"value": "Cat",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_(dark)?cat(pattern)?_).*$"
-				}]
-			},
-			{
-				"trait": "Family",
-				"value": "Crow",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_crow_).*$"
-				}]
+				"conditions": [
+					{
+						"layer": "02_body",
+						"name": "^(?=.*_(dark)?cat(pattern)?_).*$"
+					}
+				]
 			},
 			{
 				"trait": "Family",
 				"value": "Dog",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_(dark)?dog_).*$"
-				}]
-			},
-			{
-				"trait": "Family",
-				"value": "Unknown",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_darkness_).*$"
-				}]
-			},
-			{
-				"trait": "Family",
-				"value": "Deer",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_deer_).*$"
-				}]
-			},
-			{
-				"trait": "Family",
-				"value": "Giraffe",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_giraffe_).*$"
-				}]
-			},
-			{
-				"trait": "Family",
-				"value": "Lion",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_lion_).*$"
-				}]
-			},
-			{
-				"trait": "Family",
-				"value": "Penguin",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_penguin_).*$"
-				}]
-			},
-			{
-				"trait": "Family",
-				"value": "Platypus",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_platypus_).*$"
-				}]
-			},
-			{
-				"trait": "Family",
-				"value": "Rabbit",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_rabbit_).*$"
-				}]
-			},
-			{
-				"trait": "Family",
-				"value": "Rat",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_(dark)?rat_).*$"
-				}]
-			},
-			{
-				"trait": "Family",
-				"value": "Leopard",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_leopard_).*$"
-				}]
-			},
-			{
-				"trait": "Family",
-				"value": "Tiger",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^(?=.*_tiger_).*$"
-				}]
+				"conditions": [
+					{
+						"layer": "02_body",
+						"name": "^(?=.*_(dark)?dog_).*$"
+					}
+				]
 			},
 			{
 				"trait": "Color",
 				"value": "Ash",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^.*01$"
-				}]
+				"conditions": [
+					{
+						"layer": "02_body",
+						"name": "^.*01$"
+					}
+				]
 			},
 			{
 				"trait": "Color",
 				"value": "Mocha",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^.*02$"
-				}]
+				"conditions": [
+					{
+						"layer": "02_body",
+						"name": "^.*02$"
+					}
+				]
 			},
 			{
 				"trait": "Color",
 				"value": "Snow",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^.*03$"
-				}]
+				"conditions": [
+					{
+						"layer": "02_body",
+						"name": "^.*03$"
+					}
+				]
 			},
 			{
-				"trait": "Color",
-				"value": "Onyx",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^.*04$"
-				}]
+				"trait": "Face Gear",
+				"value": "Kerchief",
+				"conditions": [
+					{
+						"layer": "07_faceitem",
+						"name": "^faceitem_Eyemask.*$"
+					}
+				]
 			},
 			{
-				"trait": "Color",
-				"value": "Mustard",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^.*05$"
-				}]
-			},
-			{
-				"trait": "Color",
-				"value": "Crimson",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^.*06$"
-				}]
-			},
-			{
-				"trait": "Color",
-				"value": "Shadow",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^.*07$"
-				}]
-			},
-			{
-				"trait": "Color",
-				"value": "Cosmic",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^.*08$"
-				}]
-			},
-			{
-				"trait": "Color",
-				"value": "Chocolate",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^.*09$"
-				}]
-			},
-			{
-				"trait": "Color",
-				"value": "Desert",
-				"conditions": [{
-					"layer": "02_body",
-					"name": "^.*10$"
-				}]
+				"trait": "Face Gear",
+				"value": "Glasses",
+				"conditions": [
+					{
+						"layer": "07_faceitem",
+						"name": "^faceitem_Glasses.*$"
+					}
+				]
 			}
 		]
 	}

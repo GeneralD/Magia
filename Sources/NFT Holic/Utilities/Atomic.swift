@@ -2,6 +2,7 @@ import Foundation
 
 @propertyWrapper
 public struct Atomic<ValueType> {
+	private let lock = NSLock()
 	private let queue = DispatchQueue(label: "atomicProperty:\(UUID().uuidString)")
 	private var value: ValueType
 
@@ -10,7 +11,15 @@ public struct Atomic<ValueType> {
 	}
 
 	public var wrappedValue: ValueType {
-		get { queue.sync { value } }
-		set { queue.sync { value = newValue } }
+		get {
+			lock.lock()
+			defer { lock.unlock() }
+			return queue.sync { value }
+		}
+		set {
+			lock.lock()
+			defer { lock.unlock() }
+			queue.sync { value = newValue }
+		}
 	}
 }

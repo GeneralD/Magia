@@ -38,7 +38,11 @@ struct MetadataFactory {
 
 				config.floatLabels.orEmpty
 					.filtered(by: layer)
-					.map { label in .numberLabel(traitType: label.trait, value: .float(label.value)) },
+					.map { label in .numberLabel(traitType: label.trait, value: .float(label.value, digitsAfterPoint: 2)) },
+
+				config.rarityPercentages.orEmpty
+					.filtered(by: layer)
+					.map { label in .boostPercentage(traitType: label.trait, value: .float(layer.probability * 100, digitsAfterPoint: 2)) },
 			]
 			return attrs.flatten
 		}.unique(where: \.identity)

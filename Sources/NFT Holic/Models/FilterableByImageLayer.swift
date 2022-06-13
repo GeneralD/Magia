@@ -26,6 +26,13 @@ extension AssetConfig.Metadata.Simple: FilterableByImageLayer {
 	}
 }
 
+extension AssetConfig.Metadata.RarityPercentage: FilterableByImageLayer {
+	typealias Element = AssetConfig.Subject
+	var subjects: [AssetConfig.Subject] {
+		conditions
+	}
+}
+
 extension Sequence where Element: FilterableByImageLayer {
 	func filtered(by layer: ImageLayerSubject) -> [Element] {
 		filter { element in

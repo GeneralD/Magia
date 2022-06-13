@@ -68,7 +68,13 @@ struct AssetConfig: Decodable {
 		let dateLabels: [Label<Date>]?
 		let intLabels: [Label<Int>]?
 		let floatLabels: [Label<Float>]?
+		let rarityPercentages: [RarityPercentage]?
 		let order: Order?
+
+		struct Simple: Decodable {
+			let value: String
+			let conditions: [Subject]
+		}
 
 		struct Label<ValueType: Decodable>: Decodable {
 			let trait: String
@@ -76,8 +82,8 @@ struct AssetConfig: Decodable {
 			let conditions: [Subject]
 		}
 
-		struct Simple: Decodable {
-			let value: String
+		struct RarityPercentage: Decodable {
+			let trait: String
 			let conditions: [Subject]
 		}
 

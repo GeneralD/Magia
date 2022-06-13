@@ -40,15 +40,18 @@ struct Metadata: Encodable {
 		case boostPercentage(traitType: String, value: NumericValue)
 		case rankedNumber(traitType: String, value: NumericValue)
 
-		enum NumericValue: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
+		enum NumericValue {
 			case int(_: Int)
-			case float(_: Float)
+			case float(_: Decimal)
 
-			init(integerLiteral value: Int) {
-				self = .int(value)
+			static func float(_ value: Double, digitsAfterPoint: Int = 6) -> Self {
+				guard let decimal = Decimal(string: .init(format: "%.\(digitsAfterPoint)f", value)) else { return .float(value) }
+				return .float(decimal)
 			}
-			init(floatLiteral value: Float) {
-				self = .float(value)
+
+			static func float(_ value: Float, digitsAfterPoint: Int = 6) -> Self {
+				guard let decimal = Decimal(string: .init(format: "%.\(digitsAfterPoint)f", value)) else { return .float(Double(value)) }
+				return .float(decimal)
 			}
 		}
 

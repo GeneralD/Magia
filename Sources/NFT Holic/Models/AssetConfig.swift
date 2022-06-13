@@ -68,6 +68,11 @@ struct AssetConfig: Decodable {
 		let dateLabels: [Label<Date>]?
 		let intLabels: [Label<Int>]?
 		let floatLabels: [Label<Float>]?
+		let intRankedNumbers: [RankedNumber<Int>]?
+		let floatRankedNumbers: [RankedNumber<Float>]?
+		let intBoostNumbers: [BoostNumber<Int>]?
+		let floatBoostNumbers: [BoostNumber<Float>]?
+		let boostPercentages: [BoostPercentage]?
 		let rarityPercentages: [RarityPercentage]?
 		let order: Order?
 
@@ -79,6 +84,25 @@ struct AssetConfig: Decodable {
 		struct Label<ValueType: Decodable>: Decodable {
 			let trait: String
 			let value: ValueType
+			let conditions: [Subject]
+		}
+
+		struct RankedNumber<ValueType: Decodable>: Decodable {
+			let trait: String
+			let value: ValueType
+			let conditions: [Subject]
+		}
+
+		struct BoostNumber<ValueType: Decodable>: Decodable {
+			let trait: String
+			let value: ValueType
+			let max: ValueType
+			let conditions: [Subject]
+		}
+
+		struct BoostPercentage: Decodable {
+			let trait: String
+			let value: Float
 			let conditions: [Subject]
 		}
 

@@ -44,12 +44,12 @@ struct Metadata: Encodable {
 			case int(_: Int)
 			case float(_: Decimal)
 
-			static func float(_ value: Double, digitsAfterPoint: Int = 6) -> Self {
+			static func float(_ value: Double, digitsAfterPoint: Int = 2) -> Self {
 				guard let decimal = Decimal(string: .init(format: "%.\(digitsAfterPoint)f", value)) else { return .float(value) }
 				return .float(decimal)
 			}
 
-			static func float(_ value: Float, digitsAfterPoint: Int = 6) -> Self {
+			static func float(_ value: Float, digitsAfterPoint: Int = 2) -> Self {
 				guard let decimal = Decimal(string: .init(format: "%.\(digitsAfterPoint)f", value)) else { return .float(Double(value)) }
 				return .float(decimal)
 			}

@@ -26,6 +26,27 @@ extension AssetConfig.Metadata.Simple: FilterableByImageLayer {
 	}
 }
 
+extension AssetConfig.Metadata.RankedNumber: FilterableByImageLayer {
+	typealias Element = AssetConfig.Subject
+	var subjects: [AssetConfig.Subject] {
+		conditions
+	}
+}
+
+extension AssetConfig.Metadata.BoostNumber: FilterableByImageLayer {
+	typealias Element = AssetConfig.Subject
+	var subjects: [AssetConfig.Subject] {
+		conditions
+	}
+}
+
+extension AssetConfig.Metadata.BoostPercentage: FilterableByImageLayer {
+	typealias Element = AssetConfig.Subject
+	var subjects: [AssetConfig.Subject] {
+		conditions
+	}
+}
+
 extension AssetConfig.Metadata.RarityPercentage: FilterableByImageLayer {
 	typealias Element = AssetConfig.Subject
 	var subjects: [AssetConfig.Subject] {

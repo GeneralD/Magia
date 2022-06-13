@@ -26,23 +26,43 @@ struct MetadataFactory {
 
 				config.textLabels.orEmpty
 					.filtered(by: layer)
-					.map { label in	.textLabel(traitType: label.trait, value: label.value) },
+					.map { conf in	.textLabel(traitType: conf.trait, value: conf.value) },
 
 				config.dateLabels.orEmpty
 					.filtered(by: layer)
-					.map { label in .dateLabel(traitType: label.trait, value: label.value) },
+					.map { conf in .dateLabel(traitType: conf.trait, value: conf.value) },
 
 				config.intLabels.orEmpty
 					.filtered(by: layer)
-					.map { label in .numberLabel(traitType: label.trait, value: .int(label.value)) },
+					.map { conf in .numberLabel(traitType: conf.trait, value: .int(conf.value)) },
 
 				config.floatLabels.orEmpty
 					.filtered(by: layer)
-					.map { label in .numberLabel(traitType: label.trait, value: .float(label.value, digitsAfterPoint: 2)) },
+					.map { conf in .numberLabel(traitType: conf.trait, value: .float(conf.value)) },
+
+				config.intRankedNumbers.orEmpty
+					.filtered(by: layer)
+					.map { conf in .rankedNumber(traitType: conf.trait, value: .int(conf.value)) },
+
+				config.floatRankedNumbers.orEmpty
+					.filtered(by: layer)
+					.map { conf in .rankedNumber(traitType: conf.trait, value: .float(conf.value)) },
+
+				config.intBoostNumbers.orEmpty
+					.filtered(by: layer)
+					.map { conf in .boostNumber(traitType: conf.trait, value: .int(conf.value), maxValue: .int(conf.value)) },
+
+				config.floatBoostNumbers.orEmpty
+					.filtered(by: layer)
+					.map { conf in .boostNumber(traitType: conf.trait, value: .float(conf.value), maxValue: .float(conf.max)) },
+
+				config.boostPercentages.orEmpty
+					.filtered(by: layer)
+					.map { conf in .boostPercentage(traitType: conf.trait, value: .float(conf.value)) },
 
 				config.rarityPercentages.orEmpty
 					.filtered(by: layer)
-					.map { label in .boostPercentage(traitType: label.trait, value: .float(layer.probability * 100, digitsAfterPoint: 2)) },
+					.map { conf in .boostPercentage(traitType: conf.trait, value: .float(layer.probability * 100)) },
 			]
 			return attrs.flatten
 		}.unique(where: \.identity)

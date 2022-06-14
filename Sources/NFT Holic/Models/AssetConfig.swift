@@ -2,16 +2,16 @@ import CoreGraphics
 import DefaultCodable
 import Foundation
 
-struct AssetConfig: Decodable {
-	static let empty: Self = .init(order: nil, combinations: nil, randomization: nil, drawSerial: .default, metadata: nil)
+struct AssetConfig: Codable, Equatable {
+	static let empty: Self = .init(order: nil, combinations: .init(), randomization: .init(), drawSerial: .default, metadata: nil)
 	
 	let order: Order?
-	let combinations: [Combination]?
-	let randomization: Randomization?
+	@Default<Empty> var combinations: [Combination]
+	@Default<Randomization> var randomization: Randomization
 	let drawSerial: DrawSerial
 	let metadata: Metadata?
 
-	struct Combination: Decodable {
+	struct Combination: Codable, Equatable {
 		let target: Subject
 		let dependencies: [Subject]
 	}
@@ -21,43 +21,47 @@ struct AssetConfig: Decodable {
 		@Default<RegexMatchesNothing> var name: String
 	}
 
-	struct Randomization: Decodable {
-		let probabilities: [Probability]
+	struct Randomization: Codable, Equatable, DefaultValueProvider {
+		static var `default`: Self = .init(probabilities: .init())
 
-		struct Probability: Decodable {
+		@Default<Empty> var probabilities: [Probability]
+
+		struct Probability: Codable, Equatable {
 			let target: Subject
-			let weight: Double
+			@Default<OneDouble> var weight: Double
 			let divideByMatches: Bool?
 		}
 	}
 
 	struct DrawSerial: Codable, Equatable, DefaultValueProvider {
+		static var `default`: Self = .init()
+
 		@Default<True> var enabled: Bool
 		@Default<ZeroFillThreeDigitsFormat> var format: String
 		@Default<Empty> var font: String
 		@Default<FontMidiumSize> var size: CGFloat
 		@Default<BlackHexCode> var color: String
-		@Default<Zero> var offsetX: CGFloat
-		@Default<Zero> var offsetY: CGFloat
-
-		static var `default`: Self = .init()
+		@Default<ZeroFloat> var offsetX: CGFloat
+		@Default<ZeroFloat> var offsetY: CGFloat
 	}
 
-	struct Order: Decodable {
+	struct Order: Codable, Equatable {
 		let selection: [String]?
 		let layerDepth: [String]?
 	}
 
-	struct Metadata: Decodable {
+	struct Metadata: Codable, Equatable {
 		let imageUrlFormat: String
 		let defaultNameFormat: String
 		let defaultDescriptionFormat: String
 		let externalUrlFormat: String?
-		let backgroundColor: String?
+		@Default<WhiteHexCode> var backgroundColor: String
 		@Default<Traits> var traits: Traits
 		@Default<Empty> var traitOrder: [String]
 
 		struct Traits: Codable, Equatable, DefaultValueProvider {
+			static var `default`: Self = .init()
+
 			@Default<Empty> var texts: [Simple]
 			@Default<Empty> var textLabels: [Label<String>]
 			@Default<Empty> var dateLabels: [Label<Date>]
@@ -66,8 +70,6 @@ struct AssetConfig: Decodable {
 			@Default<Empty> var boostNumbers: [BoostNumber]
 			@Default<Empty> var boostPercentages: [BoostPercentage]
 			@Default<Empty> var rarityPercentages: [RarityPercentage]
-
-			static var `default`: Self = .init()
 
 			struct Simple: Codable, Equatable {
 				let value: String

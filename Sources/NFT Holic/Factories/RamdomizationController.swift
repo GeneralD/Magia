@@ -2,20 +2,15 @@ import Files
 import Regex
 
 struct RamdomizationController {
-	let config: AssetConfig.Randomization?
+	let config: AssetConfig.Randomization
 
 	func elect(from candidates: [Folder], targetLayer: String) -> (element: Folder, probability: Double)? {
-		guard let probabilities = config?.probabilities else {
-			guard let element = candidates.randomElement() else { return nil }
-			return (element, 1 / Double(candidates.count))
-		}
-
 		let defaultProbability: Double = 1
 		let initDict = candidates.reduce(into: [:]) { accum, candidate in
 			accum[candidate] = defaultProbability
 		}
 
-		let dict = probabilities
+		let dict = config.probabilities
 			.filter { probability in probability.target.layer == targetLayer }
 			.reduce(into: initDict) { accum, probability in
 				let matches = candidates.filter { candidate in

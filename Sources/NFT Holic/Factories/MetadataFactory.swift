@@ -76,14 +76,13 @@ struct MetadataFactory {
 		let description = String(format: config.defaultDescriptionFormat, serial)
 
 		let externalURL = config.externalUrlFormat.map { String(format: $0, serial) }.flatMap(URL.init(string: ))
-		let backgroundColor = config.backgroundColor ?? "ffffff"
 		// validate
-		guard backgroundColor =~ #"^[\da-fA-F]{6}$|^[\da-fA-F]{3}$"#.r else {
+		guard config.backgroundColor =~ #"^[\da-fA-F]{6}$|^[\da-fA-F]{3}$"#.r else {
 			try? jsonFile.delete()
 			return .failure(.invalidBackgroundColorCode)
 		}
 
-		let metadata = Metadata(image: imageURL, externalURL: externalURL, description: description, name: name, attributes: sortedAttribute, backgroundColor: backgroundColor)
+		let metadata = Metadata(image: imageURL, externalURL: externalURL, description: description, name: name, attributes: sortedAttribute, backgroundColor: config.backgroundColor)
 
 		let encoder = JSONEncoder()
 		encoder.outputFormatting = .prettyPrinted

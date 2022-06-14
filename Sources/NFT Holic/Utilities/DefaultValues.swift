@@ -1,8 +1,16 @@
 import DefaultCodable
 import CoreGraphics
 
-enum Zero: DefaultValueProvider {
+enum ZeroFloat: DefaultValueProvider {
 	static var `default`: CGFloat = 0
+}
+
+enum OneFloat: DefaultValueProvider {
+	static var `default`: CGFloat = 1
+}
+
+enum OneDouble: DefaultValueProvider {
+	static var `default`: Double = 1
 }
 
 enum ZeroFillThreeDigitsFormat: DefaultValueProvider {
@@ -11,6 +19,10 @@ enum ZeroFillThreeDigitsFormat: DefaultValueProvider {
 
 enum BlackHexCode: DefaultValueProvider {
 	static let `default` = "000000"
+}
+
+enum WhiteHexCode: DefaultValueProvider {
+	static let `default` = "ffffff"
 }
 
 enum RegexMatchesNothing: DefaultValueProvider {

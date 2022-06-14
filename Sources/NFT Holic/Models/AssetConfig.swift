@@ -1,13 +1,14 @@
 import CoreGraphics
+import DefaultCodable
 import Foundation
 
 struct AssetConfig: Decodable {
-	static let empty: Self = .init(order: nil, combinations: nil, randomization: nil, drawSerial: nil, metadata: nil)
+	static let empty: Self = .init(order: nil, combinations: nil, randomization: nil, drawSerial: .default, metadata: nil)
 	
 	let order: Order?
 	let combinations: [Combination]?
 	let randomization: Randomization?
-	let drawSerial: DrawSerial?
+	let drawSerial: DrawSerial
 	let metadata: Metadata?
 
 	struct Combination: Decodable {
@@ -15,21 +16,9 @@ struct AssetConfig: Decodable {
 		let dependencies: [Subject]
 	}
 
-	struct Subject: Decodable {
+	struct Subject: Codable, Equatable {
 		let layer: String
-		let name: String
-
-		enum CodingKeys: CodingKey {
-			case layer
-			case name // null ok in JSON
-		}
-
-		init(from decoder: Decoder) throws {
-			let container = try decoder.container(keyedBy: CodingKeys.self)
-			// if name is null in JSON, to be regex matches to nothing
-			layer = try container.decode(String.self, forKey: .layer)
-			name = try container.decodeIfPresent(String.self, forKey: .name) ?? "^(?!)$"
-		}
+		@Default<RegexMatchesNothing> var name: String
 	}
 
 	struct Randomization: Decodable {
@@ -42,14 +31,16 @@ struct AssetConfig: Decodable {
 		}
 	}
 
-	struct DrawSerial: Decodable {
-		let enabled: Bool?
-		let format: String?
-		let font: String?
-		let size: CGFloat?
-		let color: String?
-		let offsetX: CGFloat?
-		let offsetY: CGFloat?
+	struct DrawSerial: Codable, Equatable, DefaultValueProvider {
+		@Default<True> var enabled: Bool
+		@Default<ZeroFillThreeDigitsFormat> var format: String
+		@Default<Empty> var font: String
+		@Default<FontMidiumSize> var size: CGFloat
+		@Default<BlackHexCode> var color: String
+		@Default<Zero> var offsetX: CGFloat
+		@Default<Zero> var offsetY: CGFloat
+
+		static var `default`: Self = .init()
 	}
 
 	struct Order: Decodable {
@@ -63,56 +54,55 @@ struct AssetConfig: Decodable {
 		let defaultDescriptionFormat: String
 		let externalUrlFormat: String?
 		let backgroundColor: String?
-		let texts: [Simple]?
-		let textLabels: [Label<String>]?
-		let dateLabels: [Label<Date>]?
-		let intLabels: [Label<Int>]?
-		let floatLabels: [Label<Float>]?
-		let intRankedNumbers: [RankedNumber<Int>]?
-		let floatRankedNumbers: [RankedNumber<Float>]?
-		let intBoostNumbers: [BoostNumber<Int>]?
-		let floatBoostNumbers: [BoostNumber<Float>]?
-		let boostPercentages: [BoostPercentage]?
-		let rarityPercentages: [RarityPercentage]?
-		let order: Order?
+		@Default<Traits> var traits: Traits
+		@Default<Empty> var traitOrder: [String]
 
-		struct Simple: Decodable {
-			let value: String
-			let conditions: [Subject]
-		}
+		struct Traits: Codable, Equatable, DefaultValueProvider {
+			@Default<Empty> var texts: [Simple]
+			@Default<Empty> var textLabels: [Label<String>]
+			@Default<Empty> var dateLabels: [Label<Date>]
+			@Default<Empty> var numberLabels: [Label<Decimal>]
+			@Default<Empty> var rankedNumbers: [RankedNumber]
+			@Default<Empty> var boostNumbers: [BoostNumber]
+			@Default<Empty> var boostPercentages: [BoostPercentage]
+			@Default<Empty> var rarityPercentages: [RarityPercentage]
 
-		struct Label<ValueType: Decodable>: Decodable {
-			let trait: String
-			let value: ValueType
-			let conditions: [Subject]
-		}
+			static var `default`: Self = .init()
 
-		struct RankedNumber<ValueType: Decodable>: Decodable {
-			let trait: String
-			let value: ValueType
-			let conditions: [Subject]
-		}
+			struct Simple: Codable, Equatable {
+				let value: String
+				let conditions: [Subject]
+			}
 
-		struct BoostNumber<ValueType: Decodable>: Decodable {
-			let trait: String
-			let value: ValueType
-			let max: ValueType
-			let conditions: [Subject]
-		}
+			struct Label<ValueType>: Codable, Equatable where ValueType: Codable, ValueType: Equatable {
+				let trait: String
+				let value: ValueType
+				let conditions: [Subject]
+			}
 
-		struct BoostPercentage: Decodable {
-			let trait: String
-			let value: Float
-			let conditions: [Subject]
-		}
+			struct RankedNumber: Codable, Equatable {
+				let trait: String
+				let value: Decimal
+				let conditions: [Subject]
+			}
 
-		struct RarityPercentage: Decodable {
-			let trait: String
-			let conditions: [Subject]
-		}
+			struct BoostNumber: Codable, Equatable {
+				let trait: String
+				let value: Decimal
+				let max: Decimal
+				let conditions: [Subject]
+			}
 
-		struct Order: Decodable {
-			let trait: [String]?
+			struct BoostPercentage: Codable, Equatable {
+				let trait: String
+				let value: Decimal
+				let conditions: [Subject]
+			}
+
+			struct RarityPercentage: Codable, Equatable {
+				let trait: String
+				let conditions: [Subject]
+			}
 		}
 	}
 }

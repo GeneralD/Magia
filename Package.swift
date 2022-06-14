@@ -10,6 +10,7 @@ let package = Package(
 	],
     dependencies: [
 		.package(url: "https://github.com/generald/CollectionKit", branch: "master"),
+		.package(url: "https://github.com/gonzalezreal/DefaultCodable", from: "1.2.1"),
 		.package(url: "https://github.com/JohnSundell/Files", from: "4.2.0"),
 		.package(url: "https://github.com/fromkk/HashKit.git", from: "1.1.0"),
 		.package(url: "https://github.com/crossroadlabs/Regex", from: "1.2.0"),
@@ -20,7 +21,7 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "NFT Holic",
-			dependencies: ["CollectionKit", "Files", "HashKit", "Regex", "SwiftCLI", "SwiftHEXColors"]),
+			dependencies: ["CollectionKit", "DefaultCodable", "Files", "HashKit", "Regex", "SwiftCLI", "SwiftHEXColors"]),
         .testTarget(
             name: "NFT HolicTests",
             dependencies: ["NFT Holic"]),

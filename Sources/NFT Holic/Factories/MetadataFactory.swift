@@ -19,56 +19,44 @@ struct MetadataFactory {
 			let attrs: [[Metadata.Attribute]] = [
 				accum,
 
-				config.texts.orEmpty
+				config.traits.texts
 					.filtered(by: layer)
 					.map(\.value)
 					.map(Metadata.Attribute.simple(value: )),
 
-				config.textLabels.orEmpty
+				config.traits.textLabels
 					.filtered(by: layer)
 					.map { conf in	.textLabel(traitType: conf.trait, value: conf.value) },
 
-				config.dateLabels.orEmpty
+				config.traits.dateLabels
 					.filtered(by: layer)
 					.map { conf in .dateLabel(traitType: conf.trait, value: conf.value) },
 
-				config.intLabels.orEmpty
+				config.traits.numberLabels
 					.filtered(by: layer)
-					.map { conf in .numberLabel(traitType: conf.trait, value: .int(conf.value)) },
+					.map { conf in .numberLabel(traitType: conf.trait, value: conf.value) },
 
-				config.floatLabels.orEmpty
+				config.traits.rankedNumbers
 					.filtered(by: layer)
-					.map { conf in .numberLabel(traitType: conf.trait, value: .float(conf.value)) },
+					.map { conf in .rankedNumber(traitType: conf.trait, value: conf.value) },
 
-				config.intRankedNumbers.orEmpty
+				config.traits.boostNumbers
 					.filtered(by: layer)
-					.map { conf in .rankedNumber(traitType: conf.trait, value: .int(conf.value)) },
+					.map { conf in .boostNumber(traitType: conf.trait, value: conf.value, maxValue: conf.max) },
 
-				config.floatRankedNumbers.orEmpty
+				config.traits.boostPercentages
 					.filtered(by: layer)
-					.map { conf in .rankedNumber(traitType: conf.trait, value: .float(conf.value)) },
+					.map { conf in .boostPercentage(traitType: conf.trait, value: conf.value) },
 
-				config.intBoostNumbers.orEmpty
+				config.traits.rarityPercentages
 					.filtered(by: layer)
-					.map { conf in .boostNumber(traitType: conf.trait, value: .int(conf.value), maxValue: .int(conf.value)) },
-
-				config.floatBoostNumbers.orEmpty
-					.filtered(by: layer)
-					.map { conf in .boostNumber(traitType: conf.trait, value: .float(conf.value), maxValue: .float(conf.max)) },
-
-				config.boostPercentages.orEmpty
-					.filtered(by: layer)
-					.map { conf in .boostPercentage(traitType: conf.trait, value: .float(conf.value)) },
-
-				config.rarityPercentages.orEmpty
-					.filtered(by: layer)
-					.map { conf in .boostPercentage(traitType: conf.trait, value: .float(layer.probability * 100)) },
+					.map { conf in .boostPercentage(traitType: conf.trait, value: .init(layer.probability * 100, digitsAfterPoint: 2)) },
 			]
 			return attrs.flatten
 		}.unique(where: \.identity)
 
 		// sort attributes
-		guard let sortedAttribute = sort(attributes: attributes, traitOrder: config.order?.trait) else {
+		guard let sortedAttribute = sort(attributes: attributes, traitOrder: config.traitOrder) else {
 			try? jsonFile.delete()
 			return .failure(.invalidMetadataSortConfig)
 		}

@@ -255,107 +255,73 @@ Yes, you can put your configuration file as `config.json` at the root of your in
 		"backgroundColor": "f7cc1b",
 		"defaultNameFormat": "My NFT #%05d",
 		"defaultDescriptionFormat": "The serial number is %05d.",
-		"order": {
-			"trait": [
-				"Family",
-				"Color",
-				"Face Gear",
-				"Face Gear Rarity"
-			]
-		},
-		"rarityPercentages": [
-			{
-				"trait": "Face Gear Rarity",
-				"conditions": [
-					{
-						"layer": "07_faceitem",
-						"name": "^"
-					}
-				]
-			}
+		"traitOrder": [
+			"Family",
+			"Color",
+			"Item",
+			"Face Gear",
+			"Head Gear",
+			"Face Gear Rarity",
+			"Head Gear Rarity"
 		],
-		"textLabels": [
-			{
-				"trait": "Family",
-				"value": "Ape",
-				"conditions": [
-					{
-						"layer": "02_body",
-						"name": "^(?=.*_((dark)?ape|nihonzaru)_).*$"
-					}
-				]
-			},
-			{
-				"trait": "Family",
-				"value": "Cat",
-				"conditions": [
-					{
+		"traits": {
+			"textLabels": [{
+					"trait": "Family",
+					"value": "Cat",
+					"conditions": [{
 						"layer": "02_body",
 						"name": "^(?=.*_(dark)?cat(pattern)?_).*$"
-					}
-				]
-			},
-			{
-				"trait": "Family",
-				"value": "Dog",
-				"conditions": [
-					{
+					}]
+				},
+				{
+					"trait": "Family",
+					"value": "Dog",
+					"conditions": [{
 						"layer": "02_body",
 						"name": "^(?=.*_(dark)?dog_).*$"
-					}
-				]
-			},
-			{
-				"trait": "Color",
-				"value": "Ash",
-				"conditions": [
-					{
+					}]
+				},
+				{
+					"trait": "Color",
+					"value": "Ash",
+					"conditions": [{
 						"layer": "02_body",
 						"name": "^.*01$"
-					}
-				]
-			},
-			{
-				"trait": "Color",
-				"value": "Mocha",
-				"conditions": [
-					{
+					}]
+				},
+				{
+					"trait": "Color",
+					"value": "Mocha",
+					"conditions": [{
 						"layer": "02_body",
 						"name": "^.*02$"
-					}
-				]
-			},
-			{
-				"trait": "Color",
-				"value": "Snow",
-				"conditions": [
-					{
-						"layer": "02_body",
-						"name": "^.*03$"
-					}
-				]
-			},
-			{
-				"trait": "Face Gear",
-				"value": "Kerchief",
-				"conditions": [
-					{
+					}]
+				},
+				{
+					"trait": "Face Gear",
+					"value": "Kerchief",
+					"conditions": [{
 						"layer": "07_faceitem",
 						"name": "^faceitem_Eyemask.*$"
-					}
-				]
-			},
-			{
-				"trait": "Face Gear",
-				"value": "Glasses",
-				"conditions": [
-					{
+					}]
+				},
+				{
+					"trait": "Face Gear",
+					"value": "Glasses",
+					"conditions": [{
 						"layer": "07_faceitem",
 						"name": "^faceitem_Glasses.*$"
-					}
-				]
-			}
-		]
+					}]
+				}
+			],
+			"rarityPercentages": [{
+				"trait": "Face Gear Rarity",
+				"conditions": [{
+					"layer": "07_faceitem",
+					"name": "^"
+				}]
+			}]
+		}
 	}
 }
 ```

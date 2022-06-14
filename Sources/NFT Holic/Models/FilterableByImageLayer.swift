@@ -12,42 +12,42 @@ extension AssetConfig.Combination: FilterableByImageLayer {
 	}
 }
 
-extension AssetConfig.Metadata.Label: FilterableByImageLayer {
+extension AssetConfig.Metadata.Traits.Label: FilterableByImageLayer {
 	typealias Element = AssetConfig.Subject
 	var subjects: [Element] {
 		conditions
 	}
 }
 
-extension AssetConfig.Metadata.Simple: FilterableByImageLayer {
+extension AssetConfig.Metadata.Traits.Simple: FilterableByImageLayer {
 	typealias Element = AssetConfig.Subject
 	var subjects: [AssetConfig.Subject] {
 		conditions
 	}
 }
 
-extension AssetConfig.Metadata.RankedNumber: FilterableByImageLayer {
+extension AssetConfig.Metadata.Traits.RankedNumber: FilterableByImageLayer {
 	typealias Element = AssetConfig.Subject
 	var subjects: [AssetConfig.Subject] {
 		conditions
 	}
 }
 
-extension AssetConfig.Metadata.BoostNumber: FilterableByImageLayer {
+extension AssetConfig.Metadata.Traits.BoostNumber: FilterableByImageLayer {
 	typealias Element = AssetConfig.Subject
 	var subjects: [AssetConfig.Subject] {
 		conditions
 	}
 }
 
-extension AssetConfig.Metadata.BoostPercentage: FilterableByImageLayer {
+extension AssetConfig.Metadata.Traits.BoostPercentage: FilterableByImageLayer {
 	typealias Element = AssetConfig.Subject
 	var subjects: [AssetConfig.Subject] {
 		conditions
 	}
 }
 
-extension AssetConfig.Metadata.RarityPercentage: FilterableByImageLayer {
+extension AssetConfig.Metadata.Traits.RarityPercentage: FilterableByImageLayer {
 	typealias Element = AssetConfig.Subject
 	var subjects: [AssetConfig.Subject] {
 		conditions

@@ -35,25 +35,10 @@ struct Metadata: Encodable {
 		case simple(value: String)
 		case textLabel(traitType: String, value: String)
 		case dateLabel(traitType: String, value: Date)
-		case numberLabel(traitType: String, value: NumericValue)
-		case boostNumber(traitType: String, value: NumericValue, maxValue: NumericValue)
-		case boostPercentage(traitType: String, value: NumericValue)
-		case rankedNumber(traitType: String, value: NumericValue)
-
-		enum NumericValue {
-			case int(_: Int)
-			case float(_: Decimal)
-
-			static func float(_ value: Double, digitsAfterPoint: Int = 2) -> Self {
-				guard let decimal = Decimal(string: .init(format: "%.\(digitsAfterPoint)f", value)) else { return .float(value) }
-				return .float(decimal)
-			}
-
-			static func float(_ value: Float, digitsAfterPoint: Int = 2) -> Self {
-				guard let decimal = Decimal(string: .init(format: "%.\(digitsAfterPoint)f", value)) else { return .float(Double(value)) }
-				return .float(decimal)
-			}
-		}
+		case numberLabel(traitType: String, value: Decimal)
+		case boostNumber(traitType: String, value: Decimal, maxValue: Decimal)
+		case boostPercentage(traitType: String, value: Decimal)
+		case rankedNumber(traitType: String, value: Decimal)
 
 		enum CodingKeys: String, CodingKey {
 			case traitType = "trait_type"
@@ -122,17 +107,6 @@ struct Metadata: Encodable {
 			case .rankedNumber(traitType: let traitType, value: _):
 				return traitType
 			}
-		}
-	}
-}
-
-private extension KeyedEncodingContainer where Key == Metadata.Attribute.CodingKeys {
-	mutating func encode(_ value: Metadata.Attribute.NumericValue, forKey key: Metadata.Attribute.CodingKeys) throws {
-		switch value {
-		case let .int(val):
-			try encode(val, forKey: key)
-		case let .float(val):
-			try encode(val, forKey: key)
 		}
 	}
 }

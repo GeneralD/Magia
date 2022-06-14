@@ -19,23 +19,14 @@ struct InputData {
 		let formatText: NSAttributedString
 		let transform: CGAffineTransform
 
-		init?(from drawSerial: AssetConfig.DrawSerial?) {
-			guard let config = drawSerial,
-				  config.enabled ?? true else {
-				return nil
-			}
+		init?(from config: AssetConfig.DrawSerial) {
+			guard config.enabled, !config.format.isEmpty else { return nil }
 
-			let fontName = config.font ?? ""
-			let fontSize = config.size ?? 14
-			let font = NSFont(name: fontName, size: fontSize) ?? .systemFont(ofSize: fontSize)
+			let font = NSFont(name: config.font, size: config.size) ?? .systemFont(ofSize: config.size)
+			let color = NSColor(hexString: config.color) ?? .black
 
-			let format = config.format ?? "%03d"
-			let offsetX = config.offsetX ?? 0
-			let offsetY = config.offsetY ?? 0
-			let color = config.color.flatMap { NSColor(hexString: $0) } ?? .black
-
-			formatText = .init(string: format, attributes: [.font: font, .foregroundColor: color])
-			transform = .init(translationX: offsetX, y: offsetY)
+			formatText = .init(string: config.format, attributes: [.font: font, .foregroundColor: color])
+			transform = .init(translationX: config.offsetX, y: config.offsetY)
 		}
 	}
 }

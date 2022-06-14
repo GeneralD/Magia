@@ -53,7 +53,11 @@ struct MetadataFactory {
 					.map { conf in .boostPercentage(traitType: conf.trait, value: .init(layer.probability * 100, digitsAfterPoint: 2)) },
 			]
 			return attrs.flatten
-		}.unique(where: \.identity)
+		}.unique(where: \.identity) { attr0, attr1 in
+			// if 2 or more rankedNumbers with same traitType, integrate the value by +
+			guard case let (.rankedNumber(_, value0), .rankedNumber(type1, value1)) = (attr0, attr1) else { return attr1 }
+			return .rankedNumber(traitType: type1, value: value0 + value1)
+		}
 
 		// sort attributes
 		guard let sortedAttribute = sort(attributes: attributes, traitOrder: config.traitOrder) else {

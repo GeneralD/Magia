@@ -1,9 +1,10 @@
 import CollectionKit
 
 extension Sequence {
-	func unique<Identifier: Hashable>(where: (Element) -> Identifier) -> [Element] {
+	func unique<Identifier: Hashable>(where: (Element) -> Identifier, selector: (Element, Element) -> Element = { $1 }) -> [Element] {
 		reduce(into: [:], { accum, element in
-			accum[`where`(element)] = element
+			let prev = accum[`where`(element)]
+			accum[`where`(element)] = prev.map { selector($0, element) } ?? element
 		}).values.array
 	}
 

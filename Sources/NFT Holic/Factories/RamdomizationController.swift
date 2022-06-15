@@ -16,7 +16,7 @@ struct RamdomizationController {
 				let matches = candidates.filter { candidate in
 					candidate.name =~ probability.target.name
 				}
-				let weight = probability.divideByMatches == true
+				let weight = probability.divideByMatches
 				? probability.weight / Double(matches.count)
 				: probability.weight
 

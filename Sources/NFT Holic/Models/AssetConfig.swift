@@ -29,7 +29,7 @@ struct AssetConfig: Codable, Equatable {
 		struct Probability: Codable, Equatable {
 			let target: Subject
 			@Default<OneDouble> var weight: Double
-			let divideByMatches: Bool?
+			@Default<False> var divideByMatches: Bool
 		}
 	}
 

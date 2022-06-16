@@ -16,12 +16,12 @@ let package = Package(
 		.package(url: "https://github.com/crossroadlabs/Regex", from: "1.2.0"),
 		.package(url: "https://github.com/jakeheis/SwiftCLI", from: "6.0.3"),
 		.package(url: "https://github.com/thii/SwiftHEXColors.git", from: "1.4.1"),
-		
+		.package(url: "https://github.com/jpsim/Yams.git", from: "5.0.1"),
     ],
     targets: [
         .executableTarget(
             name: "NFT Holic",
-			dependencies: ["CollectionKit", "DefaultCodable", "Files", "HashKit", "Regex", "SwiftCLI", "SwiftHEXColors"]),
+			dependencies: ["CollectionKit", "DefaultCodable", "Files", "HashKit", "Regex", "SwiftCLI", "SwiftHEXColors", "Yams"]),
         .testTarget(
             name: "NFT HolicTests",
             dependencies: ["NFT Holic"]),

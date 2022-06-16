@@ -3,6 +3,7 @@ import Files
 import Foundation
 import Regex
 import SwiftCLI
+import Yams
 
 class GenCommand: Command {
 	let name = "gen"
@@ -115,13 +116,28 @@ private extension GenCommand {
 	}
 
 	func loadAssetConfig() -> AssetConfig {
-		guard let file = try? inputFolder.file(named: "config.json"),
-			  let config = try? JSONDecoder().decode(AssetConfig.self, from: file.read()) else {
-			stderr <<< "No valid config.json"
+		guard let file = inputFolder.files.first(where: { $0.nameExcludingExtension == "config" }) else {
+			stderr <<< "Config file not found in \(inputFolder.name)"
 			stdout <<< "But still ok! We can continue processing..."
 			return .empty
 		}
-		return config
+
+		do {
+			switch file.extension {
+			case "yml", "yaml":
+				return try YAMLDecoder().decode(AssetConfig.self, from: file.read())
+			case "json":
+				return try JSONDecoder().decode(AssetConfig.self, from: file.read())
+			default:
+				stderr <<< "Incompatible file extension: \(file.name)"
+				stdout <<< "But still ok! We can continue processing..."
+				return .empty
+			}
+		} catch {
+			stderr <<< "No valid config file!"
+			stdout <<< "But still ok! We can continue processing..."
+			return .empty
+		}
 	}
 
 	@discardableResult

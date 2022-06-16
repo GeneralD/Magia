@@ -4,26 +4,34 @@
 import PackageDescription
 
 let package = Package(
-    name: "NFT Holic",
+	name: "NFT Holic",
 	platforms: [
 		.macOS(.v12),
 	],
-    dependencies: [
+	dependencies: [
 		.package(url: "https://github.com/generald/CollectionKit", branch: "master"),
 		.package(url: "https://github.com/gonzalezreal/DefaultCodable", from: "1.2.1"),
 		.package(url: "https://github.com/JohnSundell/Files", from: "4.2.0"),
-		.package(url: "https://github.com/fromkk/HashKit.git", from: "1.1.0"),
+		.package(url: "https://github.com/fromkk/HashKit", from: "1.1.0"),
 		.package(url: "https://github.com/crossroadlabs/Regex", from: "1.2.0"),
 		.package(url: "https://github.com/jakeheis/SwiftCLI", from: "6.0.3"),
-		.package(url: "https://github.com/thii/SwiftHEXColors.git", from: "1.4.1"),
-		.package(url: "https://github.com/jpsim/Yams.git", from: "5.0.1"),
-    ],
-    targets: [
-        .executableTarget(
-            name: "NFT Holic",
-			dependencies: ["CollectionKit", "DefaultCodable", "Files", "HashKit", "Regex", "SwiftCLI", "SwiftHEXColors", "Yams"]),
-        .testTarget(
-            name: "NFT HolicTests",
-            dependencies: ["NFT Holic"]),
-    ]
+		.package(url: "https://github.com/thii/SwiftHEXColors", from: "1.4.1"),
+		.package(url: "https://github.com/jpsim/Yams", from: "5.0.1"),
+	],
+	targets: [
+		.executableTarget(
+			name: "NFT Holic",
+			dependencies: [
+				"CollectionKit",
+				"DefaultCodable",
+				"Files",
+				"HashKit",
+				"Regex",
+				"SwiftCLI",
+				"SwiftHEXColors",
+				"Yams"]),
+		.testTarget(
+			name: "NFT HolicTests",
+			dependencies: ["NFT Holic"]),
+	]
 )

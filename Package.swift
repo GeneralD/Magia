@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-	name: "NFT Holic",
+	name: "NFTHolic",
 	platforms: [
 		.macOS(.v12),
 	],
@@ -20,7 +20,7 @@ let package = Package(
 	],
 	targets: [
 		.executableTarget(
-			name: "NFT Holic",
+			name: "NFTHolic",
 			dependencies: [
 				"CollectionKit",
 				"DefaultCodable",
@@ -31,7 +31,7 @@ let package = Package(
 				"SwiftHEXColors",
 				"Yams"]),
 		.testTarget(
-			name: "NFT HolicTests",
-			dependencies: ["NFT Holic"]),
+			name: "NFTHolicTests",
+			dependencies: ["NFTHolic"]),
 	]
 )

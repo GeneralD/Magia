@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "NFT Holic"
-               BuildableName = "NFT Holic"
-               BlueprintName = "NFT Holic"
+               BlueprintIdentifier = "NFTHolic"
+               BuildableName = "NFTHolic"
+               BlueprintName = "NFTHolic"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -28,9 +28,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "NFT HolicTests"
-               BuildableName = "NFT HolicTests"
-               BlueprintName = "NFT HolicTests"
+               BlueprintIdentifier = "NFTHolicTests"
+               BuildableName = "NFTHolicTests"
+               BlueprintName = "NFTHolicTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -46,9 +46,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "NFT HolicTests"
-               BuildableName = "NFT HolicTests"
-               BlueprintName = "NFT HolicTests"
+               BlueprintIdentifier = "NFTHolicTests"
+               BuildableName = "NFTHolicTests"
+               BlueprintName = "NFTHolicTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
@@ -68,9 +68,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "NFT Holic"
-            BuildableName = "NFT Holic"
-            BlueprintName = "NFT Holic"
+            BlueprintIdentifier = "NFTHolic"
+            BuildableName = "NFTHolic"
+            BlueprintName = "NFTHolic"
             ReferencedContainer = "container:">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -96,7 +96,11 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-x"
+            argument = "-p"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--sample"
             isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
@@ -111,9 +115,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "NFT Holic"
-            BuildableName = "NFT Holic"
-            BlueprintName = "NFT Holic"
+            BlueprintIdentifier = "NFTHolic"
+            BuildableName = "NFTHolic"
+            BlueprintName = "NFTHolic"
             ReferencedContainer = "container:">
          </BuildableReference>
       </BuildableProductRunnable>

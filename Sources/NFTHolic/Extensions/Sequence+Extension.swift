@@ -1,4 +1,5 @@
 import CollectionKit
+import Foundation
 
 extension Sequence {
 	func unique<Identifier: Hashable>(where: (Element) -> Identifier, selector: (Element, Element) -> Element = { $1 }) -> [Element] {
@@ -20,10 +21,19 @@ extension Sequence {
 		}
 		return result
 	}
-}
 
-extension Optional where Wrapped: Sequence {
-	var orEmpty: [Wrapped.Element] {
-		self?.array ?? []
+	func waitAll<Result>(queueLabelPrefix: String, qos: Dispatch.DispatchQoS = .utility, operation: @escaping (Element) -> Result) -> [Element: Result] where Element: Hashable {
+		@Locked var accumulator = [Element: Result]()
+		let group = DispatchGroup()
+		for element in self {
+			group.enter()
+			let dispatch = DispatchQueue(label: "\(queueLabelPrefix).\(element.hashValue)", qos: qos)
+			dispatch.async(group: group) {
+				defer { group.leave() }
+				accumulator[element] = operation(element)
+			}
+		}
+		group.wait()
+		return accumulator
 	}
 }

@@ -92,7 +92,7 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-q 1000"
+            argument = "-q 100"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

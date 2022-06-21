@@ -50,25 +50,17 @@ struct ImageFactory {
 
 private extension ImageFactory {
 	func generateAllFrameImages(queueIdentification: String, serial: Int) -> [CIImage] {
-		@Locked var frames = [Int: CIImage?]()
-		let group = DispatchGroup()
-		for frame in 0..<numberOfFrames {
-			group.enter()
-			let dispatch = DispatchQueue(label: "\(queueIdentification).\(frame)", qos: .utility, attributes: .concurrent)
-			dispatch.async(group: group) {
-				defer { group.leave() }
-				var image = generateImage(for: frame)
-				if let serialText = input.serialText {
-					let text = serialText.formatText.format(serial)
-					image = image?.draw(text: text, transform: serialText.transform)
-				}
-				if input.isSampleMode {
-					image = image?.drawSample()
-				}
-				frames[frame] = image
+		let frames = (0..<numberOfFrames).waitAll(queueLabelPrefix: queueIdentification) { frame -> CIImage? in
+			var image = generateImage(for: frame)
+			if let serialText = input.serialText {
+				let text = serialText.formatText.format(serial)
+				image = image?.draw(text: text, transform: serialText.transform)
 			}
+			if input.isSampleMode {
+				image = image?.drawSample()
+			}
+			return image
 		}
-		group.wait()
 		return frames.sorted(at: \.key, by: <).compactMap(\.value)
 	}
 

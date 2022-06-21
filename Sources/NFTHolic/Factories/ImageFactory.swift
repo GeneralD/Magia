@@ -50,7 +50,7 @@ struct ImageFactory {
 
 private extension ImageFactory {
 	func generateAllFrameImages(queueIdentification: String, serial: Int) -> [CIImage] {
-		@Atomic var frames = [Int: CIImage?]()
+		@Locked var frames = [Int: CIImage?]()
 		let group = DispatchGroup()
 		for frame in 0..<numberOfFrames {
 			group.enter()

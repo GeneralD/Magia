@@ -192,7 +192,7 @@ private extension GenCommand {
 		let sortedAlphabetically = array.sorted(at: `where`, by: <)
 		guard let order = order else { return sortedAlphabetically }
 		let result = order.compactMap { name in
-			return subjects.first { subject in
+			subjects.first { subject in
 				`where`(subject) == name
 			}
 		}

@@ -57,19 +57,18 @@ private extension GenCommand {
 		let config = loadAssetConfig()
 		let regexFactory = LayerStrictionRegexFactory(layerStrictions: config.combinations)
 		let randomManager = RamdomizationController(config: config.randomization)
-		let layerFolders = sort(subjects: inputFolder.subfolders, where: \.name, order: config.order?.selection)
-		let animated = isAnimated
+		let layerFolders = sort(subjects: inputFolder.subfolders, where: \.nameExcludingExtension, order: config.order?.selection)
 
 		func inputData<F: Location, S: Sequence>(locations: (Folder) -> S) -> InputData where F: Hashable, S.Element == F {
 			let layers = layerFolders
 				.reduce(into: [InputData.ImageLayer<F>]()) { layers, layerFolder in
 					let limitRegex = regexFactory.validItemNameRegex(forLayer: layerFolder.name, conditionLayers: layers)
-					let candidates = locations(layerFolder).filter({ subfolder in
+					let candidates = locations(layerFolder).filter({ f in
 						guard let regex = limitRegex else { return true } // no limitation
-						return subfolder.name =~ regex
+						return f.nameExcludingExtension =~ regex
 					})
 					guard let elected = randomManager.elect(from: candidates, targetLayer: layerFolder.name) else { return }
-					layers.append(.init(imageLocation: elected.element, layer: layerFolder.name, name: elected.element.name, probability: elected.probability))
+					layers.append(.init(imageLocation: elected.element, layer: layerFolder.name, name: elected.element.nameExcludingExtension, probability: elected.probability))
 				}
 
 			// arrange layers in the order of depth configured in json
@@ -88,7 +87,9 @@ private extension GenCommand {
 			return InputData(assets: assets, serialText: serialText, isSampleMode: isSampleMode)
 		}
 
-		let results = indices.map { index -> Bool in
+		let animated = isAnimated
+
+		return indices.map { index -> Bool in
 			// measure time
 			let startDate = Date()
 			defer { stdout <<< "Generating an image took \(Date().timeIntervalSince(startDate)) seconds." }
@@ -96,8 +97,6 @@ private extension GenCommand {
 			let input = animated ? inputData(locations: \.subfolders) : inputData(locations: \.files)
 			return generateImage(input: input, index: index) && generateMetadata(input: input, index: index, config: config.metadata)
 		}
-
-		return results
 	}
 
 	// Detect if it's expected to be animated image from input folder structure

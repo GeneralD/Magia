@@ -14,7 +14,7 @@ struct RamdomizationController {
 			.filter { probability in probability.target.layer == targetLayer }
 			.reduce(into: initDict) { accum, probability in
 				let matches = candidates.filter { candidate in
-					candidate.name =~ probability.target.name
+					candidate.nameExcludingExtension =~ probability.target.name
 				}
 				let weight = probability.divideByMatches
 				? probability.weight / Double(matches.count)

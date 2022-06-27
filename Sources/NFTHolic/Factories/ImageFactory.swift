@@ -19,6 +19,8 @@ struct ImageFactory {
 		let frames = generateAllFrameImages(queueIdentification: serial.description, serial: serial)
 			.compactMap(\.cgImage)
 
+		guard !frames.isEmpty else { return .failure(.noImage) }
+
 		let utType: UTType = isPng ? .png : .gif
 		guard let file = try? folder.createFile(named: "\(serial).\(isPng ? "png" : "gif")"),
 			  let destination = CGImageDestinationCreateWithURL(file.url as CFURL, utType.identifier as CFString, frames.count, nil) else {
@@ -32,10 +34,14 @@ struct ImageFactory {
 		let properties = [dictionaryKey: [loopCountKey: 0]] as? CFDictionary // 0 to loop infinity
 		CGImageDestinationSetProperties(destination, properties)
 
-		let durationPerFrame = input.animationDuration / Double(frames.count)
+		let durationPerFrame = animationDuration / Double(frames.count)
 
 		frames.forEach { frame in
-			let properties = [dictionaryKey: [delayTimeKey: durationPerFrame]] as? CFDictionary
+			let properties = frames.count > 1
+			// if multiple frames, it's going to be animated
+			? [dictionaryKey: [delayTimeKey: durationPerFrame]] as? CFDictionary
+			// no option to still image
+			: nil
 			CGImageDestinationAddImage(destination, frame, properties)
 		}
 
@@ -76,21 +82,41 @@ private extension ImageFactory {
 	}
 
 	var numberOfFrames: Int {
-		input.layers.map(\.framesFolder.files.array.count).max() ?? 0
+		switch input.assets {
+		case let .animated(layers, _):
+			return layers.map(\.imageLocation.files.array.count).max() ?? 0
+		case .still:
+			return 1
+		}
 	}
 
 	func layerImages(frame: Int) -> [File] {
-		input.layers
-			.map(\.framesFolder.files.array)
-			.filter(\.isEmpty.not)
-			.map { files in
-				let sorted = files.sorted(at: \.name, by: <)
-				return sorted[safe: frame] ?? sorted.last!
-			}
+		switch input.assets {
+		case let .animated(layers, _):
+			return layers
+				.map(\.imageLocation.files.array)
+				.filter(\.isEmpty.not)
+				.map { files in
+					let sorted = files.sorted(at: \.name, by: <)
+					return sorted[safe: frame] ?? sorted.last!
+				}
+		case let .still(layers):
+			return layers.map(\.imageLocation)
+		}
+	}
+
+	var animationDuration: Double {
+		switch input.assets {
+		case let .animated(_, duration):
+			return duration
+		case .still:
+			return 0
+		}
 	}
 }
 
 enum ImageFactoryError: Error {
+	case noImage
 	case creatingFileFailed
 	case finalizeImageFailed
 }

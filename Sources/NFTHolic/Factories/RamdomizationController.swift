@@ -4,7 +4,7 @@ import Regex
 struct RamdomizationController {
 	let config: AssetConfig.Randomization
 
-	func elect(from candidates: [Folder], targetLayer: String) -> (element: Folder, probability: Double)? {
+	func elect<F: Location>(from candidates: [F], targetLayer: String) -> (element: F, probability: Double)? where F: Hashable {
 		let defaultProbability: Double = 1
 		let initDict = candidates.reduce(into: [:]) { accum, candidate in
 			accum[candidate] = defaultProbability
@@ -30,6 +30,12 @@ struct RamdomizationController {
 }
 
 extension Folder: Hashable {
+	public func hash(into hasher: inout Hasher) {
+		hasher.combine(url)
+	}
+}
+
+extension File: Hashable {
 	public func hash(into hasher: inout Hasher) {
 		hasher.combine(url)
 	}

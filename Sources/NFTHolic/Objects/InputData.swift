@@ -3,13 +3,17 @@ import Files
 import SwiftHEXColors
 
 struct InputData {
-	let layers: [ImageLayer]
-	let animationDuration: Double
+	let assets: Assets
 	let serialText: SerialText?
 	let isSampleMode: Bool
 
-	struct ImageLayer {
-		let framesFolder: Folder
+	enum Assets {
+		case animated(layers: [ImageLayer<Folder>], duration: Double)
+		case still(layers: [ImageLayer<File>])
+	}
+
+	struct ImageLayer<F: Location> {
+		let imageLocation: F
 		let layer: String
 		let name: String
 		let probability: Double

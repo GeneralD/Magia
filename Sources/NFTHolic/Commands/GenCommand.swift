@@ -58,6 +58,7 @@ private extension GenCommand {
 		let regexFactory = LayerStrictionRegexFactory(layerStrictions: config.combinations)
 		let randomManager = RamdomizationController(config: config.randomization)
 		let layerFolders = sort(subjects: inputFolder.subfolders, where: \.name, order: config.order?.selection)
+		let animated = isAnimated
 
 		let results = indices.map { index -> Bool in
 			// measure time
@@ -65,7 +66,7 @@ private extension GenCommand {
 			defer { stdout <<< "Generating an image took \(Date().timeIntervalSince(startDate)) seconds." }
 
 			let layers = layerFolders
-				.reduce(into: [InputData.ImageLayer]()) { layers, layerFolder in
+				.reduce(into: [InputData.ImageLayer<Folder>]()) { layers, layerFolder in
 					let limitRegex = regexFactory.validItemNameRegex(forLayer: layerFolder.name, conditionLayers: layers)
 					let candidates = layerFolder.subfolders.filter({ subfolder in
 						guard let regex = limitRegex else { return true } // no limitation
@@ -73,19 +74,32 @@ private extension GenCommand {
 					})
 					guard let elected = randomManager.elect(from: candidates, targetLayer: layerFolder.name) else { return }
 					let frameFolder = elected.element
-					layers.append(.init(framesFolder: frameFolder, layer: layerFolder.name, name: frameFolder.name, probability: elected.probability))
+					layers.append(.init(imageLocation: frameFolder, layer: layerFolder.name, name: frameFolder.name, probability: elected.probability))
 				}
 
 			// arrange layers in the order of depth configured in json
 			let sortedLayers = sort(subjects: layers, where: \.layer, order: config.order?.layerDepth)
 
 			let serialText = InputData.SerialText(from: config.drawSerial)
-			let input = InputData(layers: sortedLayers, animationDuration: animationDuration ?? 2, serialText: serialText, isSampleMode: isSampleMode)
+			let input = InputData(assets: .animated(layers: sortedLayers, duration: animationDuration ?? 2), serialText: serialText, isSampleMode: isSampleMode)
 
 			return generateImage(input: input, index: index) && generateMetadata(input: input, index: index, config: config.metadata)
 		}
 
 		return results
+	}
+
+	// Detect if it's expected to be animated image from input folder structure
+	var isAnimated: Bool {
+		let subfolders = inputFolder.subfolders.array
+		if subfolders.all(\.files.array.isEmpty), subfolders.any(\.subfolders.array.isEmpty.not) {
+			return true // animated
+		}
+		if subfolders.any(\.files.array.isEmpty.not), subfolders.all(\.subfolders.array.isEmpty) {
+			return false // still
+		}
+		stderr <<< "Invalid input folder structure."
+		exit(1)
 	}
 
 	/// Indices of images to create. They start from 1, not 0.
@@ -149,6 +163,8 @@ private extension GenCommand {
 			return true
 		case let .failure(error):
 			switch error {
+			case .noImage:
+				stderr <<< "Couldn't create image."
 			case .creatingFileFailed:
 				stderr <<< "Couldn't create file to write image."
 			case .finalizeImageFailed:

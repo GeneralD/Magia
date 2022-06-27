@@ -13,9 +13,22 @@ struct MetadataFactory {
 	/// - Returns: if success
 	@discardableResult
 	func generateMetadata(saveIn folder: Folder, serial: Int, metadataConfig config: AssetConfig.Metadata) -> Result<File, MetadataFactoryError> {
+		switch input.assets {
+		case let .animated(layers, _):
+			return generateMetadata(from: layers, saveIn: folder, serial: serial, metadataConfig: config)
+		case let .still(layers):
+			return generateMetadata(from: layers, saveIn: folder, serial: serial, metadataConfig: config)
+		}
+	}
+}
+
+private extension MetadataFactory {
+
+	@discardableResult
+	func generateMetadata<F: Location>(from layers: [InputData.ImageLayer<F>], saveIn folder: Folder, serial: Int, metadataConfig config: AssetConfig.Metadata) -> Result<File, MetadataFactoryError> {
 		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(serial).json") else { return .failure(.creatingFileFailed) }
 
-		let attributes = input.layers.reduce([Metadata.Attribute]()) { accum, layer in
+		let attributes = layers.reduce([Metadata.Attribute]()) { accum, layer in
 			let attrs: [[Metadata.Attribute]] = [
 				accum,
 
@@ -93,9 +106,7 @@ struct MetadataFactory {
 		}
 		return .success(jsonFile)
 	}
-}
 
-private extension MetadataFactory {
 	func sort(attributes: [Metadata.Attribute], traitOrder: [String]?) -> [Metadata.Attribute]? {
 		guard let order = traitOrder else { return attributes.sorted(at: { $0.traitType ?? "" }, by: <) } // just sort alphabetically
 		guard let sorted = attributes.sort(where: \.traitType, orderSample: order, shouldCover: true) else { return nil } // fail

@@ -24,7 +24,7 @@ class GenCommand: Command {
 	@Key("-d", "--anim-duration", description: "Animation duration in seconds (default is 2.0000)", completion: .none, validation: [.greaterThan(0)])
 	var animationDuration: Double?
 
-	@Flag("-p", "--png", description: "Make animated png instead of gif")
+	@Flag("-p", "--png", description: "Make png instead of gif")
 	var isPng: Bool
 
 	@Flag("-f", "--overwrite", description: "Overwrite existing files")

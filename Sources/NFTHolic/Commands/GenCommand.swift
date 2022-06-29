@@ -4,6 +4,7 @@ import Foundation
 import Regex
 import SwiftCLI
 import Yams
+import GRDB
 
 class GenCommand: Command {
 	let name = "gen"
@@ -89,12 +90,22 @@ private extension GenCommand {
 
 		let animated = isAnimated
 
-		return indices.map { index -> Bool in
+		// create table
+		let dbQueue = try DatabaseQueue(path: "\(outputFolder.path)/data.sqlite")
+		_ = try dbQueue.inDatabase { db in
+			try OutputRecipe.createTable(in: db)
+		}
+
+		return try indices.map { index -> Bool in
 			// measure time
 			let startDate = Date()
 			defer { stdout <<< "Generating an image took \(Date().timeIntervalSince(startDate)) seconds." }
 
+			// write to db
 			let input = animated ? inputData(locations: \.subfolders) : inputData(locations: \.files)
+			try dbQueue.inDatabase { db in
+				try OutputRecipe(serial: index, source: input).save(db)
+			}
 			return generateImage(input: input, index: index) && generateMetadata(input: input, index: index, config: config.metadata)
 		}
 	}

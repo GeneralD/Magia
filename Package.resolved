@@ -28,6 +28,15 @@
       }
     },
     {
+      "identity" : "grdb.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/groue/GRDB.swift.git",
+      "state" : {
+        "revision" : "e02f2c8abacff2799ed14926edcbf6e76fb9f805",
+        "version" : "5.25.0"
+      }
+    },
+    {
       "identity" : "hashkit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/fromkk/hashkit.git",

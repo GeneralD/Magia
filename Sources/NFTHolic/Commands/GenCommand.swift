@@ -25,6 +25,9 @@ class GenCommand: Command {
 	@Key("-d", "--anim-duration", description: "Animation duration in seconds (default is 2.0000)", completion: .none, validation: [.greaterThan(0)])
 	var animationDuration: Double?
 
+	@Key("-r", "--reprint", description: "Reprint images based on data.sqlite file", completion: .filename)
+	var sqliteFile: File?
+
 	@Flag("-p", "--png", description: "Make png instead of gif")
 	var isPng: Bool
 
@@ -90,19 +93,28 @@ private extension GenCommand {
 
 		let animated = isAnimated
 
-		// create table
-		let dbQueue = try DatabaseQueue(path: "\(outputFolder.path)/data.sqlite")
-		_ = try dbQueue.inDatabase(OutputRecipe.createTable(in:))
-		defer { try? dbQueue.close() }
+		let inputDatabaseQueue = try sqliteFile.map { file in try DatabaseQueue(path: file.path) }
+		defer { try? inputDatabaseQueue?.close() }
+
+		let outputDatabaseQueue = try DatabaseQueue(path: "\(outputFolder.path)/data.sqlite")
+		_ = try outputDatabaseQueue.inDatabase(OutputRecipe.createTable(in:))
+		defer { try? outputDatabaseQueue.close() }
 
 		return try indices.map { index -> Bool in
 			// measure time
 			let startDate = Date()
 			defer { stdout <<< "Generating an image took \(Date().timeIntervalSince(startDate)) seconds." }
 
+			// load reprint data if db file passed
+			let recipe = try inputDatabaseQueue?.inDatabase(OutputRecipe.filter(id: Int64(index)).fetchOne)
+			let inputAssets = recipe?.assets(isAnimated: isAnimated, animationDuration: animationDuration ?? 2, inputFolder: inputFolder)
+			let reprintData = inputAssets.map { InputData(assets: $0, serialText: .init(from: config.drawSerial), isSampleMode: isSampleMode) }
+
+			// load reprint data or create new
+			let input = reprintData ?? (animated ? inputData(locations: \.subfolders) : inputData(locations: \.files))
 			// write to db
-			let input = animated ? inputData(locations: \.subfolders) : inputData(locations: \.files)
-			try dbQueue.inDatabase(OutputRecipe(serial: index, source: input).save)
+			try outputDatabaseQueue.inDatabase(OutputRecipe(serial: index, source: input, inputFolder: inputFolder).save)
+			// generate image and metadata
 			return generateImage(input: input, index: index) && generateMetadata(input: input, index: index, config: config.metadata)
 		}
 	}

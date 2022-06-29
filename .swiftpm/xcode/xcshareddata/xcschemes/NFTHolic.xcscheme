@@ -88,6 +88,10 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "-r ~/Downloads/data.sqlite"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "-s 101"
             isEnabled = "NO">
          </CommandLineArgument>

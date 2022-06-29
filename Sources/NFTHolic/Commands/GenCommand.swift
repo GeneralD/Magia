@@ -1,10 +1,10 @@
 import CollectionKit
 import Files
 import Foundation
+import GRDB
 import Regex
 import SwiftCLI
 import Yams
-import GRDB
 
 class GenCommand: Command {
 	let name = "gen"

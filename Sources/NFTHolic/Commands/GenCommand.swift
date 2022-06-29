@@ -92,9 +92,8 @@ private extension GenCommand {
 
 		// create table
 		let dbQueue = try DatabaseQueue(path: "\(outputFolder.path)/data.sqlite")
-		_ = try dbQueue.inDatabase { db in
-			try OutputRecipe.createTable(in: db)
-		}
+		_ = try dbQueue.inDatabase(OutputRecipe.createTable(in:))
+		defer { try? dbQueue.close() }
 
 		return try indices.map { index -> Bool in
 			// measure time
@@ -103,9 +102,7 @@ private extension GenCommand {
 
 			// write to db
 			let input = animated ? inputData(locations: \.subfolders) : inputData(locations: \.files)
-			try dbQueue.inDatabase { db in
-				try OutputRecipe(serial: index, source: input).save(db)
-			}
+			try dbQueue.inDatabase(OutputRecipe(serial: index, source: input).save)
 			return generateImage(input: input, index: index) && generateMetadata(input: input, index: index, config: config.metadata)
 		}
 	}

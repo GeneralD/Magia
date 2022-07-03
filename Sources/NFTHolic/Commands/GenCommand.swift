@@ -19,7 +19,7 @@ class GenCommand: Command {
 	@Key("-q", "--quantity", description: "Number of creation (default is 100)", completion: .none, validation: [.greaterThan(0)])
 	var creationCount: Int?
 
-	@Key("-s", "--start-index", description: "Auto incremented index start from what? (default is 1)", completion: .none, validation: [.greaterThan(0)])
+	@Key("-s", "--start-index", description: "Auto incremented index start from what? (default is 1)", completion: .none, validation: [.greaterThanOrEqual(0)])
 	var startIndex: Int?
 
 	@Key("-d", "--anim-duration", description: "Animation duration in seconds (default is 2.0000)", completion: .none, validation: [.greaterThan(0)])
@@ -37,8 +37,15 @@ class GenCommand: Command {
 	@Flag("--without-metadata", description: "Not to generate metadata")
 	var noMetadata: Bool
 
+	@Flag("--without-image", description: "Not to generate image")
+	var noImage: Bool
+
 	@Flag("--sample", description: "Generate image with watermark (Not for sales)")
 	var isSampleMode: Bool
+
+	var optionGroups: [OptionGroup] {
+		[.atMostOne($noMetadata, $noImage)]
+	}
 
 	func execute() throws {
 		// validate
@@ -186,6 +193,7 @@ private extension GenCommand {
 
 	@discardableResult
 	func generateImage(input: InputData, index: Int) -> Bool {
+		guard !noImage else { return true }
 		let imageFactory = ImageFactory(input: input)
 		switch imageFactory.generateImage(saveIn: outputFolder, serial: index, isPng: isPng) {
 		case let .success(file):

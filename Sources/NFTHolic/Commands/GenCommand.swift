@@ -1,3 +1,4 @@
+import AppKit
 import CollectionKit
 import Files
 import Foundation
@@ -6,7 +7,6 @@ import Regex
 import SwiftCLI
 import UniformTypeIdentifiers
 import Yams
-import AppKit
 
 class GenCommand: Command {
 	let name = "gen"
@@ -19,22 +19,22 @@ class GenCommand: Command {
 	var outputFolder: Folder!
 
 	@Key("--image-foldername", description: "Folder name to place images (default is images)", completion: .filename)
-	var imageFolderName: String?
+	var imageFolderName: String!
 
 	@Key("-q", "--quantity", description: "Number of creation (default is 100)", completion: .none, validation: [.greaterThan(0)])
-	var creationCount: Int?
+	var creationCount: Int!
 
 	@Key("-s", "--start-index", description: "Auto incremented index start from what? (default is 1)", completion: .none, validation: [.greaterThanOrEqual(0)])
-	var startIndex: Int?
+	var startIndex: Int!
 
 	@Key("-d", "--anim-duration", description: "Animation duration in seconds (default is 2.0000)", completion: .none, validation: [.greaterThan(0)])
-	var animationDuration: Double?
+	var animationDuration: Double!
 
 	@Key("-r", "--reprint", description: "Reprint images based on data.sqlite file", completion: .filename)
 	var sqliteFile: File?
 
 	@Key("-t", "--type", description: "Type to generate image (default is gif)", completion: .values([(name: "gif", description: ""), (name: "png", description: "")]), validation: [.custom("unsupported image type") { $0 == .gif || $0 == .png }])
-	var imageType: UTType?
+	var imageType: UTType!
 
 	@Flag("-f", "--overwrite", description: "Overwrite existing files")
 	var forceOverwrite: Bool
@@ -53,11 +53,12 @@ class GenCommand: Command {
 	}
 
 	func execute() throws {
-		if outputFolder == nil, let defaultFolder = try Folder.documents?.createSubfolderIfNeeded(withName: "NFTs").createSubfolderIfNeeded(at: inputFolder.name) {
-			$outputFolder.update(to: defaultFolder)
-			stdout <<< "--output-dir is not specified. Automatically set to: \(defaultFolder.path)"
-			NSWorkspace.shared.open(defaultFolder.url)
-		}
+		configureOutputFolder()
+		configureImageFolderName()
+		configureCreationCount()
+		configureStartIndex()
+		configureAnimationDuration()
+		configureImageType()
 
 		let results = try generate()
 		logging(results: results)
@@ -65,6 +66,38 @@ class GenCommand: Command {
 }
 
 private extension GenCommand {
+	func configureOutputFolder() {
+		guard outputFolder == nil, let defaultFolder = try? Folder.documents?.createSubfolderIfNeeded(withName: "NFTs").createSubfolderIfNeeded(withName: inputFolder.name) else { return }
+		$outputFolder.update(to: defaultFolder)
+		stdout <<< "--output-dir is not specified. Automatically set to: \(defaultFolder.path)"
+		NSWorkspace.shared.open(defaultFolder.url)
+	}
+
+	func configureImageFolderName() {
+		guard imageFolderName == nil else { return }
+		$imageFolderName.update(to: "images")
+	}
+
+	func configureCreationCount() {
+		guard creationCount == nil else { return }
+		$creationCount.update(to: 100)
+	}
+
+	func configureStartIndex() {
+		guard startIndex == nil else { return }
+		$startIndex.update(to: 1)
+	}
+
+	func configureAnimationDuration() {
+		guard animationDuration == nil else { return }
+		$animationDuration.update(to: 2)
+	}
+
+	func configureImageType() {
+		guard imageType == nil else { return }
+		$imageType.update(to: .gif)
+	}
+
 	func generate() throws -> [Bool] {
 		// measure time
 		let startDate = Date()
@@ -94,7 +127,7 @@ private extension GenCommand {
 			let assets: InputData.Assets
 			switch sortedLayers {
 			case let (folders as [InputData.ImageLayer<Folder>]) as Any:
-				assets = .animated(layers: folders, duration: animationDuration ?? 2)
+				assets = .animated(layers: folders, duration: animationDuration)
 			case let (files as [InputData.ImageLayer<File>]) as Any:
 				assets = .still(layers: files)
 			default:
@@ -119,7 +152,7 @@ private extension GenCommand {
 
 			// load reprint data if db file passed
 			let recipe = try inputDatabaseQueue?.inDatabase(OutputRecipe.filter(id: Int64(index)).fetchOne)
-			let inputAssets = recipe?.assets(isAnimated: isAnimated, animationDuration: animationDuration ?? 2, inputFolder: inputFolder)
+			let inputAssets = recipe?.assets(isAnimated: isAnimated, animationDuration: animationDuration, inputFolder: inputFolder)
 			let reprintData = inputAssets.map { InputData(assets: $0, serialText: .init(from: config.drawSerial), isSampleMode: isSampleMode) }
 
 			// load reprint data or create new
@@ -152,11 +185,7 @@ private extension GenCommand {
 			.map(\.nameExcludingExtension)
 			.compactMap(Int.init)
 
-		let loopCount = creationCount ?? 100
-
-		let start = startIndex ?? 1
-		let end = start + loopCount
-		return Set(start..<end).subtracting(skips)
+		return Set(startIndex..<(startIndex + creationCount)).subtracting(skips)
 	}
 
 	func logging(results: [Bool]) {
@@ -199,12 +228,12 @@ private extension GenCommand {
 	@discardableResult
 	func generateImage(input: InputData, index: Int) -> Bool {
 		guard !noImage else { return true }
-		guard let imageFolder = try? outputFolder.createSubfolderIfNeeded(withName: imageFolderName ?? "images") else {
+		guard let imageFolder = try? outputFolder.createSubfolderIfNeeded(withName: imageFolderName) else {
 			stderr <<< "Couldn't create root folder to store images"
 			return false
 		}
 		let imageFactory = ImageFactory(input: input)
-		switch imageFactory.generateImage(saveIn: imageFolder, serial: index, imageType: imageType ?? .gif) {
+		switch imageFactory.generateImage(saveIn: imageFolder, serial: index, imageType: imageType) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
 			return true
@@ -227,7 +256,7 @@ private extension GenCommand {
 	func generateMetadata(input: InputData, index: Int, config: AssetConfig.Metadata?) -> Bool {
 		guard !noMetadata, let metadataConfig = config else { return true }
 		let metadataFactory = MetadataFactory(input: input)
-		switch metadataFactory.generateMetadata(saveIn: outputFolder, serial: index, metadataConfig: metadataConfig, imageFolderName: imageFolderName ?? "images", imageType: imageType ?? .gif) {
+		switch metadataFactory.generateMetadata(saveIn: outputFolder, serial: index, metadataConfig: metadataConfig, imageFolderName: imageFolderName, imageType: imageType) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
 			return true

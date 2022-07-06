@@ -51,7 +51,7 @@ struct AssetConfig: Codable, Equatable {
 	}
 
 	struct Metadata: Codable, Equatable {
-		let imageUrlFormat: String
+		let baseUrl: URL
 		let defaultNameFormat: String
 		let defaultDescriptionFormat: String
 		let externalUrlFormat: String?

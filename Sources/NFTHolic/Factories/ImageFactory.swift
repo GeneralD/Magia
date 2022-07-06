@@ -15,23 +15,20 @@ struct ImageFactory {
 	///   - isPng: to create animated png instead of gif
 	/// - Returns: if success
 	@discardableResult
-	func generateImage(saveIn folder: Folder, serial: Int, isPng: Bool = false) -> Result<File, ImageFactoryError> {
+	func generateImage(saveIn folder: Folder, serial: Int, imageType: UTType) -> Result<File, ImageFactoryError> {
+		guard imageType.isSupported else { return .failure(.unsupportedImageType) }
+
 		let frames = generateAllFrameImages(queueIdentification: serial.description, serial: serial)
 			.compactMap(\.cgImage)
 
 		guard !frames.isEmpty else { return .failure(.noImage) }
 
-		let utType: UTType = isPng ? .png : .gif
-		guard let file = try? folder.createFile(named: "\(serial).\(isPng ? "png" : "gif")"),
-			  let destination = CGImageDestinationCreateWithURL(file.url as CFURL, utType.identifier as CFString, frames.count, nil) else {
+		let fileURL = folder.url.appendingPathComponent(serial.description, conformingTo: imageType)
+		guard let destination = CGImageDestinationCreateWithURL(fileURL as CFURL, imageType.identifier as CFString, frames.count, nil) else {
 			return .failure(.creatingFileFailed)
 		}
 
-		let dictionaryKey = (isPng ? kCGImagePropertyPNGDictionary : kCGImagePropertyGIFDictionary) as String
-		let loopCountKey = (isPng ? kCGImagePropertyAPNGLoopCount : kCGImagePropertyGIFLoopCount) as String
-		let delayTimeKey = (isPng ? kCGImagePropertyAPNGDelayTime : kCGImagePropertyGIFDelayTime) as String
-
-		let properties = [dictionaryKey: [loopCountKey: 0]] as? CFDictionary // 0 to loop infinity
+		let properties = [imageType.dictionaryKey: [imageType.loopCountKey: 0]] as? CFDictionary // 0 to loop infinity
 		CGImageDestinationSetProperties(destination, properties)
 
 		let durationPerFrame = animationDuration / Double(frames.count)
@@ -39,15 +36,18 @@ struct ImageFactory {
 		frames.forEach { frame in
 			let properties = frames.count > 1
 			// if multiple frames, it's going to be animated
-			? [dictionaryKey: [delayTimeKey: durationPerFrame]] as? CFDictionary
+			? [imageType.dictionaryKey: [imageType.delayTimeKey: durationPerFrame]] as? CFDictionary
 			// no option to still image
 			: nil
 			CGImageDestinationAddImage(destination, frame, properties)
 		}
 
 		guard CGImageDestinationFinalize(destination) else {
-			try? file.delete()
 			return .failure(.finalizeImageFailed)
+		}
+
+		guard let file = try? File(path: fileURL.path) else {
+			return .failure(.creatingFileFailed)
 		}
 
 		return .success(file)
@@ -117,6 +117,49 @@ private extension ImageFactory {
 
 enum ImageFactoryError: Error {
 	case noImage
+	case unsupportedImageType
 	case creatingFileFailed
 	case finalizeImageFailed
+}
+
+private extension UTType {
+	var isSupported: Bool {
+		self == .gif || self == .png
+	}
+
+	var dictionaryKey: String {
+		switch self {
+		case .gif:
+			return kCGImagePropertyGIFDictionary as String
+		case .png:
+			return kCGImagePropertyPNGDictionary as String
+		default:
+			assertionFailure()
+			return ""
+		}
+	}
+
+	var loopCountKey: String {
+		switch self {
+		case .gif:
+			return kCGImagePropertyGIFLoopCount as String
+		case .png:
+			return kCGImagePropertyAPNGLoopCount as String
+		default:
+			assertionFailure()
+			return ""
+		}
+	}
+
+	var delayTimeKey: String {
+		switch self {
+		case .gif:
+			return kCGImagePropertyGIFDelayTime as String
+		case .png:
+			return kCGImagePropertyAPNGDelayTime as String
+		default:
+			assertionFailure()
+			return ""
+		}
+	}
 }

@@ -104,7 +104,11 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-p"
+            argument = "-t png"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "--image-foldername nfts"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument

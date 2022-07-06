@@ -1,6 +1,7 @@
 import Files
 import Foundation
 import Regex
+import UniformTypeIdentifiers
 
 struct MetadataFactory {
 
@@ -12,12 +13,12 @@ struct MetadataFactory {
 	///   - serial: will be file name (without path and extension)
 	/// - Returns: if success
 	@discardableResult
-	func generateMetadata(saveIn folder: Folder, serial: Int, metadataConfig config: AssetConfig.Metadata) -> Result<File, MetadataFactoryError> {
+	func generateMetadata(saveIn folder: Folder, serial: Int, metadataConfig config: AssetConfig.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
 		switch input.assets {
 		case let .animated(layers, _):
-			return generateMetadata(from: layers, saveIn: folder, serial: serial, metadataConfig: config)
+			return generateMetadata(from: layers, saveIn: folder, serial: serial, metadataConfig: config, imageFolderName: imageFolderName, imageType: imageType)
 		case let .still(layers):
-			return generateMetadata(from: layers, saveIn: folder, serial: serial, metadataConfig: config)
+			return generateMetadata(from: layers, saveIn: folder, serial: serial, metadataConfig: config, imageFolderName: imageFolderName, imageType: imageType)
 		}
 	}
 }
@@ -25,7 +26,7 @@ struct MetadataFactory {
 private extension MetadataFactory {
 
 	@discardableResult
-	func generateMetadata<F: Location>(from layers: [InputData.ImageLayer<F>], saveIn folder: Folder, serial: Int, metadataConfig config: AssetConfig.Metadata) -> Result<File, MetadataFactoryError> {
+	func generateMetadata<F: Location>(from layers: [InputData.ImageLayer<F>], saveIn folder: Folder, serial: Int, metadataConfig config: AssetConfig.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
 		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(serial).json") else { return .failure(.creatingFileFailed) }
 
 		let attributes = layers.reduce([Metadata.Attribute]()) { accum, layer in
@@ -78,11 +79,9 @@ private extension MetadataFactory {
 			return .failure(.invalidMetadataSortConfig)
 		}
 
-		// image url is required field
-		guard let imageURL = URL(string: .init(format: config.imageUrlFormat, serial)) else {
-			try? jsonFile.delete()
-			return .failure(.imageUrlFormatIsRequired)
-		}
+		let imageURL = config.baseUrl
+			.appendingPathComponent(imageFolderName)
+			.appendingPathComponent(serial.description, conformingTo: imageType)
 
 		// TODO: override defaults values
 		let name = String(format: config.defaultNameFormat, serial)

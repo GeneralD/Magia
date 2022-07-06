@@ -4,6 +4,7 @@ import Foundation
 import GRDB
 import Regex
 import SwiftCLI
+import UniformTypeIdentifiers
 import Yams
 
 class GenCommand: Command {
@@ -15,6 +16,9 @@ class GenCommand: Command {
 
 	@Key("-o", "--output-dir", description: "Output destination is required", completion: .filename)
 	var outputFolder: Folder!
+
+	@Key("--image-foldername", description: "Folder name to place images (default is images)", completion: .filename)
+	var imageFolderName: String?
 
 	@Key("-q", "--quantity", description: "Number of creation (default is 100)", completion: .none, validation: [.greaterThan(0)])
 	var creationCount: Int?
@@ -28,8 +32,8 @@ class GenCommand: Command {
 	@Key("-r", "--reprint", description: "Reprint images based on data.sqlite file", completion: .filename)
 	var sqliteFile: File?
 
-	@Flag("-p", "--png", description: "Make png instead of gif")
-	var isPng: Bool
+	@Key("-t", "--type", description: "Type to generate image (default is gif)", completion: .values([(name: "gif", description: ""), (name: "png", description: "")]), validation: [.custom("unsupported image type") { $0 == .gif || $0 == .png }])
+	var imageType: UTType?
 
 	@Flag("-f", "--overwrite", description: "Overwrite existing files")
 	var forceOverwrite: Bool
@@ -194,8 +198,12 @@ private extension GenCommand {
 	@discardableResult
 	func generateImage(input: InputData, index: Int) -> Bool {
 		guard !noImage else { return true }
+		guard let imageFolder = try? outputFolder.createSubfolderIfNeeded(withName: imageFolderName ?? "images") else {
+			stderr <<< "Couldn't create root folder to store images"
+			return false
+		}
 		let imageFactory = ImageFactory(input: input)
-		switch imageFactory.generateImage(saveIn: outputFolder, serial: index, isPng: isPng) {
+		switch imageFactory.generateImage(saveIn: imageFolder, serial: index, imageType: imageType ?? .gif) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
 			return true
@@ -203,6 +211,8 @@ private extension GenCommand {
 			switch error {
 			case .noImage:
 				stderr <<< "Couldn't create image."
+			case .unsupportedImageType:
+				stderr <<< "Unsupported image type."
 			case .creatingFileFailed:
 				stderr <<< "Couldn't create file to write image."
 			case .finalizeImageFailed:
@@ -216,11 +226,7 @@ private extension GenCommand {
 	func generateMetadata(input: InputData, index: Int, config: AssetConfig.Metadata?) -> Bool {
 		guard !noMetadata, let metadataConfig = config else { return true }
 		let metadataFactory = MetadataFactory(input: input)
-		guard let metadataFolder = try? outputFolder.createSubfolderIfNeeded(withName: "Metadata") else {
-			stderr <<< "Couldn't create root folder to store metadata"
-			return false
-		}
-		switch metadataFactory.generateMetadata(saveIn: metadataFolder, serial: index, metadataConfig: metadataConfig) {
+		switch metadataFactory.generateMetadata(saveIn: outputFolder, serial: index, metadataConfig: metadataConfig, imageFolderName: imageFolderName ?? "images", imageType: imageType ?? .gif) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
 			return true

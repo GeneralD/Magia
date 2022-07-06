@@ -131,7 +131,7 @@ metadata:
   defaultDescriptionFormat: "First collections of ANIM.JP. Serial number is %05d."
   defaultNameFormat: ANIM.JP#%05d
   externalUrlFormat: https://anim.jp
-  imageUrlFormat: https://animjpnfttest.s3.ap-northeast-3.amazonaws.com/images/%d.gif
+  baseUrl: https://mynft.com
   traitOrder:
   - Family
   - Color

@@ -6,6 +6,7 @@ import Regex
 import SwiftCLI
 import UniformTypeIdentifiers
 import Yams
+import AppKit
 
 class GenCommand: Command {
 	let name = "gen"
@@ -14,7 +15,7 @@ class GenCommand: Command {
 	@Param(completion: .filename)
 	var inputFolder: Folder
 
-	@Key("-o", "--output-dir", description: "Output destination is required", completion: .filename)
+	@Key("-o", "--output-dir", description: "Output destination (default is ~/Documents/NFTs/{inputFolder name})", completion: .filename)
 	var outputFolder: Folder!
 
 	@Key("--image-foldername", description: "Folder name to place images (default is images)", completion: .filename)
@@ -52,10 +53,10 @@ class GenCommand: Command {
 	}
 
 	func execute() throws {
-		// validate
-		guard outputFolder != nil else {
-			stdout <<< "--output-dir is required"
-			return
+		if outputFolder == nil, let defaultFolder = try Folder.documents?.createSubfolderIfNeeded(withName: "NFTs").createSubfolderIfNeeded(at: inputFolder.name) {
+			$outputFolder.update(to: defaultFolder)
+			stdout <<< "--output-dir is not specified. Automatically set to: \(defaultFolder.path)"
+			NSWorkspace.shared.open(defaultFolder.url)
 		}
 
 		let results = try generate()

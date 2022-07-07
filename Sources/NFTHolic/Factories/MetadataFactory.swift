@@ -28,45 +28,30 @@ private extension MetadataFactory {
 	@discardableResult
 	func generateMetadata<F: Location>(from layers: [InputData.ImageLayer<F>], saveIn folder: Folder, serial: Int, metadataConfig config: AssetConfig.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
 		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(serial).json") else { return .failure(.creatingFileFailed) }
-
 		let attributes = layers.reduce([Metadata.Attribute]()) { accum, layer in
-			let attrs: [[Metadata.Attribute]] = [
-				accum,
-
-				config.traits.texts
-					.filtered(by: layer)
-					.map(\.value)
-					.map(Metadata.Attribute.simple(value: )),
-
-				config.traits.textLabels
-					.filtered(by: layer)
-					.map { conf in	.textLabel(traitType: conf.trait, value: conf.value) },
-
-				config.traits.dateLabels
-					.filtered(by: layer)
-					.map { conf in .dateLabel(traitType: conf.trait, value: conf.value) },
-
-				config.traits.numberLabels
-					.filtered(by: layer)
-					.map { conf in .numberLabel(traitType: conf.trait, value: conf.value) },
-
-				config.traits.rankedNumbers
-					.filtered(by: layer)
-					.map { conf in .rankedNumber(traitType: conf.trait, value: conf.value) },
-
-				config.traits.boostNumbers
-					.filtered(by: layer)
-					.map { conf in .boostNumber(traitType: conf.trait, value: conf.value, maxValue: conf.max) },
-
-				config.traits.boostPercentages
-					.filtered(by: layer)
-					.map { conf in .boostPercentage(traitType: conf.trait, value: conf.value) },
-
-				config.traits.rarityPercentages
-					.filtered(by: layer)
-					.map { conf in .boostPercentage(traitType: conf.trait, value: .init(layer.probability * 100, digitsAfterPoint: 2)) },
-			]
-			return attrs.flatten
+			accum + config.data
+				.filtered(by: layer)
+				.flatMap(\.traits)
+				.map { trait in
+					switch trait {
+					case let .simple(value):
+						return .simple(value: value)
+					case let .label(trait, .string(value)):
+						return .textLabel(traitType: trait, value: value)
+					case let .label(trait, value: .date(value)):
+						return .dateLabel(traitType: trait, value: value)
+					case let .label(trait, value: .number(value)):
+						return .numberLabel(traitType: trait, value: value)
+					case let .rankedNumber(trait, value):
+						return .rankedNumber(traitType: trait, value: value)
+					case let .boostNumber(trait, value, max):
+						return .boostNumber(traitType: trait, value: value, maxValue: max)
+					case let .boostPercentage(trait, value):
+						return .boostPercentage(traitType: trait, value: value)
+					case let .rarityPercentage(trait):
+						return  .boostPercentage(traitType: trait, value: .init(layer.probability * 100, digitsAfterPoint: 2))
+					}
+				}
 		}.unique(where: \.identity) { attr0, attr1 in
 			// if 2 or more rankedNumbers with same traitType, integrate the value by +
 			guard case let (.rankedNumber(_, value0), .rankedNumber(type1, value1)) = (attr0, attr1) else { return attr1 }

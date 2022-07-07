@@ -56,54 +56,84 @@ struct AssetConfig: Codable, Equatable {
 		let defaultDescriptionFormat: String
 		let externalUrlFormat: String?
 		@Default<WhiteHexCode> var backgroundColor: String
-		@Default<Traits> var traits: Traits
+		@Default<Empty> var data: [Data]
 		@Default<Empty> var traitOrder: [String]
 
-		struct Traits: Codable, Equatable, DefaultValueProvider {
-			static var `default`: Self = .init()
+		struct Data: Codable, Equatable {
+			let traits: [Trait]
+			let conditions: [Subject]
+		}
 
-			@Default<Empty> var texts: [Simple]
-			@Default<Empty> var textLabels: [Label<String>]
-			@Default<Empty> var dateLabels: [Label<Date>]
-			@Default<Empty> var numberLabels: [Label<Decimal>]
-			@Default<Empty> var rankedNumbers: [RankedNumber]
-			@Default<Empty> var boostNumbers: [BoostNumber]
-			@Default<Empty> var boostPercentages: [BoostPercentage]
-			@Default<Empty> var rarityPercentages: [RarityPercentage]
+		enum Trait: Codable, Equatable {
+			case simple(value: String)
+			case label(trait: String, value: LabelValueType)
+			case rankedNumber(trait: String, value: Decimal)
+			case boostNumber(trait: String, value: Decimal, max: Decimal)
+			case boostPercentage(trait: String, value: Decimal)
+			case rarityPercentage(trait: String)
 
-			struct Simple: Codable, Equatable {
-				let value: String
-				let conditions: [Subject]
+			enum LabelValueType: Codable, Equatable {
+				case string(_: String)
+				case date(_: Date)
+				case number(_: Decimal)
 			}
 
-			struct Label<ValueType>: Codable, Equatable where ValueType: Codable, ValueType: Equatable {
-				let trait: String
-				let value: ValueType
-				let conditions: [Subject]
+			enum CodingKeys: CodingKey {
+				case type, trait, value, max
 			}
 
-			struct RankedNumber: Codable, Equatable {
-				let trait: String
-				let value: Decimal
-				let conditions: [Subject]
+			enum TraitType: String, Codable {
+				case simple, label, rankedNumber, boostNumber, boostPercentage, rarityPercentage
 			}
 
-			struct BoostNumber: Codable, Equatable {
-				let trait: String
-				let value: Decimal
-				let max: Decimal
-				let conditions: [Subject]
+			func encode(to encoder: Encoder) throws {
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				switch self {
+				case let .simple(value):
+					try container.encode(TraitType.simple, forKey: .type)
+					try container.encode(value, forKey: .value)
+				case let .label(trait, value):
+					try container.encode(TraitType.label, forKey: .type)
+					try container.encode(trait, forKey: .trait)
+					try container.encode(value, forKey: .value)
+				case let .rankedNumber(trait, value):
+					try container.encode(TraitType.rankedNumber, forKey: .type)
+					try container.encode(trait, forKey: .trait)
+					try container.encode(value, forKey: .value)
+				case let .boostNumber(trait, value, max):
+					try container.encode(TraitType.boostNumber, forKey: .type)
+					try container.encode(trait, forKey: .trait)
+					try container.encode(value, forKey: .value)
+					try container.encode(max, forKey: .max)
+				case let .boostPercentage(trait, value):
+					try container.encode(TraitType.boostPercentage, forKey: .type)
+					try container.encode(trait, forKey: .trait)
+					try container.encode(value, forKey: .value)
+				case let .rarityPercentage(trait):
+					try container.encode(TraitType.rarityPercentage, forKey: .type)
+					try container.encode(trait, forKey: .trait)
+				}
 			}
 
-			struct BoostPercentage: Codable, Equatable {
-				let trait: String
-				let value: Decimal
-				let conditions: [Subject]
-			}
-
-			struct RarityPercentage: Codable, Equatable {
-				let trait: String
-				let conditions: [Subject]
+			init(from decoder: Decoder) throws {
+				let container = try decoder.container(keyedBy: CodingKeys.self)
+				let type = try container.decode(TraitType.self, forKey: .type)
+				switch type {
+				case .simple:
+					self = try .simple(value: container.decode(String.self, forKey: .value))
+				case .label:
+					let value = try? container.decodeIfPresent(Date.self, forKey: .value).flatMap(LabelValueType.date)
+					?? container.decodeIfPresent(Decimal.self, forKey: .value).flatMap(LabelValueType.number)
+					self = try .label(trait: container.decode(String.self, forKey: .trait), value: value ?? .string(container.decode(String.self, forKey: .value)))
+				case .rankedNumber:
+					self = try .rankedNumber(trait: container.decode(String.self, forKey: .trait), value: container.decode(Decimal.self, forKey: .value))
+				case .boostNumber:
+					self = try .boostNumber(trait: container.decode(String.self, forKey: .trait), value: container.decode(Decimal.self, forKey: .value), max: container.decode(Decimal.self, forKey: .max))
+				case .boostPercentage:
+					self = try .boostPercentage(trait: container.decode(String.self, forKey: .trait), value: container.decode(Decimal.self, forKey: .value))
+				case .rarityPercentage:
+					self = try .rarityPercentage(trait: container.decode(String.self, forKey: .trait))
+				}
 			}
 		}
 	}

@@ -131,7 +131,7 @@ metadata:
   defaultDescriptionFormat: "First collections of ANIM.JP. Serial number is %05d."
   defaultNameFormat: ANIM.JP#%05d
   externalUrlFormat: https://anim.jp
-  baseUrl: https://mynft.com
+  baseUrl: https://nft.com
   traitOrder:
   - Family
   - Color
@@ -139,28 +139,56 @@ metadata:
   - Hair Color
   - Eyes
   - Clothing
-  traits:
-    textLabels:
-    # Ape
-    - conditions:
-      - layer: 02_body
-        name: "^(?=.*_((dark)?ape|nihonzaru)_).*$"
+  - Item
+  - Face Gear
+  - Head Gear
+  - Curiosity
+  - Endurance
+  - Fortune
+  - Identity
+  - Imagination
+  - Influence
+  - Intelligence
+  - Morality
+  - Talent
+  - Wisdom
+  data:
+  - conditions:
+    - layer: 02_body
+      name: "^(?=.*_(dark)?cat(pattern)?_).*$"
+    traits:
+    - type: label
       trait: Family
-      value: Ape
-    # Bear
-    - conditions:
-      - layer: 02_body
-        name: "^(?=.*_bear_).*$"
-      trait: Family
-      value: Bear
-    rarityPercentages:
-    - conditions:
-      - layer: 07_faceitem
-        name: "^"
-      trait: Face Gear Rarity
-    - conditions:
-      - layer: 08_headitem
-        name: "^"
-      trait: Head Gear Rarity
+      value: Cat
+    - type: rankedNumber
+      trait: Curiosity
+      value: 26
+    - type: rankedNumber
+      trait: Endurance
+      value: 3
+    - type: rankedNumber
+      trait: Fortune
+      value: 42
+    - type: rankedNumber
+      trait: Identity
+      value: 31
+    - type: rankedNumber
+      trait: Imagination
+      value: 23
+    - type: rankedNumber
+      trait: Influence
+      value: 15
+    - type: rankedNumber
+      trait: Intelligence
+      value: 39
+    - type: rankedNumber
+      trait: Morality
+      value: 15
+    - type: rankedNumber
+      trait: Talent
+      value: 37
+    - type: rankedNumber
+      trait: Wisdom
+      value: 42
 ```
 

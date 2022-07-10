@@ -4,9 +4,9 @@ import Regex
 import UniformTypeIdentifiers
 
 struct MetadataFactory {
-	
+
 	let input: InputData
-	
+
 	/// Generate a metadata json.
 	/// - Parameters:
 	///   - folder: location to save generated metadata
@@ -24,7 +24,7 @@ struct MetadataFactory {
 }
 
 private extension MetadataFactory {
-	
+
 	@discardableResult
 	func generateMetadata<F: Location>(from layers: [InputData.ImageLayer<F>], saveIn folder: Folder, serial: Int, metadataConfig config: AssetConfig.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
 		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(serial).json") else { return .failure(.creatingFileFailed) }
@@ -57,39 +57,39 @@ private extension MetadataFactory {
 			guard case let (.rankedNumber(_, value0), .rankedNumber(type1, value1)) = (attr0, attr1) else { return attr1 }
 			return .rankedNumber(traitType: type1, value: value0 + value1)
 		}
-		
+
 		// sort attributes
 		guard let sortedAttribute = sort(attributes: attributes, traitOrder: config.traitOrder) else {
 			try? jsonFile.delete()
 			return .failure(.invalidMetadataSortConfig)
 		}
-		
+
 		let imageURL = config.baseUrl
 			.appendingPathComponent(imageFolderName)
 			.appendingPathComponent(serial.description, conformingTo: imageType)
-		
+
 		let name = replace(in: config.nameFormat, attributes: attributes, serial: serial)
 		let description = replace(in: config.descriptionFormat, attributes: attributes, serial: serial)
-		
+
 		let externalURL = config.externalUrlFormat.map { String(format: $0, serial) }.flatMap(URL.init(string: ))
 		// validate
 		guard config.backgroundColor =~ #"^[\da-fA-F]{6}$|^[\da-fA-F]{3}$"#.r else {
 			try? jsonFile.delete()
 			return .failure(.invalidBackgroundColorCode)
 		}
-		
+
 		let metadata = Metadata(image: imageURL, externalURL: externalURL, description: description, name: name, attributes: sortedAttribute, backgroundColor: config.backgroundColor)
-		
+
 		let encoder = JSONEncoder()
 		encoder.outputFormatting = .prettyPrinted
-		
+
 		guard let _ = try? jsonFile.write(encoder.encode(metadata)) else {
 			try? jsonFile.delete()
 			return .failure(.writingFileFailed)
 		}
 		return .success(jsonFile)
 	}
-	
+
 	func replace(in format: String, attributes: [Metadata.Attribute], serial: Int) -> String {
 		let text = String(format: format, serial)
 		return "\\$\\{(.*)\\}".r?.replaceAll(in: text) { match in
@@ -112,7 +112,7 @@ private extension MetadataFactory {
 			}.first ?? ""
 		} ?? text
 	}
-	
+
 	func sort(attributes: [Metadata.Attribute], traitOrder: [String]?) -> [Metadata.Attribute]? {
 		guard let order = traitOrder else { return attributes.sorted(at: { $0.traitType ?? "" }, by: <) } // just sort alphabetically
 		guard let sorted = attributes.sort(where: \.traitType, orderSample: order, shouldCover: true) else { return nil } // fail

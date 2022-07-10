@@ -68,13 +68,12 @@ private extension MetadataFactory {
 			.appendingPathComponent(imageFolderName)
 			.appendingPathComponent(serial.description, conformingTo: imageType)
 
-		// TODO: override defaults values
-		let name = String(format: config.defaultNameFormat, serial)
-		let description = String(format: config.defaultDescriptionFormat, serial)
+		let name = replace(in: config.nameFormat, attributes: attributes, serial: serial)
+		let description = replace(in: config.descriptionFormat, attributes: attributes, serial: serial)
 
 		let externalURL = config.externalUrlFormat.map { String(format: $0, serial) }.flatMap(URL.init(string: ))
 		// validate
-		guard config.backgroundColor =~ #"^[\da-fA-F]{6}$|^[\da-fA-F]{3}$"#.r else {
+		guard config.backgroundColor =~ #"^[\da-fA-F]{6}$|^[\da-fA-F]{3}$"#.r else {        
 			try? jsonFile.delete()
 			return .failure(.invalidBackgroundColorCode)
 		}
@@ -89,6 +88,29 @@ private extension MetadataFactory {
 			return .failure(.writingFileFailed)
 		}
 		return .success(jsonFile)
+	}
+
+	func replace(in format: String, attributes: [Metadata.Attribute], serial: Int) -> String {
+		let text = String(format: format, serial)
+		return "\\$\\{(.*)\\}".r?.replaceAll(in: text) { match in
+			guard let trait = match.group(at: 1) else { return nil }
+			return attributes.lazy.compactMap { attr in
+				switch attr {
+				case .textLabel(traitType: trait, value: let value):
+					return value
+				case .numberLabel(traitType: trait, value: let value):
+					return value.description
+				case .boostNumber(traitType: trait, value: let value, maxValue: _):
+					return value.description
+				case .boostPercentage(traitType: trait, value: let value):
+					return value.description
+				case .rankedNumber(traitType: trait, value: let value):
+					return value.description
+				case _:
+					return nil
+				}
+			}.first ?? ""
+		} ?? text
 	}
 
 	func sort(attributes: [Metadata.Attribute], traitOrder: [String]?) -> [Metadata.Attribute]? {

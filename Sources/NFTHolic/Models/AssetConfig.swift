@@ -52,8 +52,8 @@ struct AssetConfig: Codable, Equatable {
 
 	struct Metadata: Codable, Equatable {
 		let baseUrl: URL
-		let defaultNameFormat: String
-		let defaultDescriptionFormat: String
+		let nameFormat: String
+		let descriptionFormat: String
 		let externalUrlFormat: String?
 		@Default<WhiteHexCode> var backgroundColor: String
 		@Default<Empty> var data: [Data]

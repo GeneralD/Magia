@@ -36,6 +36,7 @@ struct InputData {
 }
 
 private func loadFont(fontName: String, folder: Folder, size: CGFloat) -> NSFont {
+	// try to find in input folder
 	let fontPath =
 	(try? folder.file(named: fontName)) ??
 	(try? folder.file(named: "\(fontName).ttf")) ??
@@ -48,6 +49,6 @@ private func loadFont(fontName: String, folder: Folder, size: CGFloat) -> NSFont
 		return CTFontCreateWithGraphicsFont(font, size, nil, nil)
 	} as NSFont?
 
+	// or load from system
 	return font ?? NSFont(name: fontName, size: size) ?? .systemFont(ofSize: size)
 }
-

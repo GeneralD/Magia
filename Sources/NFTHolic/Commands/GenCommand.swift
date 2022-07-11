@@ -123,7 +123,7 @@ private extension GenCommand {
 			// arrange layers in the order of depth configured in json
 			let sortedLayers = sort(subjects: layers, where: \.layer, order: config.order?.layerDepth)
 
-			let serialText = InputData.SerialText(from: config.drawSerial)
+			let serialText = InputData.SerialText(from: config.drawSerial, inputFolder: inputFolder)
 			let assets: InputData.Assets
 			switch sortedLayers {
 			case let (folders as [InputData.ImageLayer<Folder>]) as Any:
@@ -153,7 +153,7 @@ private extension GenCommand {
 			// load reprint data if db file passed
 			let recipe = try inputDatabaseQueue?.inDatabase(OutputRecipe.filter(id: Int64(index)).fetchOne)
 			let inputAssets = recipe?.assets(isAnimated: isAnimated, animationDuration: animationDuration, inputFolder: inputFolder)
-			let reprintData = inputAssets.map { InputData(assets: $0, serialText: .init(from: config.drawSerial), isSampleMode: isSampleMode) }
+			let reprintData = inputAssets.map { InputData(assets: $0, serialText: .init(from: config.drawSerial, inputFolder: inputFolder), isSampleMode: isSampleMode) }
 
 			// load reprint data or create new
 			let input = reprintData ?? (animated ? inputData(locations: \.subfolders) : inputData(locations: \.files))

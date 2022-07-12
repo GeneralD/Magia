@@ -115,7 +115,7 @@ private extension MetadataFactory {
 
 	func sort(attributes: [Metadata.Attribute], traitOrder: [String]?) -> [Metadata.Attribute]? {
 		guard let order = traitOrder else { return attributes.sorted(at: { $0.traitType ?? "" }, by: <) } // just sort alphabetically
-		guard let sorted = attributes.sort(where: \.traitType, orderSample: order, shouldCover: true) else { return nil } // fail
+		guard let sorted = attributes.sort(where: \.identity, orderSample: order, shouldCover: true) else { return nil } // fail
 		return sorted // ok
 	}
 }

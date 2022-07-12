@@ -37,12 +37,10 @@ struct InputData {
 
 private func loadFont(fontName: String, folder: Folder, size: CGFloat) -> NSFont {
 	// try to find in input folder
-	let fontPath =
-	(try? folder.file(named: fontName)) ??
-	(try? folder.file(named: "\(fontName).ttf")) ??
-	(try? folder.file(named: "\(fontName).otf"))
-
-	let font = fontPath.flatMap { file in
+	let fontFile = ["", ".ttf", ".otf"].reduce(nil) { file, suffix in
+		file ?? (try? folder.file(named: fontName + suffix))
+	}
+	let font = fontFile.flatMap { file in
 		guard let url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, file.path as CFString, .cfurlposixPathStyle, false),
 			  let provider = CGDataProvider(url: url),
 			  let font = CGFont(provider) else { return nil }

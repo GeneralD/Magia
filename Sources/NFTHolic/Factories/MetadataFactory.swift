@@ -90,6 +90,14 @@ private extension MetadataFactory {
 		return .success(jsonFile)
 	}
 
+	/// Replace trait placeholder with value of the trait.
+	///
+	/// e.g. "${First Name} %03d" will be like "James 007"
+	/// - Parameters:
+	///   - format: text includes placeholders
+	///   - attributes: traits
+	///   - serial: serial number
+	/// - Returns: result
 	func replace(in format: String, attributes: [Metadata.Attribute], serial: Int) -> String {
 		let text = String(format: format, serial)
 		return "\\$\\{(.*)\\}".r?.replaceAll(in: text) { match in

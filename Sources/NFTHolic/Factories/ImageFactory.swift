@@ -72,7 +72,8 @@ private extension ImageFactory {
 
 	func generateImage(for frame: Int) -> CIImage? {
 		layerImages(frame: frame)
-			.compactMap(\.ciImage)
+			.map(\.url)
+			.compactMap(CIImage.init(contentsOf: ))
 			.splat
 			.map { head, tail in
 				tail.reduce(head) { accum, image in

@@ -99,9 +99,13 @@ private extension MetadataFactory {
 	///   - serial: serial number
 	/// - Returns: result
 	func replace(in format: String, attributes: [Metadata.Attribute], serial: Int) -> String {
-		let text = String(format: format, serial)
-		return "\\$\\{(.*)\\}".r?.replaceAll(in: text) { match in
-			guard let trait = match.group(at: 1) else { return nil }
+		let text = "%\\d*?d".r?.replaceAll(in: format) { match in
+			.init(format: match.matched, serial)
+		} ?? format
+
+		guard let attributeMatcher = try? Regex(pattern: "\\$\\{(.*?)\\}", groupNames: "attr") else { return text }
+		return attributeMatcher.replaceAll(in: text) { match in
+			let trait = match.group(named: "attr")
 			return attributes.lazy.compactMap { attr in
 				switch attr {
 				case .textLabel(traitType: trait, value: let value):
@@ -118,7 +122,7 @@ private extension MetadataFactory {
 					return nil
 				}
 			}.first ?? ""
-		} ?? text
+		}
 	}
 
 	func sort(attributes: [Metadata.Attribute], traitOrder: [String]?) -> [Metadata.Attribute]? {

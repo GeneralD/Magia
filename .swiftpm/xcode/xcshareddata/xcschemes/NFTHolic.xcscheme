@@ -80,11 +80,11 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "~/Downloads/ANIM_NFT"
+            argument = "~/Downloads/NFT/ANIM"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-o ~/Downloads/Output"
+            argument = "-o ~/Downloads/NFT/Output"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

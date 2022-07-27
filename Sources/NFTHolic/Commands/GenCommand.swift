@@ -287,9 +287,7 @@ private extension GenCommand {
 	func fileName(from index: Int) -> String {
 		let fileName = String(format: fileNameFormat, index)
 		guard hashFileName else { return fileName }
-		return fileName.keccak()
-			.map { String(format: "%02x", $0) }
-			.reduce(into: "", +=)
+		return fileName.keccak().hexDescription
 	}
 
 	/// Indices of images to create. They start from 1, not 0.

@@ -5,12 +5,13 @@ import Foundation
 import GRDB
 import Regex
 import SwiftCLI
+import SwiftKeccak
 import UniformTypeIdentifiers
 import Yams
 
 class GenCommand: Command {
-	let name = "gen"
-	let shortDescription = "Generate your animated NFT"
+
+	// MARK: - Arguments
 
 	@Param(completion: .filename)
 	var inputFolder: Folder
@@ -20,6 +21,12 @@ class GenCommand: Command {
 
 	@Key("--image-foldername", description: "Folder name to place images (default is images)", completion: .filename)
 	var imageFolderName: String!
+
+	@Key("--name-format", description: "Image and metadata file name format without extension (default is %d)", validation: [.formatInteger()])
+	var fileNameFormat: String!
+
+	@Flag("-k", "--hashed-name", description: "Use hashed file names (keccak256)")
+	var hashFileName: Bool
 
 	@Key("-q", "--quantity", description: "Number of creation (default is 100)", completion: .none, validation: [.greaterThan(0)])
 	var creationCount: Int!
@@ -48,17 +55,17 @@ class GenCommand: Command {
 	@Flag("--sample", description: "Generate image with watermark (Not for sales)")
 	var isSampleMode: Bool
 
+	// MARK: - Command Implementations
+	
+	let name = "gen"
+	let shortDescription = "Generate your animated NFT"
+
 	var optionGroups: [OptionGroup] {
 		[.atMostOne($noMetadata, $noImage)]
 	}
 
 	func execute() throws {
-		configureOutputFolder()
-		configureImageFolderName()
-		configureCreationCount()
-		configureStartIndex()
-		configureAnimationDuration()
-		configureImageType()
+		configureArguments()
 
 		let results = try generate()
 		logging(results: results)
@@ -66,6 +73,18 @@ class GenCommand: Command {
 }
 
 private extension GenCommand {
+
+	// MARK: - Configure Default Values
+	func configureArguments() {
+		configureOutputFolder()
+		configureImageFolderName()
+		configureFileNameFormat()
+		configureCreationCount()
+		configureStartIndex()
+		configureAnimationDuration()
+		configureImageType()
+	}
+
 	func configureOutputFolder() {
 		guard outputFolder == nil, let defaultFolder = try? Folder.documents?.createSubfolderIfNeeded(withName: "NFTs").createSubfolderIfNeeded(withName: inputFolder.name) else { return }
 		$outputFolder.update(to: defaultFolder)
@@ -76,6 +95,11 @@ private extension GenCommand {
 	func configureImageFolderName() {
 		guard imageFolderName == nil else { return }
 		$imageFolderName.update(to: "images")
+	}
+
+	func configureFileNameFormat() {
+		guard fileNameFormat == nil else { return }
+		$fileNameFormat.update(to: "%d")
 	}
 
 	func configureCreationCount() {
@@ -97,6 +121,8 @@ private extension GenCommand {
 		guard imageType == nil else { return }
 		$imageType.update(to: .gif)
 	}
+
+	// MARK: - Generate
 
 	func generate() throws -> [Bool] {
 		// measure time
@@ -164,41 +190,59 @@ private extension GenCommand {
 		}
 	}
 
-	// Detect if it's expected to be animated image from input folder structure
-	var isAnimated: Bool {
-		let subfolders = inputFolder.subfolders.array
-		if subfolders.all(\.files.array.isEmpty), subfolders.any(\.subfolders.array.isEmpty.not) {
-			return true // animated
+	@discardableResult
+	func generateImage(input: InputData, index: Int) -> Bool {
+		guard !noImage else { return true }
+		guard let imageFolder = try? outputFolder.createSubfolderIfNeeded(withName: imageFolderName) else {
+			stderr <<< "Couldn't create root folder to store images"
+			return false
 		}
-		if subfolders.any(\.files.array.isEmpty.not), subfolders.all(\.subfolders.array.isEmpty) {
-			return false // still
+		let imageFactory = ImageFactory(input: input)
+		switch imageFactory.generateImage(saveIn: imageFolder, as: fileName(from: index), serial: index, imageType: imageType) {
+		case let .success(file):
+			stdout <<< "Created: \(file.path)"
+			return true
+		case let .failure(error):
+			switch error {
+			case .noImage:
+				stderr <<< "Couldn't create image."
+			case .unsupportedImageType:
+				stderr <<< "Unsupported image type."
+			case .creatingFileFailed:
+				stderr <<< "Couldn't create file to write image."
+			case .finalizeImageFailed:
+				stderr <<< "Couldn't finalize an image."
+			}
+			return false
 		}
-		stderr <<< "Invalid input folder structure."
-		exit(1)
 	}
 
-	/// Indices of images to create. They start from 1, not 0.
-	var indices: Set<Int> {
-		let skips = forceOverwrite
-		? []
-		: outputFolder.files
-			.map(\.nameExcludingExtension)
-			.compactMap(Int.init)
-
-		return Set(startIndex..<(startIndex + creationCount)).subtracting(skips)
-	}
-
-	func logging(results: [Bool]) {
-		let successCount = results.filter { $0 }.count
-		stdout <<< "\(successCount) images have been generated!"
-
-		let failureCount = results.filter(!).count
-		guard failureCount > 0 else {
-			stdout <<< "Finish gracefully!"
-			return
+	@discardableResult
+	func generateMetadata(input: InputData, index: Int, config: AssetConfig.Metadata?) -> Bool {
+		guard !noMetadata, let metadataConfig = config else { return true }
+		let metadataFactory = MetadataFactory(input: input)
+		switch metadataFactory.generateMetadata(saveIn: outputFolder, as: fileName(from: index), serial: index, metadataConfig: metadataConfig, imageFolderName: imageFolderName, imageType: imageType) {
+		case let .success(file):
+			stdout <<< "Created: \(file.path)"
+			return true
+		case let .failure(error):
+			switch error {
+			case .creatingFileFailed:
+				stderr <<< "Couldn't create file to write metadata."
+			case .imageUrlFormatIsRequired:
+				stderr <<< "imageUrlFormat is required field in JSON."
+			case .invalidMetadataSortConfig:
+				stderr <<< "Sorting metadata config should cover all trait you defined."
+			case .invalidBackgroundColorCode:
+				stderr <<< "backgroundColor in metadata should be 3 or 6 hex code without # prefix."
+			case .writingFileFailed:
+				stderr <<< "Writing metadata failed."
+			}
+			return false
 		}
-		stderr <<< "Failed to generate \(failureCount) images..."
 	}
+
+	// MARK: - Load Config File
 
 	func loadAssetConfig() -> AssetConfig {
 		guard let file = inputFolder.files.first(where: { $0.nameExcludingExtension == "config" }) else {
@@ -225,56 +269,39 @@ private extension GenCommand {
 		}
 	}
 
-	@discardableResult
-	func generateImage(input: InputData, index: Int) -> Bool {
-		guard !noImage else { return true }
-		guard let imageFolder = try? outputFolder.createSubfolderIfNeeded(withName: imageFolderName) else {
-			stderr <<< "Couldn't create root folder to store images"
-			return false
+	// MARK: - Utilities
+
+	// Detect if it's expected to be animated image from input folder structure
+	var isAnimated: Bool {
+		let subfolders = inputFolder.subfolders.array
+		if subfolders.all(\.files.array.isEmpty), subfolders.any(\.subfolders.array.isEmpty.not) {
+			return true // animated
 		}
-		let imageFactory = ImageFactory(input: input)
-		switch imageFactory.generateImage(saveIn: imageFolder, serial: index, imageType: imageType) {
-		case let .success(file):
-			stdout <<< "Created: \(file.path)"
-			return true
-		case let .failure(error):
-			switch error {
-			case .noImage:
-				stderr <<< "Couldn't create image."
-			case .unsupportedImageType:
-				stderr <<< "Unsupported image type."
-			case .creatingFileFailed:
-				stderr <<< "Couldn't create file to write image."
-			case .finalizeImageFailed:
-				stderr <<< "Couldn't finalize an image."
-			}
-			return false
+		if subfolders.any(\.files.array.isEmpty.not), subfolders.all(\.subfolders.array.isEmpty) {
+			return false // still
 		}
+		stderr <<< "Invalid input folder structure."
+		exit(1)
 	}
 
-	@discardableResult
-	func generateMetadata(input: InputData, index: Int, config: AssetConfig.Metadata?) -> Bool {
-		guard !noMetadata, let metadataConfig = config else { return true }
-		let metadataFactory = MetadataFactory(input: input)
-		switch metadataFactory.generateMetadata(saveIn: outputFolder, serial: index, metadataConfig: metadataConfig, imageFolderName: imageFolderName, imageType: imageType) {
-		case let .success(file):
-			stdout <<< "Created: \(file.path)"
-			return true
-		case let .failure(error):
-			switch error {
-			case .creatingFileFailed:
-				stderr <<< "Couldn't create file to write metadata."
-			case .imageUrlFormatIsRequired:
-				stderr <<< "imageUrlFormat is required field in JSON."
-			case .invalidMetadataSortConfig:
-				stderr <<< "Sorting metadata config should cover all trait you defined."
-			case .invalidBackgroundColorCode:
-				stderr <<< "backgroundColor in metadata should be 3 or 6 hex code without # prefix."
-			case .writingFileFailed:
-				stderr <<< "Writing metadata failed."
-			}
-			return false
-		}
+	func fileName(from index: Int) -> String {
+		let fileName = String(format: fileNameFormat, index)
+		guard hashFileName else { return fileName }
+		return fileName.keccak()
+			.map { String(format: "%02x", $0) }
+			.reduce(into: "", +=)
+	}
+
+	/// Indices of images to create. They start from 1, not 0.
+	var indices: [Int] {
+		let skips = forceOverwrite
+		? []
+		: outputFolder.files.map(\.nameExcludingExtension)
+
+		return (startIndex..<(startIndex + creationCount))
+			.map { index in (index, fileName(from: index)) }
+			.filter { _, fileName in !skips.contains(fileName) }
+			.map(\.0)
 	}
 
 	func sort<Subjects: Sequence>(subjects: Subjects, where: (Subjects.Element) -> String, order: [String]?) -> [Subjects.Element] {
@@ -292,5 +319,19 @@ private extension GenCommand {
 			return result
 		}
 		return result
+	}
+
+	// MARK: - Logging
+
+	func logging(results: [Bool]) {
+		let successCount = results.filter { $0 }.count
+		stdout <<< "\(successCount) images have been generated!"
+
+		let failureCount = results.filter(!).count
+		guard failureCount > 0 else {
+			stdout <<< "Finish gracefully!"
+			return
+		}
+		stderr <<< "Failed to generate \(failureCount) images..."
 	}
 }

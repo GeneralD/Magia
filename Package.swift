@@ -17,6 +17,7 @@ let package = Package(
 		.package(url: "https://github.com/crossroadlabs/Regex", from: "1.2.0"),
 		.package(url: "https://github.com/jakeheis/SwiftCLI", from: "6.0.3"),
 		.package(url: "https://github.com/thii/SwiftHEXColors", from: "1.4.1"),
+		.package(url: "https://github.com/bitflying/SwiftKeccak.git", from: "0.1.0"),
 		.package(url: "https://github.com/jpsim/Yams", from: "5.0.1"),
 	],
 	targets: [
@@ -31,6 +32,7 @@ let package = Package(
 				"Regex",
 				"SwiftCLI",
 				"SwiftHEXColors",
+				"SwiftKeccak",
 				"Yams"]),
 		.testTarget(
 			name: "NFTHolicTests",

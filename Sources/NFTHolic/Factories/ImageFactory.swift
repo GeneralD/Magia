@@ -15,15 +15,15 @@ struct ImageFactory {
 	///   - isPng: to create animated png instead of gif
 	/// - Returns: if success
 	@discardableResult
-	func generateImage(saveIn folder: Folder, serial: Int, imageType: UTType) -> Result<File, ImageFactoryError> {
+	func generateImage(saveIn folder: Folder, as name: String, serial: Int, imageType: UTType) -> Result<File, ImageFactoryError> {
 		guard imageType.isSupported else { return .failure(.unsupportedImageType) }
 
-		let frames = generateAllFrameImages(queueIdentification: serial.description, serial: serial)
+		let frames = generateAllFrameImages(serial: serial)
 			.compactMap(\.cgImage)
 
 		guard !frames.isEmpty else { return .failure(.noImage) }
 
-		let fileURL = folder.url.appendingPathComponent(serial.description, conformingTo: imageType)
+		let fileURL = folder.url.appendingPathComponent(name, conformingTo: imageType)
 		guard let destination = CGImageDestinationCreateWithURL(fileURL as CFURL, imageType.identifier as CFString, frames.count, nil) else {
 			return .failure(.creatingFileFailed)
 		}
@@ -55,8 +55,8 @@ struct ImageFactory {
 }
 
 private extension ImageFactory {
-	func generateAllFrameImages(queueIdentification: String, serial: Int) -> [CIImage] {
-		let frames = (0..<numberOfFrames).waitAll(queueLabelPrefix: queueIdentification) { frame -> CIImage? in
+	func generateAllFrameImages(serial: Int) -> [CIImage] {
+		let frames = (0..<numberOfFrames).waitAll(queueLabelPrefix: serial.description) { frame -> CIImage? in
 			var image = generateImage(for: frame)
 			if let serialText = input.serialText {
 				let text = serialText.formatText.format(serial)

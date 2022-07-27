@@ -13,12 +13,12 @@ struct MetadataFactory {
 	///   - serial: will be file name (without path and extension)
 	/// - Returns: if success
 	@discardableResult
-	func generateMetadata(saveIn folder: Folder, serial: Int, metadataConfig config: AssetConfig.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
+	func generateMetadata(saveIn folder: Folder, as name: String, serial: Int, metadataConfig config: AssetConfig.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
 		switch input.assets {
 		case let .animated(layers, _):
-			return generateMetadata(from: layers, saveIn: folder, serial: serial, metadataConfig: config, imageFolderName: imageFolderName, imageType: imageType)
+			return generateMetadata(from: layers, saveIn: folder, as: name, serial: serial, metadataConfig: config, imageFolderName: imageFolderName, imageType: imageType)
 		case let .still(layers):
-			return generateMetadata(from: layers, saveIn: folder, serial: serial, metadataConfig: config, imageFolderName: imageFolderName, imageType: imageType)
+			return generateMetadata(from: layers, saveIn: folder, as: name, serial: serial, metadataConfig: config, imageFolderName: imageFolderName, imageType: imageType)
 		}
 	}
 }
@@ -26,8 +26,8 @@ struct MetadataFactory {
 private extension MetadataFactory {
 
 	@discardableResult
-	func generateMetadata<F: Location>(from layers: [InputData.ImageLayer<F>], saveIn folder: Folder, serial: Int, metadataConfig config: AssetConfig.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
-		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(serial).json") else { return .failure(.creatingFileFailed) }
+	func generateMetadata<F: Location>(from layers: [InputData.ImageLayer<F>], saveIn folder: Folder, as name: String, serial: Int, metadataConfig config: AssetConfig.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
+		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(name).json") else { return .failure(.creatingFileFailed) }
 		let attributes = layers.reduce([Metadata.Attribute]()) { accum, layer in
 			accum + config.data
 				.filtered(by: layer)
@@ -66,12 +66,12 @@ private extension MetadataFactory {
 
 		let imageURL = config.baseUrl
 			.appendingPathComponent(imageFolderName)
-			.appendingPathComponent(serial.description, conformingTo: imageType)
+			.appendingPathComponent(name, conformingTo: imageType)
 
 		let name = replace(in: config.nameFormat, attributes: attributes, serial: serial)
 		let description = replace(in: config.descriptionFormat, attributes: attributes, serial: serial)
 
-		let externalURL = config.externalUrlFormat.map { String(format: $0, serial) }.flatMap(URL.init(string: ))
+		let externalURL = config.externalUrlFormat.map { replace(in: $0, attributes: attributes, serial: serial) }.flatMap(URL.init(string: ))
 		// validate
 		guard config.backgroundColor =~ #"^[\da-fA-F]{6}$|^[\da-fA-F]{3}$"#.r else {
 			try? jsonFile.delete()

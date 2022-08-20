@@ -8,6 +8,9 @@ let package = Package(
 	platforms: [
 		.macOS(.v12),
 	],
+	products: [
+		.executable(name: "nftholic", targets: ["NFTHolic"])
+	],
 	dependencies: [
 		.package(url: "https://github.com/generald/CollectionKit", branch: "master"),
 		.package(url: "https://github.com/gonzalezreal/DefaultCodable", from: "1.2.1"),

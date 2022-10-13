@@ -2,19 +2,19 @@ import DefaultCodable
 import CoreGraphics
 
 enum ZeroFloat: DefaultValueProvider {
-	static var `default`: CGFloat = 0
+	static let `default`: CGFloat = 0
 }
 
 enum OneFloat: DefaultValueProvider {
-	static var `default`: CGFloat = 1
+	static let `default`: CGFloat = 1
 }
 
 enum OneDouble: DefaultValueProvider {
-	static var `default`: Double = 1
+	static let `default`: Double = 1
 }
 
 enum ZeroFillThreeDigitsFormat: DefaultValueProvider {
-	static var `default` = "%03d"
+	static let `default` = "%03d"
 }
 
 enum BlackHexCode: DefaultValueProvider {
@@ -26,7 +26,7 @@ enum WhiteHexCode: DefaultValueProvider {
 }
 
 enum RegexMatchesNothing: DefaultValueProvider {
-	static var `default` = "^(?!)$"
+	static let `default` = "^(?!)$"
 }
 
 enum FontMidiumSize: DefaultValueProvider {

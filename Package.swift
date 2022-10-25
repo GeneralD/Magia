@@ -28,7 +28,8 @@ let package = Package(
 			name: "Main",
 			dependencies: [
 				"CleanCommand",
-				"GenCommand"]),
+				"GenCommand",
+			]),
 		.target(
 			name: "CleanCommand",
 			dependencies: [

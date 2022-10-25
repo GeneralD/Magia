@@ -1,7 +1,6 @@
-import CollectionKit
 import Foundation
 
-extension Sequence {
+public extension Sequence {
 	func unique<Identifier: Hashable>(where: (Element) -> Identifier, selector: (Element, Element) -> Element = { $1 }) -> [Element] {
 		reduce(into: [:], { accum, element in
 			let prev = accum[`where`(element)]
@@ -21,19 +20,11 @@ extension Sequence {
 		}
 		return result
 	}
+}
 
-	func waitAll<Result>(queueLabelPrefix: String, qos: Dispatch.DispatchQoS = .utility, operation: @escaping (Element) -> Result) -> [Element: Result] where Element: Hashable {
-		@Locked var accumulator = [Element: Result]()
-		let group = DispatchGroup()
-		for element in self {
-			group.enter()
-			let dispatch = DispatchQueue(label: "\(queueLabelPrefix).\(element.hashValue)", qos: qos)
-			dispatch.async(group: group) {
-				defer { group.leave() }
-				accumulator[element] = operation(element)
-			}
-		}
-		group.wait()
-		return accumulator
+private extension Sequence {
+	// Copy from CollectionKit
+	var array: [Element] {
+		self as? [Element] ?? map { $0 }
 	}
 }

@@ -2,69 +2,69 @@ import CoreGraphics
 import DefaultCodable
 import Foundation
 
-struct AssetConfig: Codable, Equatable {
-	static let empty: Self = .init(order: nil, combinations: .init(), randomization: .init(), drawSerial: .default, metadata: nil)
+public struct AssetConfig: Codable, Equatable {
+	public static let empty: Self = .init(order: nil, combinations: .init(), randomization: .init(), drawSerial: .default, metadata: nil)
 	
-	let order: Order?
-	@Default<Empty> var combinations: [Combination]
-	@Default<Randomization> var randomization: Randomization
-	let drawSerial: DrawSerial
-	let metadata: Metadata?
+	public let order: Order?
+	@Default<Empty> public var combinations: [Combination]
+	@Default<Randomization> public var randomization: Randomization
+	public let drawSerial: DrawSerial
+	public let metadata: Metadata?
 
-	struct Combination: Codable, Equatable {
-		let target: Subject
-		let dependencies: [Subject]
+	public struct Combination: Codable, Equatable {
+		public let target: Subject
+		public let dependencies: [Subject]
 	}
 
-	struct Subject: Codable, Equatable {
-		let layer: String
-		@Default<RegexMatchesNothing> var name: String
+	public struct Subject: Codable, Equatable {
+		public let layer: String
+		@Default<RegexMatchesNothing> public var name: String
 	}
 
-	struct Randomization: Codable, Equatable, DefaultValueProvider {
-		static var `default`: Self = .init(probabilities: .init())
+	public struct Randomization: Codable, Equatable, DefaultValueProvider {
+		static public var `default`: Self = .init(probabilities: .init())
 
-		@Default<Empty> var probabilities: [Probability]
+		@Default<Empty> public var probabilities: [Probability]
 
-		struct Probability: Codable, Equatable {
-			let target: Subject
-			@Default<OneDouble> var weight: Double
-			@Default<False> var divideByMatches: Bool
+		public struct Probability: Codable, Equatable {
+			public let target: Subject
+			@Default<OneDouble> public var weight: Double
+			@Default<False> public var divideByMatches: Bool
 		}
 	}
 
-	struct DrawSerial: Codable, Equatable, DefaultValueProvider {
-		static var `default`: Self = .init()
+	public struct DrawSerial: Codable, Equatable, DefaultValueProvider {
+		static public var `default`: Self = .init()
 
-		@Default<True> var enabled: Bool
-		@Default<ZeroFillThreeDigitsFormat> var format: String
-		@Default<Empty> var font: String
-		@Default<FontMidiumSize> var size: CGFloat
-		@Default<BlackHexCode> var color: String
-		@Default<ZeroFloat> var offsetX: CGFloat
-		@Default<ZeroFloat> var offsetY: CGFloat
+		@Default<True> public var enabled: Bool
+		@Default<ZeroFillThreeDigitsFormat> public var format: String
+		@Default<Empty> public var font: String
+		@Default<FontMidiumSize> public var size: CGFloat
+		@Default<BlackHexCode> public var color: String
+		@Default<ZeroFloat> public var offsetX: CGFloat
+		@Default<ZeroFloat> public var offsetY: CGFloat
 	}
 
-	struct Order: Codable, Equatable {
-		let selection: [String]?
-		let layerDepth: [String]?
+	public struct Order: Codable, Equatable {
+		public let selection: [String]?
+		public let layerDepth: [String]?
 	}
 
-	struct Metadata: Codable, Equatable {
-		let baseUrl: URL
-		let nameFormat: String
-		let descriptionFormat: String
-		let externalUrlFormat: String?
-		@Default<WhiteHexCode> var backgroundColor: String
-		@Default<Empty> var data: [Data]
-		@Default<Empty> var traitOrder: [String]
+	public struct Metadata: Codable, Equatable {
+		public let baseUrl: URL
+		public let nameFormat: String
+		public let descriptionFormat: String
+		public let externalUrlFormat: String?
+		@Default<WhiteHexCode> public var backgroundColor: String
+		@Default<Empty> public var data: [Data]
+		@Default<Empty> public var traitOrder: [String]
 
-		struct Data: Codable, Equatable {
-			let traits: [Trait]
-			let conditions: [Subject]
+		public struct Data: Codable, Equatable {
+			public let traits: [Trait]
+			public let conditions: [Subject]
 		}
 
-		enum Trait: Codable, Equatable {
+		public enum Trait: Codable, Equatable {
 			case simple(value: String)
 			case label(trait: String, value: LabelValueType)
 			case rankedNumber(trait: String, value: Decimal)
@@ -72,7 +72,7 @@ struct AssetConfig: Codable, Equatable {
 			case boostPercentage(trait: String, value: Decimal)
 			case rarityPercentage(trait: String)
 
-			enum LabelValueType: Codable, Equatable {
+			public enum LabelValueType: Codable, Equatable {
 				case string(_: String)
 				case date(_: Date)
 				case number(_: Decimal)
@@ -86,7 +86,7 @@ struct AssetConfig: Codable, Equatable {
 				case simple, label, rankedNumber, boostNumber, boostPercentage, rarityPercentage
 			}
 
-			func encode(to encoder: Encoder) throws {
+			public func encode(to encoder: Encoder) throws {
 				var container = encoder.container(keyedBy: CodingKeys.self)
 				switch self {
 				case let .simple(value):
@@ -115,7 +115,7 @@ struct AssetConfig: Codable, Equatable {
 				}
 			}
 
-			init(from decoder: Decoder) throws {
+			public init(from decoder: Decoder) throws {
 				let container = try decoder.container(keyedBy: CodingKeys.self)
 				let type = try container.decode(TraitType.self, forKey: .type)
 				switch type {

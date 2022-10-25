@@ -1,4 +1,4 @@
-extension Bool {
+public extension Bool {
 	var not: Bool {
 		!self
 	}

@@ -1,12 +1,21 @@
+import Common
+import GenCommandCommon
+import CollectionKit
 import Files
 import Foundation
 import Regex
 import UniformTypeIdentifiers
 
-struct MetadataFactory {
+public struct MetadataFactory {
 
-	let input: InputData
+	private let input: InputData
 
+	public init(input: InputData) {
+		self.input = input
+	}
+}
+
+public extension MetadataFactory {
 	/// Generate a metadata json.
 	/// - Parameters:
 	///   - folder: location to save generated metadata
@@ -132,7 +141,7 @@ private extension MetadataFactory {
 	}
 }
 
-enum MetadataFactoryError: Error {
+public enum MetadataFactoryError: Error {
 	case creatingFileFailed
 	case imageUrlFormatIsRequired
 	case invalidMetadataSortConfig

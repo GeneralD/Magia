@@ -1,9 +1,16 @@
+import GenCommandCommon
 import Files
 import Regex
 
-struct RamdomizationController {
-	let config: AssetConfig.Randomization
+public struct RandomizationController {
+	private let config: AssetConfig.Randomization
 
+	public init(config: AssetConfig.Randomization) {
+		self.config = config
+	}
+}
+
+public extension RandomizationController {
 	func elect<F: Location>(from candidates: [F], targetLayer: String) -> (element: F, probability: Double)? where F: Hashable {
 		let defaultProbability: Double = 1
 		let initDict = candidates.reduce(into: [:]) { accum, candidate in

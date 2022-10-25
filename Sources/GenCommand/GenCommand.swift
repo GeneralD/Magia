@@ -1,3 +1,10 @@
+import CommandCommon
+import Common
+import GenCommandCommon
+import ImageFactory
+import LayerStrictionRegexFactory
+import MetadataFactory
+import RandomizationController
 import AppKit
 import CollectionKit
 import Files
@@ -9,7 +16,7 @@ import SwiftKeccak
 import UniformTypeIdentifiers
 import Yams
 
-class GenCommand: Command {
+public class GenCommand: Command {
 
 	// MARK: - Arguments
 
@@ -57,14 +64,16 @@ class GenCommand: Command {
 
 	// MARK: - Command Implementations
 	
-	let name = "gen"
-	let shortDescription = "Generate your animated NFT"
+	public let name = "gen"
+	public let shortDescription = "Generate your animated NFT"
 
-	var optionGroups: [OptionGroup] {
+	public init() {}
+
+	public var optionGroups: [OptionGroup] {
 		[.atMostOne($noMetadata, $noImage)]
 	}
 
-	func execute() throws {
+	public func execute() throws {
 		configureArguments()
 
 		let results = try generate()
@@ -131,7 +140,7 @@ private extension GenCommand {
 
 		let config = loadAssetConfig()
 		let regexFactory = LayerStrictionRegexFactory(layerStrictions: config.combinations)
-		let randomManager = RamdomizationController(config: config.randomization)
+		let randomManager = RandomizationController(config: config.randomization)
 		let layerFolders = sort(subjects: inputFolder.subfolders, where: \.nameExcludingExtension, order: config.order?.selection)
 
 		func inputData<F: Location, S: Sequence>(locations: (Folder) -> S) -> InputData where F: Hashable, S.Element == F {

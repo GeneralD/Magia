@@ -1,12 +1,18 @@
+import Common
+import GenCommandCommon
 import CollectionKit
 import CoreImage
 import Files
 import UniformTypeIdentifiers
 import AppKit
 
-struct ImageFactory {
+public struct ImageFactory {
 
-	let input: InputData
+	private let input: InputData
+
+	public init(input: InputData) {
+		self.input = input
+	}
 
 	/// Generate an animated image.
 	/// - Parameters:
@@ -15,7 +21,7 @@ struct ImageFactory {
 	///   - isPng: to create animated png instead of gif
 	/// - Returns: if success
 	@discardableResult
-	func generateImage(saveIn folder: Folder, as name: String, serial: Int, imageType: UTType) -> Result<File, ImageFactoryError> {
+	public func generateImage(saveIn folder: Folder, as name: String, serial: Int, imageType: UTType) -> Result<File, ImageFactoryError> {
 		guard imageType.isSupported else { return .failure(.unsupportedImageType) }
 
 		let frames = generateAllFrameImages(serial: serial)
@@ -116,7 +122,7 @@ private extension ImageFactory {
 	}
 }
 
-enum ImageFactoryError: Error {
+public enum ImageFactoryError: Error {
 	case noImage
 	case unsupportedImageType
 	case creatingFileFailed

@@ -9,7 +9,7 @@ let package = Package(
 		.macOS(.v12),
 	],
 	products: [
-		.executable(name: "nftholic", targets: ["NFTHolic"])
+		.executable(name: "nftholic", targets: ["Main"])
 	],
 	dependencies: [
 		.package(url: "https://github.com/generald/CollectionKit", branch: "master"),
@@ -25,20 +25,86 @@ let package = Package(
 	],
 	targets: [
 		.executableTarget(
-			name: "NFTHolic",
+			name: "Main",
 			dependencies: [
+				"CleanCommand",
+				"GenCommand"]),
+		.target(
+			name: "CleanCommand",
+			dependencies: [
+				"CommandCommon",
 				"CollectionKit",
-				"DefaultCodable",
+				"Files",
+				"HashKit",
+				"SwiftCLI",
+			]),
+		.target(
+			name: "GenCommand",
+			dependencies: [
+				"CommandCommon",
+				"Common",
+				"GenCommandCommon",
+				"ImageFactory",
+				"LayerStrictionRegexFactory",
+				"MetadataFactory",
+				"RandomizationController",
+				"CollectionKit",
 				"Files",
 				.product(name: "GRDB", package: "GRDB.swift"),
-				"HashKit",
 				"Regex",
 				"SwiftCLI",
-				"SwiftHEXColors",
 				"SwiftKeccak",
-				"Yams"]),
+				"Yams",
+			]),
+		.target(
+			name: "ImageFactory",
+			dependencies: [
+				"Common",
+				"GenCommandCommon",
+				"CollectionKit",
+				"Files",
+			]),
+		.target(
+			name: "LayerStrictionRegexFactory",
+			dependencies: [
+				"GenCommandCommon",
+				"Files",
+				"Regex",
+			]),
+		.target(
+			name: "MetadataFactory",
+			dependencies: [
+				"Common",
+				"GenCommandCommon",
+				"CollectionKit",
+				"Files",
+				"Regex",
+			]),
+		.target(
+			name: "RandomizationController",
+			dependencies: [
+				"GenCommandCommon",
+				"CollectionKit",
+				"Files",
+				"Regex",
+			]),
+		.target(
+			name: "GenCommandCommon",
+			dependencies: [
+				"DefaultCodable",
+				"Files",
+				"SwiftHEXColors",
+			]),
+		.target(
+			name: "CommandCommon",
+			dependencies: [
+				"Files",
+				"Regex",
+				"SwiftCLI",
+			]),
+		.target(name: "Common"),
 		.testTarget(
-			name: "NFTHolicTests",
-			dependencies: ["NFTHolic"]),
+			name: "MainTests",
+			dependencies: ["Main"]),
 	]
 )

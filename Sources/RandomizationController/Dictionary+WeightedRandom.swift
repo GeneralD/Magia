@@ -1,3 +1,5 @@
+import CollectionKit
+
 extension Dictionary where Value == Double {
 	func weightedRandom() -> (element: Key, probability: Double)? {
 		guard values.reduce(0, +) > 0 else { return first.map { ($0.key, 0) }}

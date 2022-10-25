@@ -1,11 +1,13 @@
+import CommandCommon
+import CollectionKit
 import Files
 import HashKit
 import SwiftCLI
 import Foundation
 
-class CleanCommand: Command {
-	let name = "clean"
-	let shortDescription = "Clean your assets"
+public class CleanCommand: Command {
+	public let name = "clean"
+	public let shortDescription = "Clean your assets"
 
 	@Param(completion: .filename)
 	var inputFolder: Folder
@@ -13,7 +15,9 @@ class CleanCommand: Command {
 	@Flag("-x", "execute", description: "Execute cleaning")
 	var executeCleaning: Bool
 
-	func execute() throws {
+	public init() {}
+
+	public func execute() throws {
 		defer {
 			if !executeCleaning {
 				stdout <<< "If you want to delete unneeded files actually, add an option -x"

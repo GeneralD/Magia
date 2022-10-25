@@ -2,28 +2,41 @@ import AppKit
 import Files
 import SwiftHEXColors
 
-struct InputData {
-	let assets: Assets
-	let serialText: SerialText?
-	let isSampleMode: Bool
+public struct InputData {
+	public let assets: Assets
+	public let serialText: SerialText?
+	public let isSampleMode: Bool
 
-	enum Assets {
+	public init(assets: Assets, serialText: SerialText?, isSampleMode: Bool) {
+		self.assets = assets
+		self.serialText = serialText
+		self.isSampleMode = isSampleMode
+	}
+
+	public enum Assets {
 		case animated(layers: [ImageLayer<Folder>], duration: Double)
 		case still(layers: [ImageLayer<File>])
 	}
 
-	struct ImageLayer<F: Location> {
-		let imageLocation: F
-		let layer: String
-		let name: String
-		let probability: Double
+	public struct ImageLayer<F: Location> {
+		public let imageLocation: F
+		public let layer: String
+		public let name: String
+		public let probability: Double
+
+		public init(imageLocation: F, layer: String, name: String, probability: Double) {
+			self.imageLocation = imageLocation
+			self.layer = layer
+			self.name = name
+			self.probability = probability
+		}
 	}
 
-	struct SerialText {
-		let formatText: NSAttributedString
-		let transform: CGAffineTransform
+	public struct SerialText {
+		public let formatText: NSAttributedString
+		public let transform: CGAffineTransform
 
-		init?(from config: AssetConfig.DrawSerial, inputFolder: Folder) {
+		public init?(from config: AssetConfig.DrawSerial, inputFolder: Folder) {
 			guard config.enabled, !config.format.isEmpty else { return nil }
 
 			let font = loadFont(fontName: config.font, folder: inputFolder, size: config.size)

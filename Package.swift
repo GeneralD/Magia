@@ -4,12 +4,12 @@
 import PackageDescription
 
 let package = Package(
-	name: "NFTHolic",
+	name: "Magia",
 	platforms: [
 		.macOS(.v12),
 	],
 	products: [
-		.executable(name: "nftholic", targets: ["Main"])
+		.executable(name: "magia", targets: ["Main"])
 	],
 	dependencies: [
 		.package(url: "https://github.com/generald/CollectionKit", branch: "master"),

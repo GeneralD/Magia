@@ -64,8 +64,8 @@ public class GenCommand: Command {
 
 	// MARK: - Command Implementations
 	
-	public let name = "gen"
-	public let shortDescription = "Generate your animated NFT"
+	public let name = "summon"
+	public let shortDescription = "Generate many NFTs"
 
 	public init() {}
 

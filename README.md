@@ -1,6 +1,6 @@
 # Magia - The NFT Generator -
 
-![magia](logo.png)
+![magia](Images/logo.png)
 
 Magiaは究極のカスタマイズ性と処理速度を誇るプロのためのNFTジェネレーター。
 
@@ -387,3 +387,20 @@ metadata:
     - `traits`
       - `type`
       - `trait`
+
+
+
+---
+
+
+
+## 実績
+
+
+
+このジェネレーターで召喚したNFTプロジェクト
+
+![ANIM.JP OpenSea](Images/animjp.gif)
+
+[ANIM.JP](https://opensea.io/collection/anim-jp)
+

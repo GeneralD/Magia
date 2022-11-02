@@ -1,6 +1,6 @@
 # MAGIA
 
-![magia](./ logo.png)
+![magia](logo.png)
 
 Magiaは究極のカスタマイズ性と処理速度を誇るプロのためのNFTジェネレーター。
 

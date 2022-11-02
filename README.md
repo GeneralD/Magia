@@ -1,4 +1,4 @@
-# MAGIA
+# Magia - The NFT Generator -
 
 ![magia](logo.png)
 
@@ -289,6 +289,8 @@ combinations:
 
 ## レイヤーの重ね順と抽選順
 
+
+
 この設定がなければレイヤーの重ね順と抽選順はレイヤーフォルダ名で辞書順となる。
 
 設定なしでレイヤーフォルダ名だけで解決する場合は先頭に番号を付けると明瞭だ。
@@ -335,7 +337,9 @@ order:
 
 
 
-## Metadata Generation
+## メタデータ生成
+
+
 
 ```yaml
 metadata:
@@ -368,3 +372,18 @@ metadata:
       value: 37
 ```
 
+- `metadata` に定義する。
+  - `backgroundColor` はHTMLカラーコードで指定できる。ただし `#` は付けない。
+    - マーケットプレースのNFT画像周囲の余白などの色として使われることがある。
+  - `defaultDescriptionFormat`
+  - `defaultNameFormat`
+  - `externalUrlFormat`
+  - `baseUrl`
+  - `traitOrder`
+  - `data`
+    - `conditions`
+      - `layer`
+      - `name`
+    - `traits`
+      - `type`
+      - `trait`

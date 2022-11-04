@@ -4,12 +4,12 @@ import ImageFactory
 import LayerStrictionRegexFactory
 import MetadataFactory
 import RandomizationController
+import RecipeStore
 import TokenFileNameFactory
 import AppKit
 import CollectionKit
 import Files
 import Foundation
-import GRDB
 import Regex
 import SwiftCLI
 import UniformTypeIdentifiers
@@ -174,27 +174,22 @@ private extension GenCommand {
 
 		let animated = isAnimatedAsset
 
-		let inputDatabaseQueue = try sqliteFile.map { file in try DatabaseQueue(path: file.path) }
-		defer { try? inputDatabaseQueue?.close() }
-
-		let outputDatabaseQueue = try DatabaseQueue(path: "\(outputFolder.path)/data.sqlite")
-		_ = try outputDatabaseQueue.inDatabase(OutputRecipe.createTable(in:))
-		defer { try? outputDatabaseQueue.close() }
+		let recipeStore = try RecipeStore(inputDatabaseFile: sqliteFile, outputDatabaseFolder: outputFolder)
+		defer { try? recipeStore.close() }
 
 		return try indices.map { index -> Bool in
 			// measure time
 			let startDate = Date()
 			defer { stdout <<< "Generating an image took \(Date().timeIntervalSince(startDate)) seconds." }
 
-			// load reprint data if db file passed
-			let recipe = try inputDatabaseQueue?.inDatabase(OutputRecipe.filter(id: Int64(index)).fetchOne)
-			let inputAssets = recipe?.assets(isAnimated: animated, animationDuration: animationDuration, inputFolder: inputFolder)
-			let reprintData = inputAssets.map { InputData(assets: $0, serialText: .init(from: config.drawSerial, inputFolder: inputFolder), isSampleMode: isSampleMode) }
+			let reprintData = try recipeStore.storedAssets(for: index, isAnimated: animated, animationDuration: animationDuration, inputFolder: inputFolder)
+				.map { InputData(assets: $0, serialText: .init(from: config.drawSerial, inputFolder: inputFolder), isSampleMode: isSampleMode) }
 
-			// load reprint data or create new
+			// use reprint data or create new
 			let input = reprintData ?? (animated ? inputData(locations: \.subfolders) : inputData(locations: \.files))
-			// write to db
-			try outputDatabaseQueue.inDatabase(OutputRecipe(serial: index, source: input, inputFolder: inputFolder).save)
+
+			try recipeStore.storeAssets(for: index, source: input, inputFolder: inputFolder)
+
 			// generate image and metadata
 			return generateImage(input: input, index: index) && generateMetadata(input: input, index: index, config: config.metadata)
 		}

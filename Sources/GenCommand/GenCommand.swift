@@ -1,5 +1,4 @@
 import CommandCommon
-import Common
 import GenCommandCommon
 import ImageFactory
 import LayerStrictionRegexFactory
@@ -283,12 +282,12 @@ private extension GenCommand {
 	// Detect if it's expected to be animated image from input folder structure
 	var isAnimated: Bool {
 		let subfolders = inputFolder.subfolders.array
-		if subfolders.all(\.files.array.isEmpty), subfolders.any(\.subfolders.array.isEmpty.not) {
-			return true // animated
-		}
-		if subfolders.any(\.files.array.isEmpty.not), subfolders.all(\.subfolders.array.isEmpty) {
-			return false // still
-		}
+		let isStillAssetEmpty = subfolders.all(\.files.array.isEmpty)
+		let isAnimatedAssetEmpty = subfolders.all(\.subfolders.array.isEmpty)
+
+		if isStillAssetEmpty, !isAnimatedAssetEmpty { return true }
+		if !isStillAssetEmpty, isAnimatedAssetEmpty { return false }
+
 		stderr <<< "Invalid input folder structure."
 		exit(1)
 	}
@@ -307,7 +306,7 @@ private extension GenCommand {
 
 		return (startIndex..<(startIndex + creationCount))
 			.map { index in (index, fileName(from: index)) }
-			.filter { _, fileName in !skips.contains(fileName) }
+			.unless { _, fileName in skips.contains(fileName) }
 			.map(\.0)
 	}
 

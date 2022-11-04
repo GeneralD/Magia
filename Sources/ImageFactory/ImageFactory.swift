@@ -1,4 +1,3 @@
-import Common
 import GenCommandCommon
 import CollectionKit
 import CoreImage
@@ -102,7 +101,7 @@ private extension ImageFactory {
 		case let .animated(layers, _):
 			return layers
 				.map(\.imageLocation.files.array)
-				.filter(\.isEmpty.not)
+				.unless(\.isEmpty)
 				.map { files in
 					let sorted = files.sorted(at: \.name, by: <)
 					return sorted[safe: frame] ?? sorted.last!

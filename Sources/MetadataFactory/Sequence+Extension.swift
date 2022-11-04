@@ -1,6 +1,6 @@
 import Foundation
 
-public extension Sequence {
+extension Sequence {
 	func unique<Identifier: Hashable>(where: (Element) -> Identifier, selector: (Element, Element) -> Element = { $1 }) -> [Element] {
 		reduce(into: [:], { accum, element in
 			let prev = accum[`where`(element)]

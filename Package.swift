@@ -43,7 +43,6 @@ let package = Package(
 			name: "GenCommand",
 			dependencies: [
 				"CommandCommon",
-				"Common",
 				"GenCommandCommon",
 				"ImageFactory",
 				"LayerStrictionRegexFactory",
@@ -60,7 +59,6 @@ let package = Package(
 		.target(
 			name: "ImageFactory",
 			dependencies: [
-				"Common",
 				"GenCommandCommon",
 				"CollectionKit",
 				"Files",
@@ -75,7 +73,6 @@ let package = Package(
 		.target(
 			name: "MetadataFactory",
 			dependencies: [
-				"Common",
 				"GenCommandCommon",
 				"CollectionKit",
 				"Files",
@@ -103,7 +100,6 @@ let package = Package(
 				"Regex",
 				"SwiftCLI",
 			]),
-		.target(name: "Common"),
 		.testTarget(
 			name: "MainTests",
 			dependencies: ["Main"]),

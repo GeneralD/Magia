@@ -170,7 +170,7 @@ private extension GenCommand {
 			return InputData(assets: assets, serialText: serialText, isSampleMode: isSampleMode)
 		}
 
-		let animated = isAnimated
+		let animated = isAnimatedAsset
 
 		let inputDatabaseQueue = try sqliteFile.map { file in try DatabaseQueue(path: file.path) }
 		defer { try? inputDatabaseQueue?.close() }
@@ -186,7 +186,7 @@ private extension GenCommand {
 
 			// load reprint data if db file passed
 			let recipe = try inputDatabaseQueue?.inDatabase(OutputRecipe.filter(id: Int64(index)).fetchOne)
-			let inputAssets = recipe?.assets(isAnimated: isAnimated, animationDuration: animationDuration, inputFolder: inputFolder)
+			let inputAssets = recipe?.assets(isAnimated: animated, animationDuration: animationDuration, inputFolder: inputFolder)
 			let reprintData = inputAssets.map { InputData(assets: $0, serialText: .init(from: config.drawSerial, inputFolder: inputFolder), isSampleMode: isSampleMode) }
 
 			// load reprint data or create new
@@ -280,16 +280,16 @@ private extension GenCommand {
 	// MARK: - Utilities
 
 	// Detect if it's expected to be animated image from input folder structure
-	var isAnimated: Bool {
+	var isAnimatedAsset: Bool {
 		let subfolders = inputFolder.subfolders.array
 		let isStillAssetEmpty = subfolders.all(\.files.array.isEmpty)
 		let isAnimatedAssetEmpty = subfolders.all(\.subfolders.array.isEmpty)
-
-		if isStillAssetEmpty, !isAnimatedAssetEmpty { return true }
-		if !isStillAssetEmpty, isAnimatedAssetEmpty { return false }
-
-		stderr <<< "Invalid input folder structure."
-		exit(1)
+		// check XOR is true
+		guard isStillAssetEmpty != isAnimatedAssetEmpty else {
+			stderr <<< "Invalid input folder structure."
+			exit(1)
+		}
+		return isStillAssetEmpty
 	}
 
 	func fileName(from index: Int) -> String {

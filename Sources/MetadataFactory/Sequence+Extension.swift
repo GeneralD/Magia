@@ -1,3 +1,4 @@
+import CollectionKit
 import Foundation
 
 extension Sequence {
@@ -19,12 +20,5 @@ extension Sequence {
 			return nil
 		}
 		return result
-	}
-}
-
-private extension Sequence {
-	// Copy from CollectionKit
-	var array: [Element] {
-		self as? [Element] ?? map { $0 }
 	}
 }

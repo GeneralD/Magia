@@ -48,12 +48,12 @@ let package = Package(
 				"LayerStrictionRegexFactory",
 				"MetadataFactory",
 				"RandomizationController",
+				"TokenFileNameFactory",
 				"CollectionKit",
 				"Files",
 				.product(name: "GRDB", package: "GRDB.swift"),
 				"Regex",
 				"SwiftCLI",
-				"SwiftKeccak",
 				"Yams",
 			]),
 		.target(
@@ -85,6 +85,11 @@ let package = Package(
 				"CollectionKit",
 				"Files",
 				"Regex",
+			]),
+		.target(
+			name: "TokenFileNameFactory",
+			dependencies: [
+				"SwiftKeccak",
 			]),
 		.target(
 			name: "GenCommandCommon",

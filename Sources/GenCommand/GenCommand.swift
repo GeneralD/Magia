@@ -4,6 +4,7 @@ import ImageFactory
 import LayerStrictionRegexFactory
 import MetadataFactory
 import RandomizationController
+import TokenFileNameFactory
 import AppKit
 import CollectionKit
 import Files
@@ -11,7 +12,6 @@ import Foundation
 import GRDB
 import Regex
 import SwiftCLI
-import SwiftKeccak
 import UniformTypeIdentifiers
 import Yams
 
@@ -65,6 +65,8 @@ public class GenCommand: Command {
 	
 	public let name = "summon"
 	public let shortDescription = "Generate many NFTs"
+
+	private lazy var nameFactory = TokenFileNameFactory(nameFormat: fileNameFormat, hash: hashFileName)
 
 	public init() {}
 
@@ -206,7 +208,7 @@ private extension GenCommand {
 			return false
 		}
 		let imageFactory = ImageFactory(input: input)
-		switch imageFactory.generateImage(saveIn: imageFolder, as: fileName(from: index), serial: index, imageType: imageType) {
+		switch imageFactory.generateImage(saveIn: imageFolder, as: nameFactory.fileName(from: index), serial: index, imageType: imageType) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
 			return true
@@ -229,7 +231,7 @@ private extension GenCommand {
 	func generateMetadata(input: InputData, index: Int, config: AssetConfig.Metadata?) -> Bool {
 		guard !noMetadata, let metadataConfig = config else { return true }
 		let metadataFactory = MetadataFactory(input: input)
-		switch metadataFactory.generateMetadata(saveIn: outputFolder, as: fileName(from: index), serial: index, metadataConfig: metadataConfig, imageFolderName: imageFolderName, imageType: imageType) {
+		switch metadataFactory.generateMetadata(saveIn: outputFolder, as: nameFactory.fileName(from: index), serial: index, metadataConfig: metadataConfig, imageFolderName: imageFolderName, imageType: imageType) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
 			return true
@@ -292,12 +294,6 @@ private extension GenCommand {
 		return isStillAssetEmpty
 	}
 
-	func fileName(from index: Int) -> String {
-		let fileName = String(format: fileNameFormat, index)
-		guard hashFileName else { return fileName }
-		return fileName.keccak().hexDescription
-	}
-
 	/// Indices of images to create. They start from 1, not 0.
 	var indices: [Int] {
 		let skips = forceOverwrite
@@ -305,7 +301,7 @@ private extension GenCommand {
 		: outputFolder.files.map(\.nameExcludingExtension)
 
 		return (startIndex..<(startIndex + creationCount))
-			.map { index in (index, fileName(from: index)) }
+			.map { index in (index, nameFactory.fileName(from: index)) }
 			.unless { _, fileName in skips.contains(fileName) }
 			.map(\.0)
 	}

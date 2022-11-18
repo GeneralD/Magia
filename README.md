@@ -117,13 +117,132 @@ magia summon [アセットフォルダ] -o [出力先]
 
 オプション
 
-- `--name-format` ファイル名のフォーマットを指定できる
+- `-d` , `--anim-duration`
+  - 出力する画像がアニメーションする場合の秒数
+  - デフォルトは `2.0` 秒
+
+- `-k` , `--hashed-name`
+  - `true` なら `keccak256` でハッシュ化した名前をファイル名に使う
+  - デフォルトは `false`
+  - `--name-format` と組み合わせて使うとミント前のトークン先読み防止に効果的
+
+- `-h` , `--help`
+  - ヘルプを表示
+- `--image-foldername`
+  - 画像を格納するフォルダの名前
+  - デフォルトは `images`
+  - メタデータの `image` のパスでも使用される
+
+- `--name-format`
+  - ファイル名のフォーマットを指定できる
   - 書式指定文字列が利用可
-  - デフォルトは `%d` で番号がそのまま使用される
+  - デフォルトは%dで `tokenId` がそのまま使用される
   - 拡張子は含めない
-  
+- `-o` , `--output-dir`
+  - 出力先のパス
+  - 適当に空きフォルダを作って指定しておけば問題ない
+  - デフォルトは `~/Documents/NFTs/{アセットフォルダ名})`
+- `-f` , `--overwrite`
+  - 再生成する場合に上書きするかどうか
+  - デフォルトは `false`
+- `-q` , `--quantity`
+  - いくつ生成するか
+  - デフォルトは `100`
+- `-r` , `--reprint`
+  - 過去の生成時に出力された `data.sqlite` のパスを指定すれば、抽選せず同じ出力を再現する。
+  - これから生成しようとする画像に関して`tokenId` で比較し再現する。
+  - ただし設定ファイルや入力画像に変更があれば同じ結果を保証できない。
+  - 設定ファイルを含むアセットフォルダに、リリース用成果物を生成時に出力された `data.sqlite` を含めて保管すると、生成された画像そのものを保存しておかなくても必要に応じて再生することができる
+    - `git` 管理時に便利
+  - アセットフォルダ内に変更を加えた後でも再生成できるので、一部のNFTを修正したい場合などオフチェーンのNFTなら手直しが楽
+- `--sample`
+  - 画像にサンプル画像用のウォータードロップを入れるかどうか
+  - デフォルトは `false`
+  - テストネットでのテスト用などにどうぞ
+- ` -s` , `--start-index`
+  - 生成開始する `tokenId`
+  - デフォルトは `1`
+- `-t` , `--type`
+  - 生成する画像のフォーマット
+  - デフォルトは `gif`
+  - `gif` , `png` が指定可能
+- `--without-image`
+  - 画像は生成しない
+  - デフォルトは `false`
+- `--without-metadata`
+  - メタデータは生成しない
+  - デフォルトは `false`
 
 
+
+### ミント前トークンの先読み防止
+
+```shell
+magia summon [アセットフォルダ] -o [出力先] -k --name-format "Magia%d"
+```
+
+として生成したファイル名を `solidity` 側で適切な `tokenURI` を組み立てるコード。
+
+```solidity
+using StringsUpgradeable for uint256;
+
+string private _keccakPrefix = "Magia";
+
+function setKeccakPrefix(string memory prefix) external onlyOwner {
+    _keccakPrefix = prefix;
+}
+
+function tokenURI(uint256 tokenId)
+    public
+    view
+    virtual
+    override
+    checkTokenIdExists(tokenId)
+    returns (string memory)
+{
+    bytes32 keccak = keccak256(abi.encodePacked(_keccakPrefix, tokenId.toString()));
+    return _toLower(string(abi.encodePacked(_baseURI(), _toHex(keccak), ".json")));
+}
+
+function _toHex(bytes32 data) private pure returns (string memory) {
+    return string(abi.encodePacked(_toHex16(bytes16(data)), _toHex16(bytes16(data << 128))));
+}
+
+function _toHex16(bytes16 data) private pure returns (bytes32 result) {
+    result =
+        (bytes32(data) & 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000) |
+        ((bytes32(data) & 0x0000000000000000FFFFFFFFFFFFFFFF00000000000000000000000000000000) >> 64);
+    result =
+        (result & 0xFFFFFFFF000000000000000000000000FFFFFFFF000000000000000000000000) |
+        ((result & 0x00000000FFFFFFFF000000000000000000000000FFFFFFFF0000000000000000) >> 32);
+    result =
+        (result & 0xFFFF000000000000FFFF000000000000FFFF000000000000FFFF000000000000) |
+        ((result & 0x0000FFFF000000000000FFFF000000000000FFFF000000000000FFFF00000000) >> 16);
+    result =
+        (result & 0xFF000000FF000000FF000000FF000000FF000000FF000000FF000000FF000000) |
+        ((result & 0x00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000) >> 8);
+    result =
+        ((result & 0xF000F000F000F000F000F000F000F000F000F000F000F000F000F000F000F000) >> 4) |
+        ((result & 0x0F000F000F000F000F000F000F000F000F000F000F000F000F000F000F000F00) >> 8);
+    result = bytes32(
+        0x3030303030303030303030303030303030303030303030303030303030303030 +
+            uint256(result) +
+            (((uint256(result) + 0x0606060606060606060606060606060606060606060606060606060606060606) >> 4) &
+                0x0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F) *
+            7
+    );
+}
+
+function _toLower(string memory str) private pure returns (string memory) {
+    bytes memory b = bytes(str);
+    bytes memory l = new bytes(b.length);
+    for (uint256 i = 0; i < b.length; i++)
+        l[i] = (uint8(b[i]) >= 65) && (uint8(b[i]) <= 90) ? bytes1(uint8(b[i]) + 32) : b[i];
+    return string(l);
+}
+```
+
+`_keccakPrefix` を `private` にすることで、ファイル名を少しでも予測しにくくしている。
 
 
 
@@ -141,11 +260,11 @@ magia summon [アセットフォルダ] -o [出力先]
 
 
 
-## シリアルナンバーを印字する
+## tokenIdを印字する
 
 
 
-トークンIDに基づいた連番を画像に印字したい場合があるはず。
+`tokenId` を画像に印字したい場合があるはず。
 
 その場合は以下のような設定を追記する。
 

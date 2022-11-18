@@ -406,7 +406,8 @@ metadata:
           - 属性のタイトルがない、値だけのトレート。
           - `value` のみを文字列で指定する必要がある。
         - `label` は標準的なトレート。
-          -   `trait` と `value` を文字列で指定する必要がある。
+          -   `trait` を文字列で、 `value` を文字列か数値または日時で指定する。
+              -   日時を指定する場合はUNIX秒を用いる。例：1668757000
         - `rankedNumber` は値が数値となるトレートで、OpenSea上ではその数値自体に加えて、その数値がトークン全体の中で何番目に大きいのかも表示される。
           - `trait` を文字列で `value` を数値で指定する必要がある。
         - `boostNumber` は値が数値となるトレートで、OpenSea上ではその数値自体に加えて、その数値が最大値付きの円グラフで表示される。
@@ -422,6 +423,17 @@ metadata:
         - 数値の場合は整数値でも小数値でも良い。
         - 少数の桁はそのままメタデータ生成時に反映される。
       - `max` は `boostNumber` のみ指定。
+
+
+
+| type             | trait  | value                          | max  | OpenSea上の表示サンプル                            |
+| ---------------- | ------ | ------------------------------ | ---- | -------------------------------------------------- |
+| simple           | -      | 文字列                         | -    | ![simple](Images/simple.png)                       |
+| label            | 文字列 | 文字列 \| 数値 \| 日付(UNIX秒) | -    | ![label](Images/label.png)![date](Images/date.png) |
+| rankedNumber     | 文字列 | 数値                           | -    | ![rankednumber](Images/rankednumber.png)           |
+| boostNumber      | 文字列 | 数値                           | 数値 | ![boostnumber](Images/boostnumber.png)             |
+| boostPercentage  | 文字列 | 数値                           | -    | ![boostpercentage](Images/boostpercentage.png)     |
+| rarityPercentage | 文字列 | -                              | -    |                                                    |
 
 
 

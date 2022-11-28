@@ -34,7 +34,7 @@ public extension MetadataFactory {
 private extension MetadataFactory {
 
 	@discardableResult
-	func generateMetadata<F: Location>(from layers: [InputData.ImageLayer<F>], saveIn folder: Folder, as name: String, serial: Int, metadataConfig config: AssetConfig.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
+	func generateMetadata(from layers: [InputData.ImageLayer<some Location>], saveIn folder: Folder, as name: String, serial: Int, metadataConfig config: AssetConfig.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
 		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(name).json") else { return .failure(.creatingFileFailed) }
 		let attributes = layers.reduce([Metadata.Attribute]()) { accum, layer in
 			accum + config.data
@@ -134,8 +134,8 @@ private extension MetadataFactory {
 	}
 
 	func sort(attributes: [Metadata.Attribute], traitOrder: [String]?) -> [Metadata.Attribute]? {
-		guard let order = traitOrder else { return attributes.sorted(at: { $0.traitType ?? "" }, by: <) } // just sort alphabetically
-		guard let sorted = attributes.sort(where: \.identity, orderSample: order, shouldCover: true) else { return nil } // fail
+		guard let traitOrder else { return attributes.sorted(at: { $0.traitType ?? "" }, by: <) } // just sort alphabetically
+		guard let sorted = attributes.sort(where: \.identity, orderSample: traitOrder, shouldCover: true) else { return nil } // fail
 		return sorted // ok
 	}
 }

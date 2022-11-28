@@ -49,7 +49,7 @@ extension OutputRecipe {
 		let name: String
 		let probability: Double
 
-		static func from<F: Location>(source: InputData.ImageLayer<F>, filePathRelatedTo folder: Folder) -> Self {
+		static func from(source: InputData.ImageLayer<some Location>, filePathRelatedTo folder: Folder) -> Self {
 			.init(path: source.imageLocation.path(relativeTo: folder), layer: source.layer, name: source.name, probability: source.probability)
 		}
 

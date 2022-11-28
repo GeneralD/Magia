@@ -149,8 +149,8 @@ private extension GenCommand {
 				.reduce(into: [InputData.ImageLayer<F>]()) { layers, layerFolder in
 					let limitRegex = regexFactory.validItemNameRegex(forLayer: layerFolder.name, conditionLayers: layers)
 					let candidates = locations(layerFolder).filter({ f in
-						guard let regex = limitRegex else { return true } // no limitation
-						return f.nameExcludingExtension =~ regex
+						guard let limitRegex else { return true } // no limitation
+						return f.nameExcludingExtension =~ limitRegex
 					})
 					guard let elected = randomManager.elect(from: candidates, targetLayer: layerFolder.name) else { return }
 					layers.append(.init(imageLocation: elected.element, layer: layerFolder.name, name: elected.element.nameExcludingExtension, probability: elected.probability))
@@ -304,7 +304,7 @@ private extension GenCommand {
 	func sort<Subjects: Sequence>(subjects: Subjects, where: (Subjects.Element) -> String, order: [String]?) -> [Subjects.Element] {
 		let array = subjects.array
 		let sortedAlphabetically = array.sorted(at: `where`, by: <)
-		guard let order = order else { return sortedAlphabetically }
+		guard let order else { return sortedAlphabetically }
 		let result = order.compactMap { name in
 			subjects.first { subject in
 				`where`(subject) == name

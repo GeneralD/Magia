@@ -10,7 +10,7 @@ public struct LayerStrictionRegexFactory {
 		self.layerStrictions = layerStrictions
 	}
 
-	public func validItemNameRegex<F: Location>(forLayer layer: String, conditionLayers: [InputData.ImageLayer<F>]) -> Regex? {
+	public func validItemNameRegex(forLayer layer: String, conditionLayers: [InputData.ImageLayer<some Location>]) -> Regex? {
 		let names = conditionLayers
 		// pick up all related strictions with current layer selections
 			.flatMap { conditionLayer in

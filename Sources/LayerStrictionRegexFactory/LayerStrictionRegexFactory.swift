@@ -1,7 +1,5 @@
 import Files
 import GenCommandCommon
-import RegexBuilder
-
 
 public struct LayerStrictionRegexFactory {
 

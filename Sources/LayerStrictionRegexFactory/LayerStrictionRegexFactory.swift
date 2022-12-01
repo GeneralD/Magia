@@ -1,6 +1,7 @@
-import GenCommandCommon
-import Regex
 import Files
+import GenCommandCommon
+import RegexBuilder
+
 
 public struct LayerStrictionRegexFactory {
 
@@ -10,12 +11,12 @@ public struct LayerStrictionRegexFactory {
 		self.layerStrictions = layerStrictions
 	}
 
-	public func validItemNameRegex(forLayer layer: String, conditionLayers: [InputData.ImageLayer<some Location>]) -> Regex? {
+	public func validItemNameRegex(forLayer layer: String, conditionLayers: [InputData.ImageLayer<some Location>]) -> Regex<Substring>? {
 		let names = conditionLayers
 		// pick up all related strictions with current layer selections
 			.flatMap { conditionLayer in
 				layerStrictions.filter { combination in
-					conditionLayer =~ combination.target
+					combination.target.contains(conditionLayer)
 				}
 			}
 			.flatMap(\.dependencies)
@@ -23,7 +24,6 @@ public struct LayerStrictionRegexFactory {
 				dependency.layer == layer
 			}
 			.map(\.name)
-		guard !names.isEmpty else { return nil }
-		return names.map { "(?=\($0))" }.joined().r
+		return try? Regex(names.map { "(?=\($0))" }.joined())
 	}
 }

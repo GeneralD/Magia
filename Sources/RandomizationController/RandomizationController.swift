@@ -1,6 +1,5 @@
 import GenCommandCommon
 import Files
-import Regex
 
 public struct RandomizationController {
 	private let config: AssetConfig.Randomization
@@ -21,7 +20,8 @@ public extension RandomizationController {
 			.filter { probability in probability.target.layer == targetLayer }
 			.reduce(into: initDict) { accum, probability in
 				let matches = candidates.filter { candidate in
-					candidate.nameExcludingExtension =~ probability.target.name
+					guard let regex = try? Regex(probability.target.name) else { return false }
+					return candidate.nameExcludingExtension.contains(regex)
 				}
 				let weight = probability.divideByMatches
 				? probability.weight / Double(matches.count)

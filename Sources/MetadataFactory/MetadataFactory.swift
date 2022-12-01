@@ -2,7 +2,7 @@ import GenCommandCommon
 import CollectionKit
 import Files
 import Foundation
-import Regex
+import RegexBuilder
 import UniformTypeIdentifiers
 
 public struct MetadataFactory {
@@ -80,13 +80,24 @@ private extension MetadataFactory {
 		let description = replace(in: config.descriptionFormat, attributes: attributes, serial: serial)
 
 		let externalURL = config.externalUrlFormat.map { replace(in: $0, attributes: attributes, serial: serial) }.flatMap(URL.init(string: ))
-		// validate
-		guard config.backgroundColor =~ #"^[\da-fA-F]{6}$|^[\da-fA-F]{3}$"#.r else {
+
+		// background color
+		let backgroundColorRef = Reference(Substring.self)
+		let hexColorRegex = Regex {
+			Optionally("#")
+			Capture(as: backgroundColorRef) {
+				ChoiceOf {
+					Repeat(.hexDigit, count: 3)
+					Repeat(.hexDigit, count: 6)
+				}
+			}
+		}
+		guard let backgroundColor = config.backgroundColor.wholeMatch(of: hexColorRegex)?[backgroundColorRef].description else {
 			try? jsonFile.delete()
 			return .failure(.invalidBackgroundColorCode)
 		}
 
-		let metadata = Metadata(image: imageURL, externalURL: externalURL, description: description, name: name, attributes: sortedAttribute, backgroundColor: config.backgroundColor)
+		let metadata = Metadata(image: imageURL, externalURL: externalURL, description: description, name: name, attributes: sortedAttribute, backgroundColor: backgroundColor)
 
 		let encoder = JSONEncoder()
 		encoder.outputFormatting = .prettyPrinted
@@ -107,13 +118,17 @@ private extension MetadataFactory {
 	///   - serial: serial number
 	/// - Returns: result
 	func replace(in format: String, attributes: [Metadata.Attribute], serial: Int) -> String {
-		let text = "%\\d*?d".r?.replaceAll(in: format) { match in
-			.init(format: match.matched, serial)
-		} ?? format
+		let text = format.replacing(Regex {
+			"%"
+			ZeroOrMore(.digit)
+			"d"
+		}) { match in
+			String(format: match.output.description, serial)
+		}
 
-		guard let attributeMatcher = try? Regex(pattern: "\\$\\{(.*?)\\}", groupNames: "attr") else { return text }
-		return attributeMatcher.replaceAll(in: text) { match in
-			let trait = match.group(named: "attr")
+		let attrRegex = #/\$\{(?<attr>.*)\}/#
+		return text.replacing(attrRegex) { match in
+			let trait = match.attr.description
 			return attributes.lazy.compactMap { attr in
 				switch attr {
 				case .textLabel(traitType: trait, value: let value):

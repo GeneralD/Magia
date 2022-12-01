@@ -1,4 +1,4 @@
-import Regex
+import RegexBuilder
 import SwiftCLI
 
 public extension Validation where T: Comparable {
@@ -13,6 +13,16 @@ public extension Validation where T: Comparable {
 
 public extension Validation where T == String {
 	static func formatInteger(message: String? = nil) -> Validation {
-		.custom(message ?? "must include integer format") { $0 =~ "^.*%[\\-\\+0-9]*d.*$".r }
+		.custom(message ?? "must include integer format") {
+			$0.contains(Regex {
+				"%"
+				Optionally(ChoiceOf {
+					"-"
+					"+"
+				})
+				ZeroOrMore(.digit)
+				"d"
+			})
+		}
 	}
 }

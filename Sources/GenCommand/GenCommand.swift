@@ -10,7 +10,6 @@ import AppKit
 import CollectionKit
 import Files
 import Foundation
-import Regex
 import SwiftCLI
 import UniformTypeIdentifiers
 import Yams
@@ -148,10 +147,10 @@ private extension GenCommand {
 			let layers = layerFolders
 				.reduce(into: [InputData.ImageLayer<F>]()) { layers, layerFolder in
 					let limitRegex = regexFactory.validItemNameRegex(forLayer: layerFolder.name, conditionLayers: layers)
-					let candidates = locations(layerFolder).filter({ f in
+					let candidates = locations(layerFolder).filter { f in
 						guard let limitRegex else { return true } // no limitation
-						return f.nameExcludingExtension =~ limitRegex
-					})
+						return f.nameExcludingExtension.contains(limitRegex)
+					}
 					guard let elected = randomManager.elect(from: candidates, targetLayer: layerFolder.name) else { return }
 					layers.append(.init(imageLocation: elected.element, layer: layerFolder.name, name: elected.element.nameExcludingExtension, probability: elected.probability))
 				}

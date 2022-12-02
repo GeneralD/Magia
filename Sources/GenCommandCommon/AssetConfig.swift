@@ -1,140 +1,90 @@
-import CoreGraphics
-import DefaultCodable
 import Foundation
 
-public struct AssetConfig: Codable, Equatable {
-	public static let empty: Self = .init(order: nil, combinations: .init(), randomization: .init(), drawSerial: .default, metadata: nil)
-	
-	public let order: Order?
-	@Default<Empty> public var combinations: [Combination]
-	@Default<Randomization> public var randomization: Randomization
-	public let drawSerial: DrawSerial
-	public let metadata: Metadata?
+public protocol AssetConfig {
+	associatedtype OrderType: Order
+	associatedtype CombinationType: Combination
+	associatedtype RandomizationType: Randomization
+	associatedtype DrawSerialType: DrawSerial
+	associatedtype MetadataType: Metadata
 
-	public struct Combination: Codable, Equatable {
-		public let target: Subject
-		public let dependencies: [Subject]
-	}
+	var order: OrderType? { get }
+	var combinations: [CombinationType] { get }
+	var randomization: RandomizationType { get }
+	var drawSerial: DrawSerialType { get }
+	var metadata: MetadataType? { get }
+}
 
-	public struct Subject: Codable, Equatable {
-		public let layer: String
-		@Default<RegexMatchesNothing> public var name: String
-	}
+public protocol Order {
+	var selection: [String]? { get }
+	var layerDepth: [String]? { get }
+}
 
-	public struct Randomization: Codable, Equatable, DefaultValueProvider {
-		static public var `default`: Self = .init(probabilities: .init())
+public protocol Combination: FilterableByImageLayer {
+	associatedtype SubjectType: Subject
 
-		@Default<Empty> public var probabilities: [Probability]
+	var target: SubjectType { get }
+	var dependencies: [SubjectType] { get }
+}
 
-		public struct Probability: Codable, Equatable {
-			public let target: Subject
-			@Default<OneDouble> public var weight: Double
-			@Default<False> public var divideByMatches: Bool
-		}
-	}
+public protocol Randomization {
+	associatedtype ProbabilityType: Probability
 
-	public struct DrawSerial: Codable, Equatable, DefaultValueProvider {
-		static public var `default`: Self = .init()
+	var probabilities: [ProbabilityType] { get }
+}
 
-		@Default<True> public var enabled: Bool
-		@Default<ZeroFillThreeDigitsFormat> public var format: String
-		@Default<Empty> public var font: String
-		@Default<FontMidiumSize> public var size: CGFloat
-		@Default<BlackHexCode> public var color: String
-		@Default<ZeroFloat> public var offsetX: CGFloat
-		@Default<ZeroFloat> public var offsetY: CGFloat
-	}
+public protocol Probability {
+	associatedtype SubjectType: Subject
 
-	public struct Order: Codable, Equatable {
-		public let selection: [String]?
-		public let layerDepth: [String]?
-	}
+	var target: SubjectType { get }
+	var weight: Double { get }
+	var divideByMatches: Bool { get }
+}
 
-	public struct Metadata: Codable, Equatable {
-		public let baseUrl: URL
-		public let nameFormat: String
-		public let descriptionFormat: String
-		public let externalUrlFormat: String?
-		@Default<WhiteHexCode> public var backgroundColor: String
-		@Default<Empty> public var data: [Data]
-		@Default<Empty> public var traitOrder: [String]
+public protocol Subject: ImageLayerSubject {
+	var layer: String { get }
+	var name: String { get }
+}
 
-		public struct Data: Codable, Equatable {
-			public let traits: [Trait]
-			public let conditions: [Subject]
-		}
+public protocol DrawSerial {
+	var enabled: Bool { get }
+	var format: String { get }
+	var font: String { get }
+	var size: CGFloat { get }
+	var color: String { get }
+	var offsetX: CGFloat { get }
+	var offsetY: CGFloat { get }
+}
 
-		public enum Trait: Codable, Equatable {
-			case simple(value: String)
-			case label(trait: String, value: LabelValueType)
-			case rankedNumber(trait: String, value: Decimal)
-			case boostNumber(trait: String, value: Decimal, max: Decimal)
-			case boostPercentage(trait: String, value: Decimal)
-			case rarityPercentage(trait: String)
+public protocol Metadata {
+	associatedtype TraitDataType: TraitData
 
-			public enum LabelValueType: Codable, Equatable {
-				case string(_: String)
-				case date(_: Date)
-				case number(_: Decimal)
-			}
+	var baseUrl: URL { get }
+	var nameFormat: String { get }
+	var descriptionFormat: String { get }
+	var externalUrlFormat: String? { get }
+	var backgroundColor: String { get }
+	var data: [TraitDataType] { get }
+	var traitOrder: [String] { get }
+}
 
-			enum CodingKeys: CodingKey {
-				case type, trait, value, max
-			}
+public protocol TraitData: FilterableByImageLayer {
+	associatedtype SubjectType: Subject
 
-			enum TraitType: String, Codable {
-				case simple, label, rankedNumber, boostNumber, boostPercentage, rarityPercentage
-			}
+	var traits: [Trait] { get }
+	var conditions: [SubjectType] { get }
+}
 
-			public func encode(to encoder: Encoder) throws {
-				var container = encoder.container(keyedBy: CodingKeys.self)
-				switch self {
-				case let .simple(value):
-					try container.encode(TraitType.simple, forKey: .type)
-					try container.encode(value, forKey: .value)
-				case let .label(trait, value):
-					try container.encode(TraitType.label, forKey: .type)
-					try container.encode(trait, forKey: .trait)
-					try container.encode(value, forKey: .value)
-				case let .rankedNumber(trait, value):
-					try container.encode(TraitType.rankedNumber, forKey: .type)
-					try container.encode(trait, forKey: .trait)
-					try container.encode(value, forKey: .value)
-				case let .boostNumber(trait, value, max):
-					try container.encode(TraitType.boostNumber, forKey: .type)
-					try container.encode(trait, forKey: .trait)
-					try container.encode(value, forKey: .value)
-					try container.encode(max, forKey: .max)
-				case let .boostPercentage(trait, value):
-					try container.encode(TraitType.boostPercentage, forKey: .type)
-					try container.encode(trait, forKey: .trait)
-					try container.encode(value, forKey: .value)
-				case let .rarityPercentage(trait):
-					try container.encode(TraitType.rarityPercentage, forKey: .type)
-					try container.encode(trait, forKey: .trait)
-				}
-			}
+public enum Trait: Equatable {
+	case simple(value: String)
+	case label(trait: String, value: LabelValueType)
+	case rankedNumber(trait: String, value: Decimal)
+	case boostNumber(trait: String, value: Decimal, max: Decimal)
+	case boostPercentage(trait: String, value: Decimal)
+	case rarityPercentage(trait: String)
 
-			public init(from decoder: Decoder) throws {
-				let container = try decoder.container(keyedBy: CodingKeys.self)
-				let type = try container.decode(TraitType.self, forKey: .type)
-				switch type {
-				case .simple:
-					self = try .simple(value: container.decode(String.self, forKey: .value))
-				case .label:
-					let value = try? container.decodeIfPresent(Date.self, forKey: .value).flatMap(LabelValueType.date)
-					?? container.decodeIfPresent(Decimal.self, forKey: .value).flatMap(LabelValueType.number)
-					self = try .label(trait: container.decode(String.self, forKey: .trait), value: value ?? .string(container.decode(String.self, forKey: .value)))
-				case .rankedNumber:
-					self = try .rankedNumber(trait: container.decode(String.self, forKey: .trait), value: container.decode(Decimal.self, forKey: .value))
-				case .boostNumber:
-					self = try .boostNumber(trait: container.decode(String.self, forKey: .trait), value: container.decode(Decimal.self, forKey: .value), max: container.decode(Decimal.self, forKey: .max))
-				case .boostPercentage:
-					self = try .boostPercentage(trait: container.decode(String.self, forKey: .trait), value: container.decode(Decimal.self, forKey: .value))
-				case .rarityPercentage:
-					self = try .rarityPercentage(trait: container.decode(String.self, forKey: .trait))
-				}
-			}
-		}
+	public enum LabelValueType: Equatable, Codable {
+		case string(_: String)
+		case date(_: Date)
+		case number(_: Decimal)
 	}
 }

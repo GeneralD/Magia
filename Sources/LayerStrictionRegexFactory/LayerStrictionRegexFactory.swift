@@ -3,9 +3,9 @@ import GenCommandCommon
 
 public struct LayerStrictionRegexFactory {
 
-	private let layerStrictions: [AssetConfig.Combination]
+	private let layerStrictions: [any Combination]
 
-	public init(layerStrictions: [AssetConfig.Combination]) {
+	public init(layerStrictions: [any Combination]) {
 		self.layerStrictions = layerStrictions
 	}
 
@@ -17,7 +17,7 @@ public struct LayerStrictionRegexFactory {
 					combination.target.contains(conditionLayer)
 				}
 			}
-			.flatMap(\.dependencies)
+			.flatMap { $0.dependencies } // keypath \.dependencies triggers a fatal error at runtime by compiler bug
 			.filter { dependency in
 				dependency.layer == layer
 			}

@@ -41,6 +41,7 @@ let package = Package(
 		.target(
 			name: "GenCommand",
 			dependencies: [
+				"AssetConfigLoader",
 				"CommandCommon",
 				"GenCommandCommon",
 				"ImageFactory",
@@ -52,6 +53,12 @@ let package = Package(
 				"CollectionKit",
 				"Files",
 				"SwiftCLI",
+			]),
+		.target(
+			name: "AssetConfigLoader",
+			dependencies: [
+				"DefaultCodable",
+				"GenCommandCommon",
 				"Yams",
 			]),
 		.target(
@@ -96,7 +103,6 @@ let package = Package(
 		.target(
 			name: "GenCommandCommon",
 			dependencies: [
-				"DefaultCodable",
 				"Files",
 				"SwiftHEXColors",
 			]),

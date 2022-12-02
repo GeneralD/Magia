@@ -1,4 +1,5 @@
 import AppKit
+import CoreImage
 import Foundation
 
 extension CIImage {

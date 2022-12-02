@@ -1,3 +1,4 @@
+import AssetConfigLoader
 import CommandCommon
 import GenCommandCommon
 import ImageFactory
@@ -12,7 +13,6 @@ import Files
 import Foundation
 import SwiftCLI
 import UniformTypeIdentifiers
-import Yams
 
 public class GenCommand: Command {
 
@@ -222,10 +222,10 @@ private extension GenCommand {
 	}
 
 	@discardableResult
-	func generateMetadata(input: InputData, index: Int, config: AssetConfig.Metadata?) -> Bool {
-		guard !noMetadata, let metadataConfig = config else { return true }
+	func generateMetadata(input: InputData, index: Int, config: (any Metadata)?) -> Bool {
+		guard !noMetadata, let config else { return true }
 		let metadataFactory = MetadataFactory(input: input)
-		switch metadataFactory.generateMetadata(saveIn: outputFolder, as: nameFactory.fileName(from: index), serial: index, metadataConfig: metadataConfig, imageFolderName: imageFolderName, imageType: imageType) {
+		switch metadataFactory.generateMetadata(saveIn: outputFolder, as: nameFactory.fileName(from: index), serial: index, metadataConfig: config, imageFolderName: imageFolderName, imageType: imageType) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
 			return true
@@ -248,28 +248,26 @@ private extension GenCommand {
 
 	// MARK: - Load Config File
 
-	func loadAssetConfig() -> AssetConfig {
+	func loadAssetConfig() -> any AssetConfig {
+		let loader = AssetConfigLoader()
+		
 		guard let file = inputFolder.files.first(where: { $0.nameExcludingExtension == "config" }) else {
 			stderr <<< "Config file not found in \(inputFolder.name)"
 			stdout <<< "But still ok! We can continue processing..."
-			return .empty
+			return loader.defaultConfig
 		}
 
-		do {
-			switch file.extension {
-			case "yml", "yaml":
-				return try YAMLDecoder().decode(AssetConfig.self, from: file.read())
-			case "json":
-				return try JSONDecoder().decode(AssetConfig.self, from: file.read())
-			default:
-				stderr <<< "Incompatible file extension: \(file.name)"
-				stdout <<< "But still ok! We can continue processing..."
-				return .empty
-			}
-		} catch {
+		switch loader.loadAssetConfig(from: file) {
+		case .success(let config):
+			return config
+		case .failure(.incompatibleFileExtension):
+			stderr <<< "Incompatible file extension: \(file.name)"
+			stdout <<< "But still ok! We can continue processing..."
+			return loader.defaultConfig
+		case .failure(.invalidConfigFile):
 			stderr <<< "No valid config file!"
 			stdout <<< "But still ok! We can continue processing..."
-			return .empty
+			return loader.defaultConfig
 		}
 	}
 
@@ -300,7 +298,7 @@ private extension GenCommand {
 			.map(\.0)
 	}
 
-	func sort<Subjects: Sequence>(subjects: Subjects, where: (Subjects.Element) -> String, order: [String]?) -> [Subjects.Element] {
+	func sort<Subjects: Sequence>(subjects: Subjects, where: (Subjects.Element) -> String, order: (some Sequence<String>)?) -> [Subjects.Element] {
 		let array = subjects.array
 		let sortedAlphabetically = array.sorted(at: `where`, by: <)
 		guard let order else { return sortedAlphabetically }
@@ -319,7 +317,7 @@ private extension GenCommand {
 
 	// MARK: - Logging
 
-	func logging(results: [Bool]) {
+	func logging(results: some Sequence<Bool>) {
 		let successCount = results.filter { $0 }.count
 		stdout <<< "\(successCount) images have been generated!"
 

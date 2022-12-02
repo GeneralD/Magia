@@ -36,7 +36,7 @@ public struct InputData {
 		public let formatText: NSAttributedString
 		public let transform: CGAffineTransform
 
-		public init?(from config: AssetConfig.DrawSerial, inputFolder: Folder) {
+		public init?(from config: some DrawSerial, inputFolder: Folder) {
 			guard config.enabled, !config.format.isEmpty else { return nil }
 
 			let font = loadFont(fontName: config.font, folder: inputFolder, size: config.size)

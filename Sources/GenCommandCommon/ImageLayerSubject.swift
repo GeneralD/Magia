@@ -3,8 +3,6 @@ public protocol ImageLayerSubject {
 	var name: String { get }
 }
 
-extension AssetConfig.Subject: ImageLayerSubject {}
-
 extension InputData.ImageLayer: ImageLayerSubject {}
 
 public extension ImageLayerSubject {

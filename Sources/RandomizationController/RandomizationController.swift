@@ -2,9 +2,9 @@ import GenCommandCommon
 import Files
 
 public struct RandomizationController {
-	private let config: AssetConfig.Randomization
+	private let config: any Randomization
 
-	public init(config: AssetConfig.Randomization) {
+	public init(config: some Randomization) {
 		self.config = config
 	}
 }

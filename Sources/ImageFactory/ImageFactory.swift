@@ -3,7 +3,6 @@ import CollectionKit
 import CoreImage
 import Files
 import UniformTypeIdentifiers
-import AppKit
 
 public struct ImageFactory {
 

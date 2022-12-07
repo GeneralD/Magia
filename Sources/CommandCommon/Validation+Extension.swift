@@ -11,7 +11,7 @@ public extension Validation where T: Comparable {
 	}
 }
 
-public extension Validation where T == String {
+public extension Validation where T: BidirectionalCollection, T.SubSequence == Substring {
 	static func formatInteger(message: String? = nil) -> Validation {
 		.custom(message ?? "must include integer format") {
 			$0.contains(Regex {

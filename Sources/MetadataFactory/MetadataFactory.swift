@@ -34,7 +34,7 @@ public extension MetadataFactory {
 private extension MetadataFactory {
 
 	@discardableResult
-	func generateMetadata(from layers: [InputData.ImageLayer<some Location>], saveIn folder: Folder, as name: String, serial: Int, metadataConfig config: some GenCommandCommon.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
+	func generateMetadata(from layers: some Sequence<InputData.ImageLayer<some Location>>, saveIn folder: Folder, as name: String, serial: Int, metadataConfig config: some GenCommandCommon.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
 		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(name).json") else { return .failure(.creatingFileFailed) }
 		let attributes = layers.reduce([Metadata.Attribute]()) { accum, layer in
 			accum + config.data

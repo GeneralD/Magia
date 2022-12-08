@@ -62,12 +62,14 @@ public class GenCommand: Command {
 
 	// MARK: - Command Implementations
 	
-	public let name = "summon"
+	public let name: String
 	public let shortDescription = "Generate many NFTs"
 
 	private lazy var nameFactory = TokenFileNameFactory(nameFormat: fileNameFormat, hash: hashFileName)
 
-	public init() {}
+	public init(name: String) {
+		self.name = name
+	}
 
 	public var optionGroups: [OptionGroup] {
 		[.atMostOne($noMetadata, $noImage)]

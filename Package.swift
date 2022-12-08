@@ -27,6 +27,7 @@ let package = Package(
 			name: "Main",
 			dependencies: [
 				"CleanCommand",
+				"EnchantCommand",
 				"GenCommand",
 			]),
 		.target(
@@ -37,6 +38,14 @@ let package = Package(
 				"Files",
 				"HashKit",
 				"SwiftCLI",
+			]),
+		.target(
+			name: "EnchantCommand",
+			dependencies: [
+				"CommandCommon",
+				"Files",
+				"SwiftCLI",
+				"TokenFileNameFactory",
 			]),
 		.target(
 			name: "GenCommand",
@@ -60,6 +69,18 @@ let package = Package(
 				"DefaultCodable",
 				"GenCommandCommon",
 				"Yams",
+			]),
+		.target(
+			name: "CommandCommon",
+			dependencies: [
+				"Files",
+				"SwiftCLI",
+			]),
+		.target(
+			name: "GenCommandCommon",
+			dependencies: [
+				"Files",
+				"SwiftHEXColors",
 			]),
 		.target(
 			name: "ImageFactory",
@@ -99,18 +120,6 @@ let package = Package(
 			name: "TokenFileNameFactory",
 			dependencies: [
 				"SwiftKeccak",
-			]),
-		.target(
-			name: "GenCommandCommon",
-			dependencies: [
-				"Files",
-				"SwiftHEXColors",
-			]),
-		.target(
-			name: "CommandCommon",
-			dependencies: [
-				"Files",
-				"SwiftCLI",
 			]),
 		.testTarget(
 			name: "MainTests",

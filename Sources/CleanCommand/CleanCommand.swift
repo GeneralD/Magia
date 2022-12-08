@@ -6,7 +6,7 @@ import SwiftCLI
 import Foundation
 
 public class CleanCommand: Command {
-	public let name = "clean"
+	public let name: String
 	public let shortDescription = "Clean your assets"
 
 	@Param(completion: .filename)
@@ -15,7 +15,9 @@ public class CleanCommand: Command {
 	@Flag("-x", "execute", description: "Execute cleaning")
 	var executeCleaning: Bool
 
-	public init() {}
+	public init(name: String) {
+		self.name = name
+	}
 
 	public func execute() throws {
 		defer {

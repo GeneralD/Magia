@@ -39,7 +39,12 @@ private extension MetadataFactory {
 		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(name).json") else { return .failure(.creatingFileFailed) }
 		let attributes = layers.reduce([Metadata.Attribute]()) { accum, layer in
 			accum + config.data
-				.filtered(by: layer)
+				.filter { trait in
+					trait.conditions.contains { condition in
+						guard let regex = try? Regex(condition.name) else { return false }
+						return condition.layer == layer.layer && layer.name.contains(regex)
+					}
+				}
 				.flatMap(\.traits)
 				.map { trait in
 					switch trait {

@@ -9,12 +9,13 @@ public struct LayerStrictionRegexFactory {
 		self.layerStrictions = layerStrictions
 	}
 
-	public func validItemNameRegex(forLayer layer: String, conditionLayers: some Sequence<some ImageLayerSubject>) -> Regex<Substring>? {
+	public func validItemNameRegex(forLayer layer: String, conditionLayers: some Sequence<some LayerSubject>) -> Regex<Substring>? {
 		let names = conditionLayers
 		// pick up all related strictions with current layer selections
 			.flatMap { conditionLayer in
 				layerStrictions.filter { combination in
-					combination.target.contains(conditionLayer)
+					guard let regex = try? Regex(combination.target.name) else { return false }
+					return combination.target.layer == conditionLayer.layer && conditionLayer.name.contains(regex)
 				}
 			}
 			.flatMap { $0.dependencies } // keypath \.dependencies triggers a fatal error at runtime by compiler bug

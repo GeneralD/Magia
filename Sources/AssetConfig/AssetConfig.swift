@@ -19,7 +19,7 @@ public protocol Order {
 	var layerDepth: [String]? { get }
 }
 
-public protocol Combination: FilterableByImageLayer {
+public protocol Combination {
 	associatedtype SubjectType: Subject
 
 	var target: SubjectType { get }
@@ -40,7 +40,7 @@ public protocol Probability {
 	var divideByMatches: Bool { get }
 }
 
-public protocol Subject: ImageLayerSubject {
+public protocol Subject {
 	var layer: String { get }
 	var name: String { get }
 }
@@ -67,7 +67,7 @@ public protocol Metadata {
 	var traitOrder: [String] { get }
 }
 
-public protocol TraitData: FilterableByImageLayer {
+public protocol TraitData {
 	associatedtype SubjectType: Subject
 
 	var traits: [Trait] { get }

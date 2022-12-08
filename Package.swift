@@ -63,6 +63,7 @@ let package = Package(
 				"CollectionKit",
 				"Files",
 				"SwiftCLI",
+				"SwiftHEXColors",
 			]),
 		.target(name: "AssetConfig"),
 		.target(
@@ -70,7 +71,6 @@ let package = Package(
 			dependencies: [
 				"AssetConfig",
 				"DefaultCodable",
-				"GenCommandCommon",
 				"Yams",
 			]),
 		.target(
@@ -82,9 +82,7 @@ let package = Package(
 		.target(
 			name: "GenCommandCommon",
 			dependencies: [
-				"AssetConfig", // TODO: remove this dependency
 				"Files",
-				"SwiftHEXColors",
 			]),
 		.target(
 			name: "ImageFactory",

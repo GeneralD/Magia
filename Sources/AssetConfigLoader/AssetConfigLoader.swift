@@ -1,6 +1,6 @@
+import AssetConfig
 import Files
 import Foundation
-import GenCommandCommon
 import Yams
 
 public struct AssetConfigLoader {

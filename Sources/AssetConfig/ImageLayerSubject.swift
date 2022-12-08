@@ -3,8 +3,6 @@ public protocol ImageLayerSubject {
 	var name: String { get }
 }
 
-extension InputData.ImageLayer: ImageLayerSubject {}
-
 public extension ImageLayerSubject {
 	func contains(_ target: ImageLayerSubject) -> Bool {
 		guard let regex = try? Regex(name) else { return false }

@@ -1,5 +1,5 @@
+import AssetConfig
 import Files
-import GenCommandCommon
 
 public struct LayerStrictionRegexFactory {
 
@@ -9,7 +9,7 @@ public struct LayerStrictionRegexFactory {
 		self.layerStrictions = layerStrictions
 	}
 
-	public func validItemNameRegex(forLayer layer: String, conditionLayers: [InputData.ImageLayer<some Location>]) -> Regex<Substring>? {
+	public func validItemNameRegex(forLayer layer: String, conditionLayers: some Sequence<some ImageLayerSubject>) -> Regex<Substring>? {
 		let names = conditionLayers
 		// pick up all related strictions with current layer selections
 			.flatMap { conditionLayer in

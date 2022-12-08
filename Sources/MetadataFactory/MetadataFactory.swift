@@ -4,6 +4,7 @@ import Files
 import Foundation
 import RegexBuilder
 import UniformTypeIdentifiers
+import protocol AssetConfig.Metadata
 
 public struct MetadataFactory {
 
@@ -21,7 +22,7 @@ public extension MetadataFactory {
 	///   - serial: will be file name (without path and extension)
 	/// - Returns: if success
 	@discardableResult
-	func generateMetadata(saveIn folder: Folder, as name: String, serial: Int, metadataConfig config: some GenCommandCommon.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
+	func generateMetadata(saveIn folder: Folder, as name: String, serial: Int, metadataConfig config: some AssetConfig.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
 		switch input.assets {
 		case let .animated(layers, _):
 			return generateMetadata(from: layers, saveIn: folder, as: name, serial: serial, metadataConfig: config, imageFolderName: imageFolderName, imageType: imageType)
@@ -34,7 +35,7 @@ public extension MetadataFactory {
 private extension MetadataFactory {
 
 	@discardableResult
-	func generateMetadata(from layers: some Sequence<InputData.ImageLayer<some Location>>, saveIn folder: Folder, as name: String, serial: Int, metadataConfig config: some GenCommandCommon.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
+	func generateMetadata(from layers: some Sequence<InputData.ImageLayer<some Location>>, saveIn folder: Folder, as name: String, serial: Int, metadataConfig config: some AssetConfig.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
 		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(name).json") else { return .failure(.creatingFileFailed) }
 		let attributes = layers.reduce([Metadata.Attribute]()) { accum, layer in
 			accum + config.data

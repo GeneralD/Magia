@@ -1,4 +1,5 @@
 import AppKit
+import AssetConfig
 import Files
 import SwiftHEXColors
 
@@ -18,7 +19,7 @@ public struct InputData {
 		case still(layers: [ImageLayer<File>])
 	}
 
-	public struct ImageLayer<F: Location> {
+	public struct ImageLayer<F: Location>: ImageLayerSubject {
 		public let imageLocation: F
 		public let layer: String
 		public let name: String

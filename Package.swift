@@ -50,6 +50,7 @@ let package = Package(
 		.target(
 			name: "GenCommand",
 			dependencies: [
+				"AssetConfig",
 				"AssetConfigLoader",
 				"CommandCommon",
 				"GenCommandCommon",
@@ -63,9 +64,11 @@ let package = Package(
 				"Files",
 				"SwiftCLI",
 			]),
+		.target(name: "AssetConfig"),
 		.target(
 			name: "AssetConfigLoader",
 			dependencies: [
+				"AssetConfig",
 				"DefaultCodable",
 				"GenCommandCommon",
 				"Yams",
@@ -79,6 +82,7 @@ let package = Package(
 		.target(
 			name: "GenCommandCommon",
 			dependencies: [
+				"AssetConfig", // TODO: remove this dependency
 				"Files",
 				"SwiftHEXColors",
 			]),
@@ -92,12 +96,13 @@ let package = Package(
 		.target(
 			name: "LayerStrictionRegexFactory",
 			dependencies: [
-				"GenCommandCommon",
+				"AssetConfig",
 				"Files",
 			]),
 		.target(
 			name: "MetadataFactory",
 			dependencies: [
+				"AssetConfig",
 				"GenCommandCommon",
 				"CollectionKit",
 				"Files",
@@ -105,7 +110,7 @@ let package = Package(
 		.target(
 			name: "RandomizationController",
 			dependencies: [
-				"GenCommandCommon",
+				"AssetConfig",
 				"CollectionKit",
 				"Files",
 			]),

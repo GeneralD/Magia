@@ -1,3 +1,4 @@
+import AssetConfig
 import AssetConfigLoader
 import CommandCommon
 import GenCommandCommon

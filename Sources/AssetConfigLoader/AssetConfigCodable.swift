@@ -1,6 +1,6 @@
+import AssetConfig
 import CoreGraphics
 import DefaultCodable
-import GenCommandCommon
 import Foundation
 
 struct AssetConfigCodable: AssetConfig, Codable, Equatable, DefaultValueProvider {

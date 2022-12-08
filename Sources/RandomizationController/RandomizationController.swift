@@ -1,4 +1,4 @@
-import GenCommandCommon
+import AssetConfig
 import Files
 
 public struct RandomizationController {

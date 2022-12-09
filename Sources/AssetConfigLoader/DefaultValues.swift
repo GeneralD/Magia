@@ -1,4 +1,3 @@
-import CoreGraphics
 import DefaultCodable
 import Foundation
 
@@ -24,10 +23,6 @@ enum BlackHexCode: DefaultValueProvider {
 
 enum WhiteHexCode: DefaultValueProvider {
 	public static let `default` = "ffffff"
-}
-
-enum RegexMatchesNothing: DefaultValueProvider {
-	public static let `default` = "^(?!)$"
 }
 
 enum FontMidiumSize: DefaultValueProvider {

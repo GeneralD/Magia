@@ -13,6 +13,7 @@ import CollectionKit
 import Files
 import Foundation
 import SwiftCLI
+import SwiftHEXColors
 import UniformTypeIdentifiers
 
 public class GenCommand: Command {
@@ -142,6 +143,7 @@ private extension GenCommand {
 		defer { stdout <<< "Generating many images took \(Date().timeIntervalSince(startDate)) seconds." }
 
 		let config = loadAssetConfig()
+		let serialText = serialText(from: config.drawSerial)
 		let regexFactory = LayerStrictionRegexFactory(layerStrictions: config.combinations)
 		let randomManager = RandomizationController(config: config.randomization)
 		let layerFolders = sort(subjects: inputFolder.subfolders, where: \.nameExcludingExtension, order: config.order?.selection)
@@ -161,7 +163,6 @@ private extension GenCommand {
 			// arrange layers in the order of depth configured in json
 			let sortedLayers = sort(subjects: layers, where: \.layer, order: config.order?.layerDepth)
 
-			let serialText = InputData.SerialText(from: config.drawSerial, inputFolder: inputFolder)
 			let assets: InputData.Assets
 			switch sortedLayers {
 			case let (folders as [InputData.ImageLayer<Folder>]) as Any:
@@ -184,8 +185,8 @@ private extension GenCommand {
 			let startDate = Date()
 			defer { stdout <<< "Generating an image took \(Date().timeIntervalSince(startDate)) seconds." }
 
-			let reprintData = try recipeStore.storedAssets(for: index, isAnimated: animated, animationDuration: animationDuration, inputFolder: inputFolder)
-				.map { InputData(assets: $0, serialText: .init(from: config.drawSerial, inputFolder: inputFolder), isSampleMode: isSampleMode) }
+			let storedAssets = try recipeStore.storedAssets(for: index, isAnimated: animated, animationDuration: animationDuration, inputFolder: inputFolder)
+			let reprintData = storedAssets.map { InputData(assets: $0, serialText: serialText, isSampleMode: isSampleMode) }
 
 			// use reprint data or create new
 			let input = reprintData ?? (animated ? inputData(locations: \.subfolders) : inputData(locations: \.files))
@@ -273,6 +274,36 @@ private extension GenCommand {
 			return loader.defaultConfig
 		}
 	}
+
+	// MARK: - SerialText from config
+
+	func serialText(from config: some DrawSerial) -> InputData.SerialText? {
+		guard config.enabled, !config.format.isEmpty else { return nil }
+
+		let font = loadFont(fontName: config.font, folder: inputFolder, size: config.size)
+		let color = NSColor(hexString: config.color) ?? .black
+
+		return .init(
+			formatText: .init(string: config.format, attributes: [.font: font, .foregroundColor: color]),
+			transform: .init(translationX: config.offsetX, y: config.offsetY))
+	}
+
+	func loadFont(fontName: String, folder: Folder, size: CGFloat) -> NSFont {
+		// try to find in input folder
+		let fontFile = ["", ".ttf", ".otf"].reduce(nil) { file, suffix in
+			file ?? (try? folder.file(named: fontName + suffix))
+		}
+		let font = fontFile.flatMap { file in
+			guard let url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, file.path as CFString, .cfurlposixPathStyle, false),
+				  let provider = CGDataProvider(url: url),
+				  let font = CGFont(provider) else { return nil }
+			return CTFontCreateWithGraphicsFont(font, size, nil, nil)
+		} as NSFont?
+
+		// or load from system
+		return font ?? NSFont(name: fontName, size: size) ?? .systemFont(ofSize: size)
+	}
+
 
 	// MARK: - Utilities
 

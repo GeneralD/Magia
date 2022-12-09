@@ -33,7 +33,6 @@ public extension MetadataFactory {
 }
 
 private extension MetadataFactory {
-
 	@discardableResult
 	func generateMetadata(from layers: some Sequence<InputData.ImageLayer<some Location>>, saveIn folder: Folder, as name: String, serial: Int, metadataConfig config: some AssetConfig.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
 		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(name).json") else { return .failure(.creatingFileFailed) }
@@ -86,18 +85,7 @@ private extension MetadataFactory {
 
 		let externalURL = config.externalUrlFormat.map { replace(in: $0, attributes: attributes, serial: serial) }.flatMap(URL.init(string: ))
 
-		// background color
-		let backgroundColorRef = Reference(Substring.self)
-		let hexColorRegex = Regex {
-			Optionally("#")
-			Capture(as: backgroundColorRef) {
-				ChoiceOf {
-					Repeat(.hexDigit, count: 3)
-					Repeat(.hexDigit, count: 6)
-				}
-			}
-		}
-		guard let backgroundColor = config.backgroundColor.wholeMatch(of: hexColorRegex)?[backgroundColorRef].description else {
+		guard let backgroundColor = config.backgroundColor.wholeMatch(of: hexColorRegex)?[hexColorRef].description else {
 			try? jsonFile.delete()
 			return .failure(.invalidBackgroundColorCode)
 		}
@@ -123,11 +111,7 @@ private extension MetadataFactory {
 	///   - serial: serial number
 	/// - Returns: result
 	func replace(in format: String, attributes: [Metadata.Attribute], serial: Int) -> String {
-		let text = format.replacing(Regex {
-			"%"
-			ZeroOrMore(.digit)
-			"d"
-		}) { match in
+		let text = format.replacing(integerFormatRegex) { match in
 			String(format: match.output.description, serial)
 		}
 
@@ -160,10 +144,20 @@ private extension MetadataFactory {
 	}
 }
 
-public enum MetadataFactoryError: Error {
-	case creatingFileFailed
-	case imageUrlFormatIsRequired
-	case invalidMetadataSortConfig
-	case invalidBackgroundColorCode
-	case writingFileFailed
+private let hexColorRef = Reference(Substring.self)
+
+private let hexColorRegex = Regex {
+	Optionally("#")
+	Capture(as: hexColorRef) {
+		ChoiceOf {
+			Repeat(.hexDigit, count: 3)
+			Repeat(.hexDigit, count: 6)
+		}
+	}
+}
+
+private let integerFormatRegex = Regex {
+	"%"
+	ZeroOrMore(.digit)
+	"d"
 }

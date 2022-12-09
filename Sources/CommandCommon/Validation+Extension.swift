@@ -14,15 +14,17 @@ public extension Validation where T: Comparable {
 public extension Validation where T: BidirectionalCollection, T.SubSequence == Substring {
 	static func formatInteger(message: String? = nil) -> Validation {
 		.custom(message ?? "must include integer format") {
-			$0.contains(Regex {
-				"%"
-				Optionally(ChoiceOf {
-					"-"
-					"+"
-				})
-				ZeroOrMore(.digit)
-				"d"
-			})
+			$0.contains(integerFormatRegex)
 		}
 	}
+}
+
+private let integerFormatRegex = Regex {
+	"%"
+	Optionally(ChoiceOf {
+		"-"
+		"+"
+	})
+	ZeroOrMore(.digit)
+	"d"
 }

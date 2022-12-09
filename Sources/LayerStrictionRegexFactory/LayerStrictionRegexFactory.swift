@@ -9,8 +9,8 @@ public struct LayerStrictionRegexFactory {
 		self.layerStrictions = layerStrictions
 	}
 
-	public func validItemNameRegex(forLayer layer: String, conditionLayers: some Sequence<some LayerSubject>) -> Regex<Substring>? {
-		let names = conditionLayers
+	public func isValidItem(itemName: String, forLayer layer: String, conditionLayers: some Sequence<some LayerSubject>) -> Bool {
+		conditionLayers
 		// pick up all related strictions with current layer selections
 			.flatMap { conditionLayer in
 				layerStrictions.filter { combination in
@@ -18,10 +18,7 @@ public struct LayerStrictionRegexFactory {
 				}
 			}
 			.flatMap { $0.dependencies } // keypath \.dependencies triggers a fatal error at runtime by compiler bug
-			.filter { dependency in
-				dependency.layer == layer
-			}
-			.map(\.name)
-		return try? Regex(names.map { "(?=\($0))" }.joined())
+			.filter { dependency in dependency.layer == layer }
+			.reduce(true) { accum, dependency in accum && itemName.contains(dependency.name) }
 	}
 }

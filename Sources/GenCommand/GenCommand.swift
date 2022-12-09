@@ -151,10 +151,8 @@ private extension GenCommand {
 		func inputData<F: Location, S: Sequence>(locations: (Folder) -> S) -> InputData where F: Hashable, S.Element == F {
 			let layers = layerFolders
 				.reduce(into: [InputData.ImageLayer<F>]()) { layers, layerFolder in
-					let limitRegex = regexFactory.validItemNameRegex(forLayer: layerFolder.name, conditionLayers: layers)
 					let candidates = locations(layerFolder).filter { f in
-						guard let limitRegex else { return true } // no limitation
-						return f.nameExcludingExtension.contains(limitRegex)
+						regexFactory.isValidItem(itemName: f.nameExcludingExtension, forLayer: layerFolder.name, conditionLayers: layers)
 					}
 					guard let elected = randomManager.elect(from: candidates, targetLayer: layerFolder.name) else { return }
 					layers.append(.init(imageLocation: elected.element, layer: layerFolder.name, name: elected.element.nameExcludingExtension, probability: elected.probability))

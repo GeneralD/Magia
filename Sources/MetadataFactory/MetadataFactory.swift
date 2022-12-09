@@ -41,8 +41,7 @@ private extension MetadataFactory {
 			accum + config.data
 				.filter { trait in
 					trait.conditions.contains { condition in
-						guard let regex = try? Regex(condition.name) else { return false }
-						return condition.layer == layer.layer && layer.name.contains(regex)
+						condition.layer == layer.layer && layer.name.contains(condition.name)
 					}
 				}
 				.flatMap(\.traits)

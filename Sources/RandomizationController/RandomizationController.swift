@@ -20,8 +20,7 @@ public extension RandomizationController {
 			.filter { probability in probability.target.layer == targetLayer }
 			.reduce(into: initDict) { accum, probability in
 				let matches = candidates.filter { candidate in
-					guard let regex = try? Regex(probability.target.name) else { return false }
-					return candidate.nameExcludingExtension.contains(regex)
+					candidate.nameExcludingExtension.contains(probability.target.name)
 				}
 				let weight = probability.divideByMatches
 				? probability.weight / Double(matches.count)

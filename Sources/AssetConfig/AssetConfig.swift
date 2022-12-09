@@ -42,7 +42,7 @@ public protocol Probability {
 
 public protocol Subject {
 	var layer: String { get }
-	var name: String { get }
+	var name: Regex<AnyRegexOutput> { get }
 }
 
 public protocol DrawSerial {

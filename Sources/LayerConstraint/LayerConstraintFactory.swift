@@ -1,7 +1,6 @@
 import AssetConfig
-import Files
 
-public struct LayerStrictionRegexFactory {
+public struct LayerConstraintFactory {
 
 	private let layerStrictions: [any Combination]
 
@@ -9,8 +8,8 @@ public struct LayerStrictionRegexFactory {
 		self.layerStrictions = layerStrictions
 	}
 
-	public func isValidItem(itemName: String, forLayer layer: String, conditionLayers: some Sequence<some LayerSubject>) -> Bool {
-		conditionLayers
+	public func constraint(forLayer layer: String, conditionLayers: some Sequence<some LayerSubject>) -> LayerConstraint {
+		let dependencies = conditionLayers
 		// pick up all related strictions with current layer selections
 			.flatMap { conditionLayer in
 				layerStrictions.filter { combination in
@@ -19,6 +18,6 @@ public struct LayerStrictionRegexFactory {
 			}
 			.flatMap { $0.dependencies } // keypath \.dependencies triggers a fatal error at runtime by compiler bug
 			.filter { dependency in dependency.layer == layer }
-			.reduce(true) { accum, dependency in accum && itemName.contains(dependency.name) }
+		return .init(subjects: dependencies)
 	}
 }

@@ -55,7 +55,7 @@ let package = Package(
 				"CommandCommon",
 				"GenCommandCommon",
 				"ImageFactory",
-				"LayerStrictionRegexFactory",
+				"LayerConstraint",
 				"MetadataFactory",
 				"RandomizationController",
 				"RecipeStore",
@@ -92,10 +92,9 @@ let package = Package(
 				"Files",
 			]),
 		.target(
-			name: "LayerStrictionRegexFactory",
+			name: "LayerConstraint",
 			dependencies: [
 				"AssetConfig",
-				"Files",
 			]),
 		.target(
 			name: "MetadataFactory",

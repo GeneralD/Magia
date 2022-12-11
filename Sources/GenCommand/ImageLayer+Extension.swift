@@ -1,4 +1,4 @@
 import GenCommandCommon
-import LayerStrictionRegexFactory
+import LayerConstraint
 
 extension InputData.ImageLayer: LayerSubject {}

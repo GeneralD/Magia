@@ -3,7 +3,7 @@ import AssetConfigLoader
 import CommandCommon
 import GenCommandCommon
 import ImageFactory
-import LayerStrictionRegexFactory
+import LayerConstraint
 import MetadataFactory
 import RandomizationController
 import RecipeStore
@@ -144,15 +144,16 @@ private extension GenCommand {
 
 		let config = loadAssetConfig()
 		let serialText = serialText(from: config.drawSerial)
-		let regexFactory = LayerStrictionRegexFactory(layerStrictions: config.combinations)
+		let constraintFactory = LayerConstraintFactory(layerStrictions: config.combinations)
 		let randomManager = RandomizationController(config: config.randomization)
 		let layerFolders = sort(subjects: inputFolder.subfolders, where: \.nameExcludingExtension, order: config.order?.selection)
 
 		func inputData<F: Location, S: Sequence>(locations: (Folder) -> S) -> InputData where F: Hashable, S.Element == F {
 			let layers = layerFolders
 				.reduce(into: [InputData.ImageLayer<F>]()) { layers, layerFolder in
+					let constraint = constraintFactory.constraint(forLayer: layerFolder.name, conditionLayers: layers)
 					let candidates = locations(layerFolder).filter { f in
-						regexFactory.isValidItem(itemName: f.nameExcludingExtension, forLayer: layerFolder.name, conditionLayers: layers)
+						constraint.isValidItem(name: f.nameExcludingExtension)
 					}
 					guard let elected = randomManager.elect(from: candidates, targetLayer: layerFolder.name) else { return }
 					layers.append(.init(imageLocation: elected.element, layer: layerFolder.name, name: elected.element.nameExcludingExtension, probability: elected.probability))

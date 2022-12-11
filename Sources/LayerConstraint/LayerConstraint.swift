@@ -8,6 +8,8 @@ public struct LayerConstraint {
 	}
 
 	public func isValidItem(name: String) -> Bool {
-		subjects.reduce(true) { accum, subject in accum && name.contains(subject.name) }
+		subjects.allSatisfy { subject in
+			name.contains(subject.name)
+		}
 	}
 }

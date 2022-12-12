@@ -5,11 +5,11 @@ import Foundation
 struct AssetConfigCodable: AssetConfig, Codable, Equatable, DefaultValueProvider {
 	static let `default`: Self = .init()
 
-	@Default<Nil> var order: OrderCodable?
+	@Default<OrderCodable> var order: OrderCodable
 	@Default<Empty> var combinations: [CombinationCodable]
 	@Default<RandomizationCodable> var randomization: RandomizationCodable
 	@Default<DrawSerialCodable> var drawSerial: DrawSerialCodable
-	@Default<Nil> var metadata: MetadataCodable?
+	@Default<MetadataCodable> var metadata: MetadataCodable
 
 	struct OrderCodable: Order, Codable, Equatable, DefaultValueProvider {
 		static let `default`: Self = .init()

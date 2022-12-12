@@ -7,11 +7,11 @@ public protocol AssetConfig {
 	associatedtype DrawSerialType: DrawSerial
 	associatedtype MetadataType: Metadata
 
-	var order: OrderType? { get }
+	var order: OrderType { get }
 	var combinations: [CombinationType] { get }
 	var randomization: RandomizationType { get }
 	var drawSerial: DrawSerialType { get }
-	var metadata: MetadataType? { get }
+	var metadata: MetadataType { get }
 }
 
 public protocol Order {

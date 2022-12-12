@@ -147,7 +147,7 @@ private extension GenCommand {
 		let serialText = serialText(from: config.drawSerial)
 		let constraintFactory = LayerConstraintFactory(layerStrictions: config.combinations)
 		let randomManager = RandomizationController(config: config.randomization)
-		let layerFolders = sort(subjects: inputFolder.subfolders, where: \.nameExcludingExtension, order: config.order?.selection)
+		let layerFolders = sort(subjects: inputFolder.subfolders, where: \.nameExcludingExtension, order: config.order.selection)
 
 		func inputData<F: Location, S: Sequence>(locations: (Folder) -> S) -> InputData where F: Hashable, S.Element == F {
 			let layers = layerFolders
@@ -161,7 +161,7 @@ private extension GenCommand {
 				}
 
 			// arrange layers in the order of depth configured in json
-			let sortedLayers = sort(subjects: layers, where: \.layer, order: config.order?.layerDepth)
+			let sortedLayers = sort(subjects: layers, where: \.layer, order: config.order.layerDepth)
 
 			let assets: InputData.Assets
 			switch sortedLayers {
@@ -226,8 +226,8 @@ private extension GenCommand {
 	}
 
 	@discardableResult
-	func generateMetadata(input: InputData, index: Int, config: (any Metadata)?) -> Bool {
-		guard !noMetadata, let config else { return true }
+	func generateMetadata(input: InputData, index: Int, config: any Metadata) -> Bool {
+		guard !noMetadata else { return true }
 
 		switch metadataFactory.generateMetadata(from: input.assets.metadataSubject, saveIn: outputFolder, as: nameFactory.fileName(from: index), serial: index, config: config, imageFolderName: imageFolderName, imageType: imageType) {
 		case let .success(file):

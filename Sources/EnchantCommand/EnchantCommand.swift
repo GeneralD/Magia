@@ -120,9 +120,8 @@ private extension EnchantCommand {
 	}
 
 	@discardableResult
-	func generateMetadata(assetFile: File, index: Int, config: (any Metadata)?) -> Bool {
+	func generateMetadata(assetFile: File, index: Int, config: any Metadata) -> Bool {
 		guard !noMetadata,
-			  let config,
 			  let fileType = assetFile.extension.flatMap({ UTType(filenameExtension: $0) })
 		else { return true }
 

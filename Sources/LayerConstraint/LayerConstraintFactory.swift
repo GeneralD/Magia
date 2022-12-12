@@ -8,7 +8,7 @@ public struct LayerConstraintFactory {
 		self.layerStrictions = layerStrictions
 	}
 
-	public func constraint(forLayer layer: String, conditionLayers: some Sequence<some LayerSubject>) -> LayerConstraint {
+	public func constraint(forLayer layer: String, conditionLayers: some Sequence<LayerConstraintSubject>) -> LayerConstraint {
 		let dependencies = conditionLayers
 		// pick up all related strictions with current layer selections
 			.flatMap { conditionLayer in

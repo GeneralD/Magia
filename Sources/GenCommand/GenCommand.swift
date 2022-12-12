@@ -68,6 +68,7 @@ public class GenCommand: Command {
 	public let shortDescription = "Generate many NFTs"
 
 	private lazy var nameFactory = TokenFileNameFactory(nameFormat: fileNameFormat, hash: hashFileName)
+	private let metadataFactory = MetadataFactory()
 
 	public init(name: String) {
 		self.name = name
@@ -151,7 +152,7 @@ private extension GenCommand {
 		func inputData<F: Location, S: Sequence>(locations: (Folder) -> S) -> InputData where F: Hashable, S.Element == F {
 			let layers = layerFolders
 				.reduce(into: [InputData.ImageLayer<F>]()) { layers, layerFolder in
-					let constraint = constraintFactory.constraint(forLayer: layerFolder.name, conditionLayers: layers)
+					let constraint = constraintFactory.constraint(forLayer: layerFolder.name, conditionLayers: layers.map(\.layerConstraintSubject))
 					let candidates = locations(layerFolder).filter { f in
 						constraint.isValidItem(name: f.nameExcludingExtension)
 					}
@@ -227,8 +228,8 @@ private extension GenCommand {
 	@discardableResult
 	func generateMetadata(input: InputData, index: Int, config: (any Metadata)?) -> Bool {
 		guard !noMetadata, let config else { return true }
-		let metadataFactory = MetadataFactory(input: input)
-		switch metadataFactory.generateMetadata(saveIn: outputFolder, as: nameFactory.fileName(from: index), serial: index, metadataConfig: config, imageFolderName: imageFolderName, imageType: imageType) {
+
+		switch metadataFactory.generateMetadata(from: input.assets.metadataLayerSubjects, saveIn: outputFolder, as: nameFactory.fileName(from: index), serial: index, metadataConfig: config, imageFolderName: imageFolderName, imageType: imageType) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
 			return true

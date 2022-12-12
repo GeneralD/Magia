@@ -100,7 +100,6 @@ let package = Package(
 			name: "MetadataFactory",
 			dependencies: [
 				"AssetConfig",
-				"GenCommandCommon",
 				"CollectionKit",
 				"Files",
 			]),

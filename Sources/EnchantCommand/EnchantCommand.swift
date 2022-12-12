@@ -94,16 +94,19 @@ private extension EnchantCommand {
 		defer { stdout <<< "Generating items took \(Date().timeIntervalSince(startDate)) seconds." }
 
 		let config = loadAssetConfig()
+
+		let temporaryFolder = try inputFolder.createSubfolder(named: "__Temporary__")
+		defer { try? temporaryFolder.delete() }
 		
 		return inputFolder.files.recursive
 			.filter { file in file.nameExcludingExtension != "config" }
-			.sorted(at: \.name, by: >)
+			.sorted(at: \.name, by: <)
 			.zip(startIndex...)
-			.map { file, index in generateImage(assetFile: file, index: index) && generateMetadata(assetFile: file, index: index, config: config.metadata) }
+			.map { file, index in generateImage(assetFile: file, index: index, temporaryFolder: temporaryFolder) && generateMetadata(assetFile: file, index: index, config: config.metadata) }
 	}
 
 	@discardableResult
-	func generateImage(assetFile: File, index: Int) -> Bool {
+	func generateImage(assetFile: File, index: Int, temporaryFolder: Folder) -> Bool {
 		guard !noImage else { return true }
 		guard let imageFolder = try? outputFolder.createSubfolderIfNeeded(withName: imageFolderName) else {
 			stderr <<< "Couldn't create root folder to store images"
@@ -111,9 +114,9 @@ private extension EnchantCommand {
 		}
 
 		do {
-			try assetFile
-				.copy(to: imageFolder)
-				.rename(to: nameFactory.fileName(from: index))
+			let copied = try assetFile.copy(to: temporaryFolder)
+			try copied.rename(to: nameFactory.fileName(from: index))
+			try copied.move(to: imageFolder)
 			return true
 		} catch {
 			return false

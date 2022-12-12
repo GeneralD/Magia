@@ -1,6 +1,7 @@
 import AppKit
 import AssetConfig
 import AssetConfigLoader
+import CollectionKit
 import CommandCommon
 import Files
 import MetadataFactory
@@ -94,13 +95,11 @@ private extension EnchantCommand {
 
 		let config = loadAssetConfig()
 		
-		let assetFiles = inputFolder.files.recursive.filter { file in
-			file.nameExcludingExtension != "config"
-		}
-
-		return zip(assetFiles, startIndex...).map { file, index in
-			return generateImage(assetFile: file, index: index) && generateMetadata(assetFile: file, index: index, config: config.metadata)
-		}
+		return inputFolder.files.recursive
+			.filter { file in file.nameExcludingExtension != "config" }
+			.sorted(at: \.name, by: >)
+			.zip(startIndex...)
+			.map { file, index in generateImage(assetFile: file, index: index) && generateMetadata(assetFile: file, index: index, config: config.metadata) }
 	}
 
 	@discardableResult
@@ -112,7 +111,9 @@ private extension EnchantCommand {
 		}
 
 		do {
-			try assetFile.copy(to: imageFolder)
+			try assetFile
+				.copy(to: imageFolder)
+				.rename(to: nameFactory.fileName(from: index))
 			return true
 		} catch {
 			return false

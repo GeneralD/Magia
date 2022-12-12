@@ -33,8 +33,8 @@ let package = Package(
 		.target(
 			name: "CleanCommand",
 			dependencies: [
-				"CommandCommon",
 				"CollectionKit",
+				"CommandCommon",
 				"Files",
 				"HashKit",
 				"SwiftCLI",
@@ -44,6 +44,7 @@ let package = Package(
 			dependencies: [
 				"AssetConfig",
 				"AssetConfigLoader",
+				"CollectionKit",
 				"CommandCommon",
 				"Files",
 				"MetadataFactory",
@@ -55,18 +56,18 @@ let package = Package(
 			dependencies: [
 				"AssetConfig",
 				"AssetConfigLoader",
+				"CollectionKit",
 				"CommandCommon",
+				"Files",
 				"GenCommandCommon",
 				"ImageFactory",
 				"LayerConstraint",
 				"MetadataFactory",
 				"RandomizationController",
 				"RecipeStore",
-				"TokenFileNameFactory",
-				"CollectionKit",
-				"Files",
 				"SwiftCLI",
 				"SwiftHEXColors",
+				"TokenFileNameFactory",
 			]),
 		.target(name: "AssetConfig"),
 		.target(

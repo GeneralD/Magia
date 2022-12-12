@@ -42,8 +42,11 @@ let package = Package(
 		.target(
 			name: "EnchantCommand",
 			dependencies: [
+				"AssetConfig",
+				"AssetConfigLoader",
 				"CommandCommon",
 				"Files",
+				"MetadataFactory",
 				"SwiftCLI",
 				"TokenFileNameFactory",
 			]),

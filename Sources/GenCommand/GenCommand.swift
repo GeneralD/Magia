@@ -229,7 +229,7 @@ private extension GenCommand {
 	func generateMetadata(input: InputData, index: Int, config: (any Metadata)?) -> Bool {
 		guard !noMetadata, let config else { return true }
 
-		switch metadataFactory.generateMetadata(from: input.assets.metadataLayerSubjects, saveIn: outputFolder, as: nameFactory.fileName(from: index), serial: index, metadataConfig: config, imageFolderName: imageFolderName, imageType: imageType) {
+		switch metadataFactory.generateMetadata(from: input.assets.metadataSubject, saveIn: outputFolder, as: nameFactory.fileName(from: index), serial: index, config: config, imageFolderName: imageFolderName, imageType: imageType) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
 			return true

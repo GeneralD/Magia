@@ -2,12 +2,12 @@ import GenCommandCommon
 import MetadataFactory
 
 extension InputData.Assets {
-	var metadataLayerSubjects: [MetadataLayerSubject] {
+	var metadataSubject: MetadataSubject {
 		switch self {
 		case let .animated(layers, _):
-			return layers.map(\.metadataLayerSubject)
+			return .generativeAssets(layers: layers.map(\.metadataLayerSubject))
 		case let .still(layers):
-			return layers.map(\.metadataLayerSubject)
+			return .generativeAssets(layers: layers.map(\.metadataLayerSubject))
 		}
 	}
 }

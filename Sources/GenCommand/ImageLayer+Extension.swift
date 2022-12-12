@@ -7,7 +7,7 @@ extension InputData.ImageLayer {
 		.init(layer: layer, name: name)
 	}
 
-	var metadataLayerSubject: MetadataLayerSubject {
+	var metadataLayerSubject: MetadataSubject.LayerSubject {
 		.init(layer: layer, name: name, probability: probability)
 	}
 }

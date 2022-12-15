@@ -36,8 +36,11 @@ struct AssetConfigCodable: AssetConfig, Codable, Equatable, DefaultValueProvider
 	}
 
 	struct SubjectCodable: Subject, Codable, Equatable {
+		/// default: empty
 		let layer: String
+		/// default: #/^(?!)$/#
 		let name: Regex<AnyRegexOutput>
+		/// to just keep original string to compare 2 objects
 		private let nameExpression: String
 
 		enum CodingKeys: CodingKey {
@@ -52,7 +55,7 @@ struct AssetConfigCodable: AssetConfig, Codable, Equatable, DefaultValueProvider
 
 		init(from decoder: Decoder) throws {
 			let container = try decoder.container(keyedBy: CodingKeys.self)
-			layer = try container.decode(String.self, forKey: .layer)
+			layer = try container.decodeIfPresent(String.self, forKey: .layer) ?? ""
 			nameExpression = try container.decodeIfPresent(String.self, forKey: .name) ?? "^(?!)$"
 			name = try Regex(nameExpression)
 		}

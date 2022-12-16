@@ -126,6 +126,7 @@ private extension EnchantCommand {
 		}
 
 		do {
+			// copy to temporary folder instead of destination folder directly to avoid name confliction
 			let copied = try assetFile.copy(to: temporaryFolder)
 			try copied.rename(to: nameFactory.fileName(from: index))
 			try copied.move(to: imageFolder)

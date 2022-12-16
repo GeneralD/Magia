@@ -49,6 +49,7 @@ let package = Package(
 				"Files",
 				"MetadataFactory",
 				"SwiftCLI",
+				"SingleAssetSequence",
 				"TokenFileNameFactory",
 			]),
 		.target(
@@ -125,6 +126,13 @@ let package = Package(
 			name: "TokenFileNameFactory",
 			dependencies: [
 				"SwiftKeccak",
+			]),
+		.target(
+			name: "SingleAssetSequence",
+			dependencies: [
+				"AssetConfig",
+				"CollectionKit",
+				"Files",
 			]),
 		.testTarget(
 			name: "MainTests",

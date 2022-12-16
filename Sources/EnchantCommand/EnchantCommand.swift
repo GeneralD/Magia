@@ -5,6 +5,7 @@ import CollectionKit
 import CommandCommon
 import Files
 import MetadataFactory
+import SingleAssetSequence
 import SwiftCLI
 import TokenFileNameFactory
 import UniformTypeIdentifiers
@@ -29,6 +30,9 @@ public class EnchantCommand: Command {
 	@Flag("-k", "--hashed-name", description: "Use hashed file names (keccak256)")
 	var hashFileName: Bool
 
+	@Key("-q", "--quantity", description: "Number of creation", completion: .none, validation: [.greaterThan(0)])
+	var creationCount: Int?
+
 	@Key("-s", "--start-index", description: "Auto incremented index start from what? (default is 1)", completion: .none, validation: [.greaterThanOrEqual(0)])
 	var startIndex: Int!
 
@@ -43,6 +47,10 @@ public class EnchantCommand: Command {
 
 	public init(name: String) {
 		self.name = name
+	}
+
+	public var options: [OptionGroup] {
+		[.atMostOne($noMetadata, $noImage)]
 	}
 
 	public func execute() throws {
@@ -97,12 +105,18 @@ private extension EnchantCommand {
 
 		let temporaryFolder = try inputFolder.createSubfolder(named: "__Temporary__")
 		defer { try? temporaryFolder.delete() }
-		
-		return inputFolder.files.recursive
-			.filter { file in file.nameExcludingExtension != "config" }
-			.sorted(at: \.name, by: <)
-			.zip(startIndex...)
-			.map { file, index in generateImage(assetFile: file, index: index, temporaryFolder: temporaryFolder) && generateMetadata(assetFile: file, index: index, config: config.metadata) }
+
+		let assetSequence = try assetSequence(election: config.singleAsset)
+
+		return assetSequence
+			.elements
+			.array
+			.enumerated()
+			.map { offset, file in
+				let index = startIndex + offset
+				return generateImage(assetFile: file, index: index, temporaryFolder: temporaryFolder)
+				&& generateMetadata(assetFile: file, index: index, config: config.metadata)
+			}
 	}
 
 	@discardableResult
@@ -147,6 +161,24 @@ private extension EnchantCommand {
 				stderr <<< "Writing metadata failed."
 			}
 			return false
+		}
+	}
+
+	func assetSequence(election: SingleAssetElection) throws -> SingleAssetSequence {
+		let assetFiles = inputFolder.files.recursive
+			.filter { file in file.nameExcludingExtension != "config" }
+		do {
+			return try SingleAssetSequence(assetFiles: assetFiles, election: election, quantity: creationCount)
+		} catch {
+			switch error {
+			case SingleAssetSequenceError.tooMuchQuantitySpecified:
+				stderr <<< "Quantity must be less than or equal to number of assets if alphabetical or duplicatableShuffle is selected."
+			case SingleAssetSequenceError.quantityMustBeSpecified:
+				stderr <<< "Quantity must be specified if duplicatableShuffle is selected."
+			default:
+				stderr <<< error.localizedDescription
+			}
+			throw error
 		}
 	}
 

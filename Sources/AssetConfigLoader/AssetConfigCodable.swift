@@ -10,6 +10,7 @@ struct AssetConfigCodable: AssetConfig, Codable, Equatable, DefaultValueProvider
 	@Default<RandomizationCodable> var randomization: RandomizationCodable
 	@Default<DrawSerialCodable> var drawSerial: DrawSerialCodable
 	@Default<MetadataCodable> var metadata: MetadataCodable
+	@Default<SingleAssetElection> var singleAsset: SingleAssetElection
 
 	struct OrderCodable: Order, Codable, Equatable, DefaultValueProvider {
 		static let `default`: Self = .init()

@@ -49,6 +49,7 @@ let package = Package(
 				"Files",
 				"MetadataFactory",
 				"SwiftCLI",
+				"SingleAssetElectionStore",
 				"SingleAssetSequence",
 				"TokenFileNameFactory",
 			]),
@@ -126,6 +127,12 @@ let package = Package(
 			name: "TokenFileNameFactory",
 			dependencies: [
 				"SwiftKeccak",
+			]),
+		.target(
+			name: "SingleAssetElectionStore",
+			dependencies: [
+				"Files",
+				.product(name: "GRDB", package: "GRDB.swift"),
 			]),
 		.target(
 			name: "SingleAssetSequence",

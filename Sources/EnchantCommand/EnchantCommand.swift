@@ -5,6 +5,7 @@ import CollectionKit
 import CommandCommon
 import Files
 import MetadataFactory
+import SingleAssetElectionStore
 import SingleAssetSequence
 import SwiftCLI
 import TokenFileNameFactory
@@ -35,6 +36,9 @@ public class EnchantCommand: Command {
 
 	@Key("-s", "--start-index", description: "Auto incremented index start from what? (default is 1)", completion: .none, validation: [.greaterThanOrEqual(0)])
 	var startIndex: Int!
+
+	@Key("-r", "--reprint", description: "Pickup assets based on data.sqlite file", completion: .filename)
+	var sqliteFile: File?
 
 	@Flag("--without-metadata", description: "Not to generate metadata")
 	var noMetadata: Bool
@@ -108,10 +112,17 @@ private extension EnchantCommand {
 
 		let assetSequence = try assetSequence(election: config.singleAsset)
 
+		let store = try SingleAssetElectionStore(inputDatabaseFile: sqliteFile, outputDatabaseFolder: outputFolder)
+		defer { try? store.close() }
+
 		return assetSequence
 			.enumerated()
 			.map { offset, file in
 				let index = startIndex + offset
+				return (index, store[index, inputFolder] ?? file)
+			}
+			.map { index, file in
+				store[index, inputFolder] = file
 				return generateImage(assetFile: file, index: index, temporaryFolder: temporaryFolder)
 				&& generateMetadata(assetFile: file, index: index, config: config.metadata)
 			}

@@ -109,8 +109,6 @@ private extension EnchantCommand {
 		let assetSequence = try assetSequence(election: config.singleAsset)
 
 		return assetSequence
-			.elements
-			.array
 			.enumerated()
 			.map { offset, file in
 				let index = startIndex + offset

@@ -3,7 +3,7 @@ import CollectionKit
 import Files
 
 public struct SingleAssetSequence {
-	public let elements: any Sequence<File>
+	private let elements: [File]
 
 	public init(assetFiles: [File], election: SingleAssetElection, quantity: Int? = nil) throws {
 		switch election {
@@ -16,7 +16,7 @@ public struct SingleAssetSequence {
 			guard quantity <= sorted.count else {
 				throw SingleAssetSequenceError.tooMuchQuantitySpecified
 			}
-			self.elements = sorted.prefix(quantity)
+			self.elements = sorted.prefix(quantity).array
 		case .shuffle(.duplicatable):
 			guard let quantity else {
 				throw SingleAssetSequenceError.quantityMustBeSpecified
@@ -31,7 +31,25 @@ public struct SingleAssetSequence {
 			guard quantity <= shuffled.count else {
 				throw SingleAssetSequenceError.tooMuchQuantitySpecified
 			}
-			self.elements = shuffled.prefix(quantity)
+			self.elements = shuffled.prefix(quantity).array
 		}
+	}
+}
+
+extension SingleAssetSequence: Collection {
+	public func index(after i: Int) -> Int {
+		elements.index(after: i)
+	}
+
+	public var startIndex: Int {
+		elements.startIndex
+	}
+
+	public var endIndex: Int {
+		elements.endIndex
+	}
+
+	public subscript(position: Int) -> File {
+		elements[position]
 	}
 }

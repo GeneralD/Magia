@@ -106,12 +106,7 @@ private extension EnchantCommand {
 		defer { stdout <<< "Generating items took \(Date().timeIntervalSince(startDate)) seconds." }
 
 		let config = loadAssetConfig()
-
-		let temporaryFolder = try inputFolder.createSubfolder(named: "__Temporary__")
-		defer { try? temporaryFolder.delete() }
-
 		let assetSequence = try assetSequence(election: config.singleAsset)
-
 		let store = try SingleAssetElectionStore(inputDatabaseFile: sqliteFile, outputDatabaseFolder: outputFolder)
 		defer { try? store.close() }
 
@@ -123,35 +118,33 @@ private extension EnchantCommand {
 			}
 			.map { index, file in
 				store[index, inputFolder] = file
-				return generateImage(assetFile: file, index: index, temporaryFolder: temporaryFolder)
+				return generateImage(assetFile: file, index: index)
 				&& generateMetadata(assetFile: file, index: index, config: config.metadata)
 			}
 	}
 
 	@discardableResult
-	func generateImage(assetFile: File, index: Int, temporaryFolder: Folder) -> Bool {
+	func generateImage(assetFile: File, index: Int) -> Bool {
 		guard !noImage else { return true }
 		guard let imageFolder = try? outputFolder.createSubfolderIfNeeded(withName: imageFolderName) else {
 			stderr <<< "Couldn't create root folder to store images"
 			return false
 		}
 
-		do {
-			// copy to temporary folder instead of destination folder directly to avoid name confliction
-			let copied = try assetFile.copy(to: temporaryFolder)
-			try copied.rename(to: nameFactory.fileName(from: index))
-			try copied.move(to: imageFolder)
-			return true
-		} catch {
-			return false
-		}
+		guard let originalExtension = assetFile.extension,
+			  let fileType = UTType(filenameExtension: originalExtension),
+			  let preferredExtension = fileType.preferredFilenameExtension else { return false }
+
+		let fileName = "\(nameFactory.fileName(from: index)).\(preferredExtension)"
+		guard let _ = try? imageFolder.createFile(named: fileName, contents: assetFile.read()) else { return false }
+		return true
 	}
 
 	@discardableResult
 	func generateMetadata(assetFile: File, index: Int, config: any Metadata) -> Bool {
-		guard !noMetadata,
-			  let fileType = assetFile.extension.flatMap({ UTType(filenameExtension: $0) })
-		else { return true }
+		guard !noMetadata else { return true }
+		guard let fileExtension = assetFile.extension,
+			  let fileType = UTType(filenameExtension: fileExtension) else { return false }
 
 		switch metadataFactory.generateMetadata(from: .completedAsset(name: assetFile.nameExcludingExtension), saveIn: outputFolder, as: nameFactory.fileName(from: index), serial: index, config: config, imageFolderName: imageFolderName, imageType: fileType) {
 		case let .success(file):

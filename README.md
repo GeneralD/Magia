@@ -181,12 +181,20 @@ magia summon [アセットフォルダ] -o [出力先]
 magia summon [アセットフォルダ] -o [出力先] -k --name-format "Magia%d"
 ```
 
-として生成したファイル名を `solidity` 側で適切な `tokenURI` を組み立てるコード。
+とすると生成されるファイル名は暗号化され、サーバーに配置した際のURLの先読みを困難にさせる。
+
+例えば、上の例ならトークンIDが1のとき、 `Magia1` を `keccak256` で暗号化した名前を用いる。この例ならメタデータのファイル名は `738261d87963911ed66c49e58b809371981909ffd660146be8a5576daedc7d91.json` となる。合わせて画像のファイル名も決定される。
+
+
+
+生成したファイル名を `solidity` 側で適切な `tokenURI` を組み立てるコード。
+
+（`ERC721` を例にしているので `ERC1155` や `Upgradeable` に対応している場合は適切にアレンジすること。）
 
 ```solidity
-using StringsUpgradeable for uint256;
+using Strings for uint256;
 
-string private _keccakPrefix = "Magia";
+string private _keccakPrefix;
 
 function setKeccakPrefix(string memory prefix) external onlyOwner {
     _keccakPrefix = prefix;
@@ -201,7 +209,12 @@ function tokenURI(uint256 tokenId)
     returns (string memory)
 {
     bytes32 keccak = keccak256(abi.encodePacked(_keccakPrefix, tokenId.toString()));
-    return _toLower(string(abi.encodePacked(_baseURI(), _toHex(keccak), ".json")));
+    return string(abi.encodePacked(_baseURI(), _toLower(_toHex(keccak)), ".json"));
+}
+
+modifier checkTokenIdExists(uint256 tokenId) {
+    require(_exists(tokenId), "tokenId not exist");
+    _;
 }
 
 function _toHex(bytes32 data) private pure returns (string memory) {
@@ -243,6 +256,61 @@ function _toLower(string memory str) private pure returns (string memory) {
 ```
 
 `_keccakPrefix` を `private` にすることで、ファイル名を少しでも予測しにくくしている。
+
+ファイル名は予測しにくいが、トークンごとに1つずつコントラクトに記憶させる方式ではないので、ガス代が嵩むこともなく `ERC721A` や `ERC721AUpgradeable` などとも相性が良い。
+
+
+
+上記の例の場合、 `setKeccakPrefix("Magia")` を呼び出すことで設定すれば良いが、Etherscanなどでトランザクションを見れば `_keccakPrefix` の値を調べることはできてしまう。しかし、その値を踏まえた上で最終的に決定される `tokenURI` を導き出せるユーザーは一般的には多くないはず。
+
+
+
+#### ERC721Aとの両立
+
+`ERC721A` では `baseURI` と `tokenId` を単純に連結したものを `tokenURI` として返却するのがデフォルト実装になっているが、実装をoverrideすれば良い。連番をもとに暗号化された `tokenURI` を生成するので `ERC721A` と合わせると、コストパフォーマンスと先読み防止を両立できる。
+
+
+
+#### 発展的な使い方
+
+以下はReveal（リビール）を扱う場合のコード。
+
+```solidity
+bool public isRevealed;
+
+event Revealed(bool state);
+
+function setIsRevealed(bool state) external onlyOwner {
+    isRevealed = state;
+    emit Revealed(state);
+}
+
+function tokenURI(uint256 tokenId)
+    public
+    view
+    virtual
+    override
+    checkTokenIdExists(tokenId)
+    returns (string memory)
+{
+    return isRevealed ? _tokenURIAfterReveal(tokenId) : _tokenURIBeforeReveal();
+}
+
+function _tokenURIAfterReveal(uint256 tokenId) private view returns (string memory) {
+    bytes32 keccak = keccak256(abi.encodePacked(_keccakPrefix, tokenId.toString()));
+    return string(abi.encodePacked(_baseURI(), _toLower(_toHex(keccak)), ".json"));
+}
+
+function _tokenURIBeforeReveal() private view returns (string memory) {
+    return string(abi.encodePacked(_baseURI(), "seed.json"));
+}
+```
+
+リビール前は同一の `tokenURI` を全てのトークンIDに対して返却する。
+
+リビール後は暗号化された `tokenURI` をそれぞれ返却する。
+
+このケースなら、ミントが完了するまで `setKeccakPrefix` を実行しなければ、サーバーにファイルの配置が完了していても先読みした上でミントされるようなことは絶対にない。（`_keccakPrefix` に渡す値が人為的に流出していなければ）
 
 
 

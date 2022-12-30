@@ -1,4 +1,4 @@
 public enum AITraitListing: Equatable, Codable {
-	case allow(list: [String])
-	case block(list: [String])
+	case allow(spells: [String])
+	case block(spells: [String])
 }

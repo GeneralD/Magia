@@ -98,36 +98,36 @@ struct AssetConfigCodable: AssetConfig, Codable, Equatable, DefaultValueProvider
 		struct AITraitDataCodable: AITraitData, Codable, Equatable, DefaultValueProvider {
 			static let `default`: Self = .init()
 
-			@Default<Empty> var conversions: [AITraitTagConversionCodable]
+			@Default<Empty> var conversions: [AITraitSpellConversionCodable]
 			@Default<AITraitListing> var listing: AITraitListing
 
-			struct AITraitTagConversionCodable: AITraitTagConversion, Codable, Equatable {
+			struct AITraitSpellConversionCodable: AITraitSpellConversion, Codable, Equatable {
 				/// default: empty
 				let traits: [Trait]
 				/// default: #/^(?!)$/#
-				let tag: Regex<AnyRegexOutput>
+				let spell: Regex<AnyRegexOutput>
 				/// to just keep original string to compare 2 objects
-				private let tagExpression: String
+				private let spellExpression: String
 
 				enum CodingKeys: CodingKey {
-					case traits, tag
+					case traits, spell
 				}
 
 				func encode(to encoder: Encoder) throws {
 					var container = encoder.container(keyedBy: CodingKeys.self)
 					try container.encode(traits, forKey: .traits)
-					try container.encode(tagExpression, forKey: .tag)
+					try container.encode(spellExpression, forKey: .spell)
 				}
 
 				init(from decoder: Decoder) throws {
 					let container = try decoder.container(keyedBy: CodingKeys.self)
 					traits = try container.decodeIfPresent([Trait].self, forKey: .traits) ?? []
-					tagExpression = try container.decodeIfPresent(String.self, forKey: .tag) ?? "^(?!)$"
-					tag = try Regex(tagExpression)
+					spellExpression = try container.decodeIfPresent(String.self, forKey: .spell) ?? "^(?!)$"
+					spell = try Regex(spellExpression)
 				}
 
 				static func == (lhs: Self, rhs: Self) -> Bool {
-					lhs.tagExpression == rhs.tagExpression && lhs.traits == rhs.traits
+					lhs.spellExpression == rhs.spellExpression && lhs.traits == rhs.traits
 				}
 			}
 		}

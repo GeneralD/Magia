@@ -146,7 +146,15 @@ private extension EnchantCommand {
 		guard let fileExtension = assetFile.extension,
 			  let fileType = UTType(filenameExtension: fileExtension) else { return false }
 
-		switch metadataFactory.generateMetadata(from: .completedAsset(name: assetFile.nameExcludingExtension), saveIn: outputFolder, as: nameFactory.fileName(from: index), serial: index, config: config, imageFolderName: imageFolderName, imageType: fileType) {
+		let result = metadataFactory.generateMetadata(
+			from: .completedAsset(name: assetFile.nameExcludingExtension),
+			saveIn: outputFolder,
+			as: nameFactory.fileName(from: index),
+			serial: index,
+			config: config,
+			imageFolderName: imageFolderName,
+			imageType: fileType)
+		switch result {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
 			return true

@@ -46,6 +46,7 @@ let package = Package(
 				"AssetConfigLoader",
 				"CollectionKit",
 				"CommandCommon",
+				"ExifReader",
 				"Files",
 				"MetadataFactory",
 				"SwiftCLI",

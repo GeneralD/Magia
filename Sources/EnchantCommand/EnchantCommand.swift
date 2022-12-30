@@ -3,6 +3,7 @@ import AssetConfig
 import AssetConfigLoader
 import CollectionKit
 import CommandCommon
+import ExifReader
 import Files
 import MetadataFactory
 import SingleAssetElectionStore
@@ -145,6 +146,9 @@ private extension EnchantCommand {
 		guard !noMetadata else { return true }
 		guard let fileExtension = assetFile.extension,
 			  let fileType = UTType(filenameExtension: fileExtension) else { return false }
+
+		let exifReader = ExifReader(fileURL: assetFile.url)
+		print(exifReader.spells)
 
 		let result = metadataFactory.generateMetadata(
 			from: .completedAsset(name: assetFile.nameExcludingExtension),

@@ -11,16 +11,10 @@ public struct ExifReader {
 public extension ExifReader {
 	var spells: [Spell] {
 		let exifData = exif
-		let softwareName = exifData["Software"] as? String
+		guard let softwareName = exifData(key: kCGImagePropertyPNGSoftware),
+			  let description = exifData(key: kCGImagePropertyPNGDescription) else { return [] }
 		switch softwareName {
-		case "NovelAI":
-			guard let description = exifData["Description"] as? String else { return [] }
-			return description
-				.split(separator: ",")
-				.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-				.map(spell)
-		case "stability.ai":
-			guard let description = exifData["Image Description"] as? String else { return [] }
+		case "NovelAI", "stability.ai":
 			return description
 				.split(separator: ",")
 				.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }

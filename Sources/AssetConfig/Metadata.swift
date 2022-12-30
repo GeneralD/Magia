@@ -9,9 +9,10 @@ public protocol Metadata {
 	var descriptionFormat: String { get }
 	var externalUrlFormat: String? { get }
 	var backgroundColor: String { get }
-	var data: [TraitDataType] { get }
+	var traitData: [TraitDataType] { get }
 	var traitOrder: [String] { get }
 
 	// refered in enchant command
-	var aiData: [AITraitDataType] { get }
+	var aiTraitData: [AITraitDataType] { get }
+	var aiTraitListing: AITraitListing { get }
 }

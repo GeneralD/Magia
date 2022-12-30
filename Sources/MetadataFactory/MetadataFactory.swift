@@ -66,7 +66,7 @@ private extension MetadataFactory {
 
 	func attributes(layers: some Sequence<MetadataSubject.LayerSubject>, config: some AssetConfig.Metadata) -> [Metadata.Attribute] {
 		return layers.reduce([Metadata.Attribute]()) { accum, layer in
-			accum + config.data
+			accum + config.traitData
 				.filter { trait in
 					trait.conditions.contains { condition in
 						condition.layer == layer.layer && layer.name.contains(condition.name)
@@ -101,7 +101,7 @@ private extension MetadataFactory {
 	}
 
 	func attributes(assetName: String, config: some AssetConfig.Metadata) -> [Metadata.Attribute] {
-		config.data
+		config.traitData
 			.filter { trait in
 				trait.conditions.contains { condition in
 					assetName.contains(condition.name)

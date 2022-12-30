@@ -143,8 +143,5 @@ let package = Package(
 				"CollectionKit",
 				"Files",
 			]),
-		.testTarget(
-			name: "MainTests",
-			dependencies: ["Main"]),
 	]
 )

@@ -86,49 +86,43 @@ struct AssetConfigCodable: AssetConfig, Codable, Equatable, DefaultValueProvider
 		@Default<Empty> var descriptionFormat: String
 		@Default<Nil> var externalUrlFormat: String?
 		@Default<WhiteHexCode> var backgroundColor: String
-		@Default<Empty> var data: [TraitDataCodable]
+		@Default<Empty> var traitData: [TraitDataCodable]
 		@Default<Empty> var traitOrder: [String]
-		@Default<Empty> var aiData: [AITraitDataCodable]
+		@Default<Empty> var aiTraitData: [AITraitDataCodable]
+		@Default<AITraitListing> var aiTraitListing: AITraitListing
 
 		struct TraitDataCodable: TraitData, Codable, Equatable {
 			let traits: [Trait]
 			let conditions: [SubjectCodable]
 		}
 
-		struct AITraitDataCodable: AITraitData, Codable, Equatable, DefaultValueProvider {
-			static let `default`: Self = .init()
+		struct AITraitDataCodable: AITraitData, Codable, Equatable {
+			/// default: empty
+			let traits: [Trait]
+			/// default: #/^(?!)$/#
+			let spell: Regex<AnyRegexOutput>
+			/// to just keep original string to compare 2 objects
+			private let spellExpression: String
 
-			@Default<Empty> var conversions: [AITraitSpellConversionCodable]
-			@Default<AITraitListing> var listing: AITraitListing
+			enum CodingKeys: CodingKey {
+				case traits, spell
+			}
 
-			struct AITraitSpellConversionCodable: AITraitSpellConversion, Codable, Equatable {
-				/// default: empty
-				let traits: [Trait]
-				/// default: #/^(?!)$/#
-				let spell: Regex<AnyRegexOutput>
-				/// to just keep original string to compare 2 objects
-				private let spellExpression: String
+			func encode(to encoder: Encoder) throws {
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encode(traits, forKey: .traits)
+				try container.encode(spellExpression, forKey: .spell)
+			}
 
-				enum CodingKeys: CodingKey {
-					case traits, spell
-				}
+			init(from decoder: Decoder) throws {
+				let container = try decoder.container(keyedBy: CodingKeys.self)
+				traits = try container.decodeIfPresent([Trait].self, forKey: .traits) ?? []
+				spellExpression = try container.decodeIfPresent(String.self, forKey: .spell) ?? "^(?!)$"
+				spell = try Regex(spellExpression)
+			}
 
-				func encode(to encoder: Encoder) throws {
-					var container = encoder.container(keyedBy: CodingKeys.self)
-					try container.encode(traits, forKey: .traits)
-					try container.encode(spellExpression, forKey: .spell)
-				}
-
-				init(from decoder: Decoder) throws {
-					let container = try decoder.container(keyedBy: CodingKeys.self)
-					traits = try container.decodeIfPresent([Trait].self, forKey: .traits) ?? []
-					spellExpression = try container.decodeIfPresent(String.self, forKey: .spell) ?? "^(?!)$"
-					spell = try Regex(spellExpression)
-				}
-
-				static func == (lhs: Self, rhs: Self) -> Bool {
-					lhs.spellExpression == rhs.spellExpression && lhs.traits == rhs.traits
-				}
+			static func == (lhs: Self, rhs: Self) -> Bool {
+				lhs.spellExpression == rhs.spellExpression && lhs.traits == rhs.traits
 			}
 		}
 	}

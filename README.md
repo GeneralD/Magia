@@ -545,7 +545,7 @@ metadata:
   - Fortune
   - Intelligence
   - Talent
-  data:
+  traitData:
   - conditions:
     - layer: 02_body
       name: "^(?=.*_cat_).*$"
@@ -584,7 +584,7 @@ metadata:
     - コントラクトで `baseURI` を扱っている場合はそれを指定する。
   - `traitOrder` はメタデータの `traits` 配列内の並び順を指定する。
     - 指定しなくても構わないが、指定する場合は網羅されていなければエラーとなる。
-  - `data`
+  - `traitData`
     - `conditions` はトレートを付与したい対象を定義する。
       - `layer` はトレートを付与する条件判定を行うレイヤーを指定する。
       - `name` は正規表現でパーツ名を表現し、マッチすれば条件に適合したとみなす。

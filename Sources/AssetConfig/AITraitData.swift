@@ -1,5 +1,4 @@
 public protocol AITraitData {
-	associatedtype AITraitSpellConversionType: AITraitSpellConversion
-	var conversions: [AITraitSpellConversionType] { get }
-	var listing: AITraitListing { get }
+	var spell: Regex<AnyRegexOutput> { get }
+	var traits: [Trait] { get }
 }

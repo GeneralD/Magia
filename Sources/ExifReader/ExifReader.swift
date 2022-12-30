@@ -18,6 +18,7 @@ public extension ExifReader {
 			return description
 				.split(separator: ",")
 				.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+				.filter { !$0.isEmpty }
 				.map(Spell.from)
 		default:
 			return []

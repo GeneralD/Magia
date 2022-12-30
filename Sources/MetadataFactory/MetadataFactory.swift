@@ -4,6 +4,7 @@ import Foundation
 import RegexBuilder
 import UniformTypeIdentifiers
 import protocol AssetConfig.Metadata
+import enum AssetConfig.Trait
 
 public struct MetadataFactory {
 	let outputFolder: Folder
@@ -19,7 +20,13 @@ public extension MetadataFactory {
 	@discardableResult
 	func generateMetadata(from subject: MetadataSubject, as name: String, serial: Int, config: some AssetConfig.Metadata, imageType: UTType) -> Result<File, MetadataFactoryError> {
 		guard let jsonFile = try? outputFolder.createFileIfNeeded(withName: "\(name).json") else { return .failure(.creatingFileFailed) }
+
 		let attributes = attributes(subject: subject, config: config)
+			.unique(where: \.identity) { lhs, rhs in
+				// if 2 or more rankedNumbers with same traitType, integrate the value by +
+				guard case let (.rankedNumber(_, lhsValue), .rankedNumber(rhsType, rhsValue)) = (lhs, rhs) else { return rhs }
+				return .rankedNumber(traitType: rhsType, value: lhsValue + rhsValue)
+			}
 
 		// sort attributes
 		guard let sortedAttribute = sort(attributes: attributes, traitOrder: config.traitOrder) else {
@@ -59,8 +66,9 @@ private extension MetadataFactory {
 		switch subject {
 		case let .generativeAssets(layers):
 			return attributes(layers: layers, config: config)
-		case let .completedAsset(name):
-			return attributes(assetName: name, config: config)
+		case let .completedAsset(name, spells):
+			// merge attributes come from asset's name and AI spells
+			return attributes(assetName: name, config: config) + attributes(spells: spells, config: config)
 		}
 	}
 
@@ -73,30 +81,7 @@ private extension MetadataFactory {
 					}
 				}
 				.flatMap(\.traits)
-				.map { trait in
-					switch trait {
-					case let .simple(value):
-						return .simple(value: value)
-					case let .label(trait, .string(value)):
-						return .textLabel(traitType: trait, value: value)
-					case let .label(trait, value: .date(value)):
-						return .dateLabel(traitType: trait, value: value)
-					case let .label(trait, value: .number(value)):
-						return .numberLabel(traitType: trait, value: value)
-					case let .rankedNumber(trait, value):
-						return .rankedNumber(traitType: trait, value: value)
-					case let .boostNumber(trait, value, max):
-						return .boostNumber(traitType: trait, value: value, maxValue: max)
-					case let .boostPercentage(trait, value):
-						return .boostPercentage(traitType: trait, value: value)
-					case let .rarityPercentage(trait):
-						return  .boostPercentage(traitType: trait, value: .init(layer.probability * 100, digitsAfterPoint: 2))
-					}
-				}
-		}.unique(where: \.identity) { attr0, attr1 in
-			// if 2 or more rankedNumbers with same traitType, integrate the value by +
-			guard case let (.rankedNumber(_, value0), .rankedNumber(type1, value1)) = (attr0, attr1) else { return attr1 }
-			return .rankedNumber(traitType: type1, value: value0 + value1)
+				.compactMap { $0.metadata(probability: layer.probability) }
 		}
 	}
 
@@ -108,27 +93,27 @@ private extension MetadataFactory {
 				}
 			}
 			.flatMap(\.traits)
-			.compactMap { trait in
-				switch trait {
-				case let .simple(value):
-					return .simple(value: value)
-				case let .label(trait, .string(value)):
-					return .textLabel(traitType: trait, value: value)
-				case let .label(trait, value: .date(value)):
-					return .dateLabel(traitType: trait, value: value)
-				case let .label(trait, value: .number(value)):
-					return .numberLabel(traitType: trait, value: value)
-				case let .rankedNumber(trait, value):
-					return .rankedNumber(traitType: trait, value: value)
-				case let .boostNumber(trait, value, max):
-					return .boostNumber(traitType: trait, value: value, maxValue: max)
-				case let .boostPercentage(trait, value):
-					return .boostPercentage(traitType: trait, value: value)
-				case .rarityPercentage(_):
-					// not supported
-					return nil
+			.compactMap(\.metadata)
+	}
+
+	func attributes(spells: some Sequence<String>, config: some AssetConfig.Metadata) -> [Metadata.Attribute] {
+		let filteredSpells: [String]
+		switch config.aiTraitListing {
+		case .allow(let list):
+			filteredSpells = Set(spells).intersection(list).array
+		case .block(let list):
+			filteredSpells = Set(spells).subtracting(list).array
+		}
+
+		let traits = filteredSpells
+			.flatMap { spell -> [AssetConfig.Trait] in
+				let matched = config.aiTraitData.filter { data in spell.contains(data.spell) }
+				guard !matched.isEmpty else {
+					return [.simple(value: spell)]
 				}
+				return matched.flatMap(\.traits)
 			}
+		return traits.compactMap(\.metadata)
 	}
 
 	/// Replace trait placeholder with value of the trait.
@@ -166,8 +151,8 @@ private extension MetadataFactory {
 		}
 	}
 
-	func sort(attributes: [Metadata.Attribute], traitOrder: [String]?) -> [Metadata.Attribute]? {
-		guard let traitOrder else { return attributes.sorted(at: { $0.traitType ?? "" }, by: <) } // just sort alphabetically
+	func sort(attributes: [Metadata.Attribute], traitOrder: [String]) -> [Metadata.Attribute]? {
+		guard !traitOrder.isEmpty else { return attributes.sorted(at: { $0.traitType ?? "" }, by: <) } // just sort alphabetically
 		guard let sorted = attributes.sort(where: \.identity, orderSample: traitOrder, shouldCover: true) else { return nil } // fail
 		return sorted // ok
 	}
@@ -189,4 +174,32 @@ private let integerFormatRegex = Regex {
 	"%"
 	ZeroOrMore(.digit)
 	"d"
+}
+
+private extension AssetConfig.Trait {
+	var metadata: Metadata.Attribute? {
+		metadata()
+	}
+
+	func metadata(probability: Double? = nil) -> Metadata.Attribute? {
+		switch self {
+		case let .simple(value):
+			return .simple(value: value)
+		case let .label(trait, .string(value)):
+			return .textLabel(traitType: trait, value: value)
+		case let .label(trait, value: .date(value)):
+			return .dateLabel(traitType: trait, value: value)
+		case let .label(trait, value: .number(value)):
+			return .numberLabel(traitType: trait, value: value)
+		case let .rankedNumber(trait, value):
+			return .rankedNumber(traitType: trait, value: value)
+		case let .boostNumber(trait, value, max):
+			return .boostNumber(traitType: trait, value: value, maxValue: max)
+		case let .boostPercentage(trait, value):
+			return .boostPercentage(traitType: trait, value: value)
+		case let .rarityPercentage(trait):
+			guard let probability else { return nil }
+			return  .boostPercentage(traitType: trait, value: .init(probability * 100, digitsAfterPoint: 2))
+		}
+	}
 }

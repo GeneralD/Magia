@@ -1,5 +1,5 @@
 public enum MetadataSubject {
-	case completedAsset(name: String)
+	case completedAsset(name: String, spells: any Sequence<String>)
 	case generativeAssets(layers: any Sequence<LayerSubject>)
 
 	public struct LayerSubject {

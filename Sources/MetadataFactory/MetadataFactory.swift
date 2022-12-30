@@ -6,13 +6,19 @@ import UniformTypeIdentifiers
 import protocol AssetConfig.Metadata
 
 public struct MetadataFactory {
-	public init() {}
+	let outputFolder: Folder
+	let imageFolderName: String
+
+	public init(outputFolder: Folder, imageFolderName: String) {
+		self.outputFolder = outputFolder
+		self.imageFolderName = imageFolderName
+	}
 }
 
 public extension MetadataFactory {
 	@discardableResult
-	func generateMetadata(from subject: MetadataSubject, saveIn folder: Folder, as name: String, serial: Int, config: some AssetConfig.Metadata, imageFolderName: String, imageType: UTType) -> Result<File, MetadataFactoryError> {
-		guard let jsonFile = try? folder.createFileIfNeeded(withName: "\(name).json") else { return .failure(.creatingFileFailed) }
+	func generateMetadata(from subject: MetadataSubject, as name: String, serial: Int, config: some AssetConfig.Metadata, imageType: UTType) -> Result<File, MetadataFactoryError> {
+		guard let jsonFile = try? outputFolder.createFileIfNeeded(withName: "\(name).json") else { return .failure(.creatingFileFailed) }
 		let attributes = attributes(subject: subject, config: config)
 
 		// sort attributes

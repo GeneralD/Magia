@@ -48,7 +48,7 @@ public class EnchantCommand: Command {
 	var noImage: Bool
 
 	private lazy var nameFactory = TokenFileNameFactory(nameFormat: fileNameFormat, hash: hashFileName)
-	private let metadataFactory = MetadataFactory()
+	private lazy var metadataFactory = MetadataFactory(outputFolder: outputFolder, imageFolderName: imageFolderName)
 
 	public init(name: String) {
 		self.name = name
@@ -150,15 +150,7 @@ private extension EnchantCommand {
 		let exifReader = ExifReader(fileURL: assetFile.url)
 		print(exifReader.spells)
 
-		let result = metadataFactory.generateMetadata(
-			from: .completedAsset(name: assetFile.nameExcludingExtension),
-			saveIn: outputFolder,
-			as: nameFactory.fileName(from: index),
-			serial: index,
-			config: config,
-			imageFolderName: imageFolderName,
-			imageType: fileType)
-		switch result {
+		switch metadataFactory.generateMetadata(from: .completedAsset(name: assetFile.nameExcludingExtension), as: nameFactory.fileName(from: index), serial: index, config: config, imageType: fileType) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
 			return true

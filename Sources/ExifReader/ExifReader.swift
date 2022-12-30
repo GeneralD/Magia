@@ -11,14 +11,23 @@ public struct ExifReader {
 public extension ExifReader {
 	var spells: [Spell] {
 		let exifData = exif
-		if exifData["Software"] as? String == "NovelAI" {
+		let softwareName = exifData["Software"] as? String
+		switch softwareName {
+		case "NovelAI":
 			guard let description = exifData["Description"] as? String else { return [] }
 			return description
 				.split(separator: ",")
 				.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
 				.map(spell)
+		case "stability.ai":
+			guard let description = exifData["Image Description"] as? String else { return [] }
+			return description
+				.split(separator: ",")
+				.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+				.map(spell)
+		default:
+			return []
 		}
-		return []
 	}
 }
 
@@ -33,19 +42,27 @@ private extension ExifReader {
 private let inBracesRegex = #/^\{(?<match>.+)\}$/#
 private let inBracketsRegex = #/^\[(?<match>.+)\]$/#
 private let inParenthesesRegex = #/^\((?<match>.+)\)$/#
+private let cleanerRegex = #/^[\{\[\(]*(?<match>.+?)[\}\]\)]*$/#
 
 private func spell(_ str: String) -> Spell {
 	func reduce(_ base: Spell) -> Spell {
-		if let match = try? inBracesRegex.wholeMatch(in: base.text)?.output.match.description {
-			return reduce(.init(text: match, strength: base.strength * 1.05))
+		// peel off braces
+		if let match = try? inBracesRegex.wholeMatch(in: base.phrase)?.output.match.description {
+			return reduce(.init(phrase: match, enhanced: base.enhanced + 1))
 		}
-		if let match = try? inBracketsRegex.wholeMatch(in: base.text)?.output.match.description {
-			return reduce(.init(text: match, strength: base.strength / 1.05))
+		// peel off brackets
+		if let match = try? inBracketsRegex.wholeMatch(in: base.phrase)?.output.match.description {
+			return reduce(.init(phrase: match, enhanced: base.enhanced - 1))
 		}
-		if let match = try? inParenthesesRegex.wholeMatch(in: base.text)?.output.match.description {
-			return reduce(.init(text: match, strength: base.strength))
+		// peel off parentheses
+		if let match = try? inParenthesesRegex.wholeMatch(in: base.phrase)?.output.match.description {
+			return reduce(.init(phrase: match, enhanced: base.enhanced + 1))
+		}
+		// clean parentheses of one half
+		if let match = try? cleanerRegex.wholeMatch(in: base.phrase)?.output.match.description {
+			return .init(phrase: match, enhanced: base.enhanced)
 		}
 		return base
 	}
-	return reduce(.init(text: str, strength: 1))
+	return reduce(.init(phrase: str, enhanced: .zero))
 }

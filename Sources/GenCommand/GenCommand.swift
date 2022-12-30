@@ -68,7 +68,7 @@ public class GenCommand: Command {
 	public let shortDescription = "Generate many NFTs"
 
 	private lazy var nameFactory = TokenFileNameFactory(nameFormat: fileNameFormat, hash: hashFileName)
-	private let metadataFactory = MetadataFactory()
+	private lazy var metadataFactory = MetadataFactory(outputFolder: outputFolder, imageFolderName: imageFolderName)
 
 	public init(name: String) {
 		self.name = name
@@ -229,7 +229,7 @@ private extension GenCommand {
 	func generateMetadata(input: InputData, index: Int, config: any Metadata) -> Bool {
 		guard !noMetadata else { return true }
 
-		switch metadataFactory.generateMetadata(from: input.assets.metadataSubject, saveIn: outputFolder, as: nameFactory.fileName(from: index), serial: index, config: config, imageFolderName: imageFolderName, imageType: imageType) {
+		switch metadataFactory.generateMetadata(from: input.assets.metadataSubject, as: nameFactory.fileName(from: index), serial: index, config: config, imageType: imageType) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
 			return true

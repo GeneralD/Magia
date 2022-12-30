@@ -1,9 +1,9 @@
 public struct Spell {
-	public let text: String
-	public let strength: Double
+	public let phrase: String
+	public let enhanced: Int
 
-	init(text: String, strength: Double) {
-		self.text = text
-		self.strength = strength
+	init(phrase: String, enhanced: Int) {
+		self.phrase = phrase
+		self.enhanced = enhanced
 	}
 }

@@ -85,6 +85,7 @@ let package = Package(
 				"Files",
 				"SwiftCLI",
 			]),
+		.target(name: "ExifReader"),
 		.target(
 			name: "GenCommandCommon",
 			dependencies: [

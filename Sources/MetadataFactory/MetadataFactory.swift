@@ -109,7 +109,7 @@ private extension MetadataFactory {
 			.flatMap { spell -> [AssetConfig.Trait] in
 				let matched = config.aiTraitData.filter { data in spell.contains(data.spell) }
 				guard !matched.isEmpty else {
-					return [.simple(value: spell)]
+					return [.simple(value: spell.capitalized)]
 				}
 				return matched.flatMap(\.traits)
 			}

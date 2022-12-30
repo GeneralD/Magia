@@ -88,11 +88,48 @@ struct AssetConfigCodable: AssetConfig, Codable, Equatable, DefaultValueProvider
 		@Default<WhiteHexCode> var backgroundColor: String
 		@Default<Empty> var data: [TraitDataCodable]
 		@Default<Empty> var traitOrder: [String]
+		@Default<Empty> var aiData: [AITraitDataCodable]
 
 		struct TraitDataCodable: TraitData, Codable, Equatable {
 			let traits: [Trait]
 			let conditions: [SubjectCodable]
 		}
+
+		struct AITraitDataCodable: AITraitData, Codable, Equatable, DefaultValueProvider {
+			static let `default`: Self = .init()
+
+			@Default<Empty> var conversions: [AITraitTagConversionCodable]
+			@Default<AITraitListing> var listing: AITraitListing
+
+			struct AITraitTagConversionCodable: AITraitTagConversion, Codable, Equatable {
+				/// default: empty
+				let traits: [Trait]
+				/// default: #/^(?!)$/#
+				let tag: Regex<AnyRegexOutput>
+				/// to just keep original string to compare 2 objects
+				private let tagExpression: String
+
+				enum CodingKeys: CodingKey {
+					case traits, tag
+				}
+
+				func encode(to encoder: Encoder) throws {
+					var container = encoder.container(keyedBy: CodingKeys.self)
+					try container.encode(traits, forKey: .traits)
+					try container.encode(tagExpression, forKey: .tag)
+				}
+
+				init(from decoder: Decoder) throws {
+					let container = try decoder.container(keyedBy: CodingKeys.self)
+					traits = try container.decodeIfPresent([Trait].self, forKey: .traits) ?? []
+					tagExpression = try container.decodeIfPresent(String.self, forKey: .tag) ?? "^(?!)$"
+					tag = try Regex(tagExpression)
+				}
+
+				static func == (lhs: Self, rhs: Self) -> Bool {
+					lhs.tagExpression == rhs.tagExpression && lhs.traits == rhs.traits
+				}
+			}
+		}
 	}
 }
-

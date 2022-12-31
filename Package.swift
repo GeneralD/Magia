@@ -27,6 +27,7 @@ let package = Package(
 			name: "Main",
 			dependencies: [
 				"CleanCommand",
+				"CompletionCommand",
 				"EnchantCommand",
 				"GenCommand",
 			]),
@@ -37,6 +38,11 @@ let package = Package(
 				"CommandCommon",
 				"Files",
 				"HashKit",
+				"SwiftCLI",
+			]),
+		.target(
+			name: "CompletionCommand",
+			dependencies: [
 				"SwiftCLI",
 			]),
 		.target(

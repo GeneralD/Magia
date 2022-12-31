@@ -1,14 +1,16 @@
 import CleanCommand
+import CompletionCommand
 import EnchantCommand
 import GenCommand
 import SwiftCLI
 
-CLI(
-	name: "magia",
-	version: "1.0.0",
-	description: "Ultimate NFT generator",
-	commands: [
-		GenCommand(name: "summon"),
-		EnchantCommand(name: "enchant"),
-		CleanCommand(name: "clean"),
-	]).go()
+let cli = CLI(name: "magia", version: "1.0.4", description: "Ultimate NFT generator")
+
+cli.commands = [
+	GenCommand(name: "summon"),
+	EnchantCommand(name: "enchant"),
+	CleanCommand(name: "clean"),
+	CompletionCommand(name: "completions", cli: cli)
+]
+
+cli.go()

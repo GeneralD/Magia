@@ -97,12 +97,12 @@ private extension MetadataFactory {
 	}
 
 	func attributes(spells: some Sequence<String>, config: some AssetConfig.Metadata) -> [Metadata.Attribute] {
-		let filteredSpells: [String]
-		switch config.aiTraitListing {
-		case .allow(let list):
-			filteredSpells = Set(spells).intersection(list).array
-		case .block(let list):
-			filteredSpells = Set(spells).subtracting(list).array
+		let filteredSpells = spells.filter { spell in
+			let isAllowlist = config.aiTraitListing.intent == .allowlist
+			let isSpellListed = config.aiTraitListing.list.contains { regex in
+				spell.contains(regex)
+			}
+			return isAllowlist == isSpellListed
 		}
 
 		let traits = filteredSpells

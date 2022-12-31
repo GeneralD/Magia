@@ -1,4 +1,4 @@
-public enum AITraitListing: Equatable {
-	case allow(spells: [String])
-	case block(spells: [String])
+public protocol AITraitListing {
+	var intent: AITraitListingIntent { get }
+	var list: [Regex<AnyRegexOutput>] { get }
 }

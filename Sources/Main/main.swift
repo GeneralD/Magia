@@ -1,6 +1,7 @@
 import CleanCommand
 import CompletionCommand
 import EnchantCommand
+import Foundation
 import GenCommand
 import SwiftCLI
 
@@ -13,4 +14,4 @@ cli.commands = [
 	CompletionCommand(name: "completions", cli: cli)
 ]
 
-cli.go()
+exit(cli.go())

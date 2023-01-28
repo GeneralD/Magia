@@ -48,7 +48,7 @@ public extension MetadataFactory {
 			return .failure(.invalidBackgroundColorCode)
 		}
 
-		let metadata = Metadata(image: imageURL, externalURL: externalURL, description: description, name: name, attributes: sortedAttribute, backgroundColor: backgroundColor)
+		let metadata = Metadata(imageURL: imageURL, externalURL: externalURL, description: description, name: name, attributes: sortedAttribute, backgroundColor: backgroundColor)
 
 		let encoder = JSONEncoder()
 		encoder.outputFormatting = .prettyPrinted

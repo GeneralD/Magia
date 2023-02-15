@@ -209,7 +209,7 @@ function tokenURI(uint256 tokenId)
     returns (string memory)
 {
     bytes32 keccak = keccak256(abi.encodePacked(_keccakPrefix, tokenId.toString()));
-    return string(abi.encodePacked(_baseURI(), _toLower(_toHex(keccak)), ".json"));
+    return string(abi.encodePacked(_baseURI(), _toHexString(keccak), ".json"));
 }
 
 modifier checkTokenIdExists(uint256 tokenId) {
@@ -217,41 +217,13 @@ modifier checkTokenIdExists(uint256 tokenId) {
     _;
 }
 
-function _toHex(bytes32 data) private pure returns (string memory) {
-    return string(abi.encodePacked(_toHex16(bytes16(data)), _toHex16(bytes16(data << 128))));
-}
-
-function _toHex16(bytes16 data) private pure returns (bytes32 result) {
-    result =
-        (bytes32(data) & 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000) |
-        ((bytes32(data) & 0x0000000000000000FFFFFFFFFFFFFFFF00000000000000000000000000000000) >> 64);
-    result =
-        (result & 0xFFFFFFFF000000000000000000000000FFFFFFFF000000000000000000000000) |
-        ((result & 0x00000000FFFFFFFF000000000000000000000000FFFFFFFF0000000000000000) >> 32);
-    result =
-        (result & 0xFFFF000000000000FFFF000000000000FFFF000000000000FFFF000000000000) |
-        ((result & 0x0000FFFF000000000000FFFF000000000000FFFF000000000000FFFF00000000) >> 16);
-    result =
-        (result & 0xFF000000FF000000FF000000FF000000FF000000FF000000FF000000FF000000) |
-        ((result & 0x00FF000000FF000000FF000000FF000000FF000000FF000000FF000000FF0000) >> 8);
-    result =
-        ((result & 0xF000F000F000F000F000F000F000F000F000F000F000F000F000F000F000F000) >> 4) |
-        ((result & 0x0F000F000F000F000F000F000F000F000F000F000F000F000F000F000F000F00) >> 8);
-    result = bytes32(
-        0x3030303030303030303030303030303030303030303030303030303030303030 +
-            uint256(result) +
-            (((uint256(result) + 0x0606060606060606060606060606060606060606060606060606060606060606) >> 4) &
-                0x0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F) *
-            7
-    );
-}
-
-function _toLower(string memory str) private pure returns (string memory) {
-    bytes memory b = bytes(str);
-    bytes memory l = new bytes(b.length);
-    for (uint256 i = 0; i < b.length; i++)
-        l[i] = (uint8(b[i]) >= 65) && (uint8(b[i]) <= 90) ? bytes1(uint8(b[i]) + 32) : b[i];
-    return string(l);
+function _toHexString(bytes32 data) private pure returns (string memory) {
+    uint256 k = uint256(data);
+    bytes16 symbols = "0123456789abcdef";
+    uint256 length = data.length * 2;
+    bytes memory result = new bytes(length);
+    for (uint256 i = 1; i <= length; i++ + (k >>= 4)) result[length - i] = symbols[k & 0xf];
+    return string(result);
 }
 ```
 
@@ -585,10 +557,10 @@ metadata:
   - `traitOrder` はメタデータの `traits` 配列内の並び順を指定する。
     - 指定しなくても構わないが、指定する場合は網羅されていなければエラーとなる。
   - `traitData`
+    - バージョン1.0.3以前は `data` とする。
     - `conditions` はトレートを付与したい対象を定義する。
       - `layer` はトレートを付与する条件判定を行うレイヤーを指定する。
       - `name` は正規表現でパーツ名を表現し、マッチすれば条件に適合したとみなす。
-      - バージョン1.0.3以前は `data` とする。
     - `traits` は付与するトレートを配列で列挙する。
       - 基本的にトレートは `trait` をキーとし `value` を値とするキーバリューペア。
       - `type` にトレートのタイプを以下のいずれかから指定する。

@@ -18,7 +18,7 @@ public struct MetadataFactory {
 
 public extension MetadataFactory {
 	@discardableResult
-	func generateMetadata(from subject: MetadataSubject, as name: String, serial: Int, config: some AssetConfig.Metadata, imageType: UTType) -> Result<File, MetadataFactoryError> {
+	func generateMetadata(from subject: MetadataSubject, as name: String, serial: Int, config: some AssetConfig.Metadata, imageType: UTType, embededImage: Data? = nil) -> Result<File, MetadataFactoryError> {
 		guard let jsonFile = try? outputFolder.createFileIfNeeded(withName: "\(name).json") else { return .failure(.creatingFileFailed) }
 
 		let attributes = attributes(subject: subject, config: config)
@@ -34,9 +34,8 @@ public extension MetadataFactory {
 			return .failure(.invalidMetadataSortConfig)
 		}
 
-		let imageURL = config.baseUrl
-			.appendingPathComponent(imageFolderName)
-			.appendingPathComponent(name, conformingTo: imageType)
+		let imageURLType = embededImage.map(ImageURLType.dataURL(data: )) ?? .locationURL(baseURL: config.baseUrl, name: name)
+		let imageURL = imageURL(urlType: imageURLType, imageType: imageType)
 
 		let name = replace(in: config.nameFormat, attributes: attributes, serial: serial)
 		let description = replace(in: config.descriptionFormat, attributes: attributes, serial: serial)
@@ -62,6 +61,17 @@ public extension MetadataFactory {
 }
 
 private extension MetadataFactory {
+	func imageURL(urlType: ImageURLType, imageType: UTType) -> URL {
+		switch urlType {
+			case let .locationURL(baseURL, name):
+				return baseURL
+					.appendingPathComponent(imageFolderName)
+					.appendingPathComponent(name, conformingTo: imageType)
+			case let .dataURL(data):
+				return URL(string: "data:image/\(imageType.preferredFilenameExtension ?? "");base64,\(data.base64EncodedString())") ?? .init(fileURLWithPath: "")
+		}
+	}
+
 	func attributes(subject: MetadataSubject, config: some AssetConfig.Metadata) -> [Metadata.Attribute] {
 		switch subject {
 		case let .generativeAssets(layers):
@@ -156,6 +166,11 @@ private extension MetadataFactory {
 		guard let sorted = attributes.sort(where: \.identity, orderSample: traitOrder, shouldCover: true) else { return nil } // fail
 		return sorted // ok
 	}
+}
+
+private enum ImageURLType {
+	case locationURL(baseURL: URL, name: String)
+	case dataURL(data: Data)
 }
 
 private let hexColorRef = Reference(Substring.self)

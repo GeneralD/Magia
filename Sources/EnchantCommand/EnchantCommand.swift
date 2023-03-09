@@ -158,8 +158,6 @@ private extension EnchantCommand {
 			switch error {
 			case .creatingFileFailed:
 				stderr <<< "Couldn't create file to write metadata."
-			case .imageUrlFormatIsRequired:
-				stderr <<< "imageUrlFormat is required field in JSON."
 			case .invalidMetadataSortConfig:
 				stderr <<< "Sorting metadata config should cover all trait you defined."
 			case .invalidBackgroundColorCode:

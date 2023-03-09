@@ -50,6 +50,9 @@ public class GenCommand: Command {
 	@Key("-t", "--type", description: "Type to generate image (default is gif)", completion: .values([(name: "gif", description: ""), (name: "png", description: "")]), validation: [.custom("unsupported image type") { $0 == .gif || $0 == .png }])
 	var imageType: UTType!
 
+	@Flag("-e", "--embedded", description: "Embed encoded image in metadata")
+	var embedDecodedImageInMetadata: Bool
+
 	@Flag("-f", "--overwrite", description: "Overwrite existing files")
 	var forceOverwrite: Bool
 
@@ -75,7 +78,11 @@ public class GenCommand: Command {
 	}
 
 	public var optionGroups: [OptionGroup] {
-		[.atMostOne($noMetadata, $noImage)]
+		[
+			// if both noMetadata and noImage are true, nothing happens.
+			// embedDecodedImageInMetadata needs to make source image files, so noImage is unavailable.
+			.atMostOne($noMetadata, $noImage, $embedDecodedImageInMetadata),
+		]
 	}
 
 	public func execute() throws {
@@ -193,23 +200,47 @@ private extension GenCommand {
 
 			try recipeStore.storeAssets(for: index, source: input, inputFolder: inputFolder)
 
+			// apply some arguments
+			func generateMetadata(embededImage data: Data? = nil) -> Bool {
+				switch self.generateMetadata(input: input, index: index, config: config.metadata, embededImage: data) {
+					case .nothing, .success:
+						return true
+					case .failure:
+						return false
+				}
+			}
+
 			// generate image and metadata
-			return generateImage(input: input, index: index) && generateMetadata(input: input, index: index, config: config.metadata)
+			switch generateImage(input: input, index: index) {
+				case .nothing:
+					return generateMetadata()
+				case let .success(file):
+					let data: Data? = embedDecodedImageInMetadata ? try? file.read() : nil
+					return generateMetadata(embededImage: data)
+				case .failure:
+					return false
+			}
 		}
 	}
 
+	enum GenResult {
+		case nothing
+		case success(file: File)
+		case failure
+	}
+
 	@discardableResult
-	func generateImage(input: InputData, index: Int) -> Bool {
-		guard !noImage else { return true }
+	func generateImage(input: InputData, index: Int) -> GenResult {
+		guard !noImage else { return .nothing }
 		guard let imageFolder = try? outputFolder.createSubfolderIfNeeded(withName: imageFolderName) else {
 			stderr <<< "Couldn't create root folder to store images"
-			return false
+			return .failure
 		}
 		let imageFactory = ImageFactory(input: input)
 		switch imageFactory.generateImage(saveIn: imageFolder, as: nameFactory.fileName(from: index), serial: index, imageType: imageType) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
-			return true
+				return .success(file: file)
 		case let .failure(error):
 			switch error {
 			case .noImage:
@@ -221,24 +252,22 @@ private extension GenCommand {
 			case .finalizeImageFailed:
 				stderr <<< "Couldn't finalize an image."
 			}
-			return false
+				return .failure
 		}
 	}
 
 	@discardableResult
-	func generateMetadata(input: InputData, index: Int, config: any Metadata) -> Bool {
-		guard !noMetadata else { return true }
+	func generateMetadata(input: InputData, index: Int, config: any Metadata, embededImage: Data? = nil) -> GenResult {
+		guard !noMetadata else { return .nothing }
 
-		switch metadataFactory.generateMetadata(from: input.assets.metadataSubject, as: nameFactory.fileName(from: index), serial: index, config: config, imageType: imageType) {
+		switch metadataFactory.generateMetadata(from: input.assets.metadataSubject, as: nameFactory.fileName(from: index), serial: index, config: config, imageType: imageType, embededImage: embededImage) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
-			return true
+				return .success(file: file)
 		case let .failure(error):
 			switch error {
 			case .creatingFileFailed:
 				stderr <<< "Couldn't create file to write metadata."
-			case .imageUrlFormatIsRequired:
-				stderr <<< "imageUrlFormat is required field in JSON."
 			case .invalidMetadataSortConfig:
 				stderr <<< "Sorting metadata config should cover all trait you defined."
 			case .invalidBackgroundColorCode:
@@ -246,7 +275,7 @@ private extension GenCommand {
 			case .writingFileFailed:
 				stderr <<< "Writing metadata failed."
 			}
-			return false
+				return .failure
 		}
 	}
 

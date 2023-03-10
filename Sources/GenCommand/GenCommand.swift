@@ -172,12 +172,12 @@ private extension GenCommand {
 
 			let assets: InputData.Assets
 			switch sortedLayers {
-			case let (folders as [InputData.ImageLayer<Folder>]) as Any:
-				assets = .animated(layers: folders, duration: animationDuration)
-			case let (files as [InputData.ImageLayer<File>]) as Any:
-				assets = .still(layers: files)
-			default:
-				exit(1)
+				case let (folders as [InputData.ImageLayer<Folder>]) as Any:
+					assets = .animated(layers: folders, duration: animationDuration)
+				case let (files as [InputData.ImageLayer<File>]) as Any:
+					assets = .still(layers: files)
+				default:
+					exit(1)
 			}
 			return InputData(assets: assets, serialText: serialText, isSampleMode: isSampleMode)
 		}
@@ -201,7 +201,7 @@ private extension GenCommand {
 			try recipeStore.storeAssets(for: index, source: input, inputFolder: inputFolder)
 
 			// apply some arguments
-			func generateMetadata(embededImage data: Data? = nil) -> Bool {
+			func generateMetadata(embededImage data: Data?) -> Bool {
 				switch self.generateMetadata(input: input, index: index, config: config.metadata, embededImage: data) {
 					case .nothing, .success:
 						return true
@@ -213,10 +213,9 @@ private extension GenCommand {
 			// generate image and metadata
 			switch generateImage(input: input, index: index) {
 				case .nothing:
-					return generateMetadata()
+					return generateMetadata(embededImage: nil)
 				case let .success(file):
-					let data: Data? = embedDecodedImageInMetadata ? try? file.read() : nil
-					return generateMetadata(embededImage: data)
+					return generateMetadata(embededImage: try? file.read())
 				case .failure:
 					return false
 			}
@@ -238,43 +237,44 @@ private extension GenCommand {
 		}
 		let imageFactory = ImageFactory(input: input)
 		switch imageFactory.generateImage(saveIn: imageFolder, as: nameFactory.fileName(from: index), serial: index, imageType: imageType) {
-		case let .success(file):
-			stdout <<< "Created: \(file.path)"
+			case let .success(file):
+				stdout <<< "Created: \(file.path)"
 				return .success(file: file)
-		case let .failure(error):
-			switch error {
-			case .noImage:
-				stderr <<< "Couldn't create image."
-			case .unsupportedImageType:
-				stderr <<< "Unsupported image type."
-			case .creatingFileFailed:
-				stderr <<< "Couldn't create file to write image."
-			case .finalizeImageFailed:
-				stderr <<< "Couldn't finalize an image."
-			}
+			case let .failure(error):
+				switch error {
+					case .noImage:
+						stderr <<< "Couldn't create image."
+					case .unsupportedImageType:
+						stderr <<< "Unsupported image type."
+					case .creatingFileFailed:
+						stderr <<< "Couldn't create file to write image."
+					case .finalizeImageFailed:
+						stderr <<< "Couldn't finalize an image."
+				}
 				return .failure
 		}
 	}
 
 	@discardableResult
-	func generateMetadata(input: InputData, index: Int, config: any Metadata, embededImage: Data? = nil) -> GenResult {
+	func generateMetadata(input: InputData, index: Int, config: any Metadata, embededImage data: Data? = nil) -> GenResult {
 		guard !noMetadata else { return .nothing }
+		let imageData = embedDecodedImageInMetadata ? data : nil
 
-		switch metadataFactory.generateMetadata(from: input.assets.metadataSubject, as: nameFactory.fileName(from: index), serial: index, config: config, imageType: imageType, embededImage: embededImage) {
-		case let .success(file):
-			stdout <<< "Created: \(file.path)"
+		switch metadataFactory.generateMetadata(from: input.assets.metadataSubject, as: nameFactory.fileName(from: index), serial: index, config: config, imageType: imageType, embededImage: imageData) {
+			case let .success(file):
+				stdout <<< "Created: \(file.path)"
 				return .success(file: file)
-		case let .failure(error):
-			switch error {
-			case .creatingFileFailed:
-				stderr <<< "Couldn't create file to write metadata."
-			case .invalidMetadataSortConfig:
-				stderr <<< "Sorting metadata config should cover all trait you defined."
-			case .invalidBackgroundColorCode:
-				stderr <<< "backgroundColor in metadata should be 3 or 6 hex code without # prefix."
-			case .writingFileFailed:
-				stderr <<< "Writing metadata failed."
-			}
+			case let .failure(error):
+				switch error {
+					case .creatingFileFailed:
+						stderr <<< "Couldn't create file to write metadata."
+					case .invalidMetadataSortConfig:
+						stderr <<< "Sorting metadata config should cover all trait you defined."
+					case .invalidBackgroundColorCode:
+						stderr <<< "backgroundColor in metadata should be 3 or 6 hex code without # prefix."
+					case .writingFileFailed:
+						stderr <<< "Writing metadata failed."
+				}
 				return .failure
 		}
 	}
@@ -291,16 +291,16 @@ private extension GenCommand {
 		}
 
 		switch loader.loadAssetConfig(from: file) {
-		case .success(let config):
-			return config
-		case .failure(.incompatibleFileExtension):
-			stderr <<< "Incompatible file extension: \(file.name)"
-			stdout <<< "But still ok! We can continue processing..."
-			return loader.defaultConfig
-		case .failure(.invalidConfigFile):
-			stderr <<< "No valid config file!"
-			stdout <<< "But still ok! We can continue processing..."
-			return loader.defaultConfig
+			case .success(let config):
+				return config
+			case .failure(.incompatibleFileExtension):
+				stderr <<< "Incompatible file extension: \(file.name)"
+				stdout <<< "But still ok! We can continue processing..."
+				return loader.defaultConfig
+			case .failure(.invalidConfigFile):
+				stderr <<< "No valid config file!"
+				stdout <<< "But still ok! We can continue processing..."
+				return loader.defaultConfig
 		}
 	}
 

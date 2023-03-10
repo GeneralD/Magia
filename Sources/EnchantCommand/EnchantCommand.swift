@@ -41,6 +41,9 @@ public class EnchantCommand: Command {
 	@Key("-r", "--reprint", description: "Pickup assets based on data.sqlite file", completion: .filename)
 	var sqliteFile: File?
 
+	@Flag("-e", "--embedded", description: "Embed encoded image in metadata")
+	var embedDecodedImageInMetadata: Bool
+
 	@Flag("--without-metadata", description: "Not to generate metadata")
 	var noMetadata: Bool
 
@@ -55,7 +58,7 @@ public class EnchantCommand: Command {
 	}
 
 	public var options: [OptionGroup] {
-		[.atMostOne($noMetadata, $noImage)]
+		[.atMostOne($noMetadata, $noImage, $embedDecodedImageInMetadata)]
 	}
 
 	public func execute() throws {
@@ -144,13 +147,15 @@ private extension EnchantCommand {
 	@discardableResult
 	func generateMetadata(assetFile: File, index: Int, config: any Metadata) -> Bool {
 		guard !noMetadata else { return true }
+		let imageData = embedDecodedImageInMetadata ? try? assetFile.read() : nil
+
 		guard let fileExtension = assetFile.extension,
 			  let fileType = UTType(filenameExtension: fileExtension) else { return false }
 
 		let exifReader = ExifReader(fileURL: assetFile.url)
 		let spells = exifReader.spells.map(\.phrase)
 
-		switch metadataFactory.generateMetadata(from: .completedAsset(name: assetFile.nameExcludingExtension, spells: spells), as: nameFactory.fileName(from: index), serial: index, config: config, imageType: fileType) {
+		switch metadataFactory.generateMetadata(from: .completedAsset(name: assetFile.nameExcludingExtension, spells: spells), as: nameFactory.fileName(from: index), serial: index, config: config, imageType: fileType, embededImage: imageData) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
 			return true
@@ -176,12 +181,12 @@ private extension EnchantCommand {
 			return try SingleAssetSequence(assetFiles: assetFiles, election: election, quantity: creationCount)
 		} catch {
 			switch error {
-			case SingleAssetSequenceError.tooMuchQuantitySpecified:
-				stderr <<< "Quantity must be less than or equal to number of assets if alphabetical or duplicatableShuffle is selected."
-			case SingleAssetSequenceError.quantityMustBeSpecified:
-				stderr <<< "Quantity must be specified if duplicatableShuffle is selected."
-			default:
-				stderr <<< error.localizedDescription
+				case SingleAssetSequenceError.tooMuchQuantitySpecified:
+					stderr <<< "Quantity must be less than or equal to number of assets if alphabetical or duplicatableShuffle is selected."
+				case SingleAssetSequenceError.quantityMustBeSpecified:
+					stderr <<< "Quantity must be specified if duplicatableShuffle is selected."
+				default:
+					stderr <<< error.localizedDescription
 			}
 			throw error
 		}
@@ -199,16 +204,16 @@ private extension EnchantCommand {
 		}
 
 		switch loader.loadAssetConfig(from: file) {
-		case .success(let config):
-			return config
-		case .failure(.incompatibleFileExtension):
-			stderr <<< "Incompatible file extension: \(file.name)"
-			stdout <<< "But still ok! We can continue processing..."
-			return loader.defaultConfig
-		case .failure(.invalidConfigFile):
-			stderr <<< "No valid config file!"
-			stdout <<< "But still ok! We can continue processing..."
-			return loader.defaultConfig
+			case .success(let config):
+				return config
+			case .failure(.incompatibleFileExtension):
+				stderr <<< "Incompatible file extension: \(file.name)"
+				stdout <<< "But still ok! We can continue processing..."
+				return loader.defaultConfig
+			case .failure(.invalidConfigFile):
+				stderr <<< "No valid config file!"
+				stdout <<< "But still ok! We can continue processing..."
+				return loader.defaultConfig
 		}
 	}
 

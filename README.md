@@ -611,11 +611,25 @@ metadata:
 
 
 
-このジェネレーターで召喚したNFTプロジェクト
+このジェネレーターで召喚したNFTプロジェクトを新着順に紹介
 
+### [FOS - Ancient Alpha](https://opensea.io/collection/fos-ancient-alpha)
+- リリース元
+  - THE LEGAL
+- リリース日
+  - 2023年3
+- 準備数
+  - 50 (初回)
+![FOS - Ancient Alpha OpenSea](Images/fos.gif)
+
+### [ANIM.JP](https://opensea.io/collection/anim-jp)
+- リリース元
+  - ANIM.JP (DAO)
+- リリース日
+  - 2022年7
+- 準備数
+  - 10,000
 ![ANIM.JP OpenSea](Images/animjp.gif)
-
-[ANIM.JP](https://opensea.io/collection/anim-jp)
 
 
 
@@ -625,7 +639,6 @@ metadata:
 
 自己の責任でご自由にご利用ください🙏
 
-また、~~召喚したNFTプロジェクトの売上の10％~~ お気持ちだけ投げ銭とかWelcomeです。実績欄に掲載させていただけても嬉しいです👑
+実績欄に掲載させていただけるだけでも嬉しいです👑
 
 投げ銭は`0x222222222C769bEcDdb7829B763e9F31F06B2d42` まで☕️
-

@@ -616,8 +616,8 @@ metadata:
 ### [FOS - Ancient Alpha](https://opensea.io/collection/fos-ancient-alpha)
 - リリース元
   - THE LEGAL
-- リリース日
-  - 2023年3
+- リリース時期
+  - 2023年3月
 - 準備数
   - 50 (初回)
 ![FOS - Ancient Alpha OpenSea](Images/fos.gif)
@@ -625,8 +625,8 @@ metadata:
 ### [ANIM.JP](https://opensea.io/collection/anim-jp)
 - リリース元
   - ANIM.JP (DAO)
-- リリース日
-  - 2022年7
+- リリース時期
+  - 2022年7月
 - 準備数
   - 10,000
 ![ANIM.JP OpenSea](Images/animjp.gif)

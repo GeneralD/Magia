@@ -1,53 +1,26 @@
 import AssetConfig
-import CollectionKit
 import Files
 
 public struct RandomizationController {
 	private let config: any Randomization
-	private let reservedWeight: [String: Double]
-	private var reserved: [String] = []
+	private var reserved: [Subject] = []
 
 	public init(config: some Randomization) {
 		self.config = config
 
-		guard let reservation = config.reservation else {
-			reservedWeight = [:]
-			return
-		}
-
-		let totalWeight = reservation.allocations
-			.map(\.weight)
-			.reduce(.zero, +)
-
-		guard totalWeight > .zero else {
-			reservedWeight = [:]
-			return
-		}
-
-		reservedWeight = reservation.allocations
-			.reduce(into: [:]) { accum, alloc in accum[alloc.name] = alloc.weight / totalWeight }
-
-		reserved = reservedWeight
-			.mapValues { w in Int(Double(reservation.quantity) * w)	}
-			.reduce(into: []) { accum, pair in accum.append(contentsOf: (0..<pair.value).map { _ in pair.key }) }
+		reserved = config.allocations
+			.filter { allocation in allocation.quantity > .zero }
+			.flatMap { allocation in (0..<allocation.quantity).map { _ in allocation.target } }
 			.shuffled()
-
-		// supply a shortage
-		let shortage = reservation.quantity - reserved.count
-		guard shortage > .zero else { return }
-		reserved.append(contentsOf: (0..<shortage).compactMap { _ in reservation.allocations.randomElement()?.name })
 	}
 }
 
 public extension RandomizationController {
 	mutating func elect<F: Location>(from candidates: [F], targetLayer: String) -> (element: F, probability: Double)? where F: Hashable {
-		if targetLayer == config.reservation?.layer,
-		   !reserved.isEmpty,
-		   let (head, tail) = reserved.splat,
-		   let candidate = candidates.first(where: { $0.nameExcludingExtension == head }),
-		   let weight = reservedWeight[head] {
-			reserved = tail.array
-			return (candidate, weight)
+		if let (index, subject) = reserved.enumerated().first(where: { _, sub in sub.layer == targetLayer }),
+		   let candidate = candidates.first(where: { $0.nameExcludingExtension.contains(subject.name) }) {
+			reserved.remove(at: index) // mutate
+			return (candidate, 1)
 		}
 
 		let defaultProbability: Double = 1

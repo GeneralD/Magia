@@ -1,7 +1,7 @@
 public protocol Randomization {
 	associatedtype ProbabilityType: Probability
-	associatedtype ReservationType: Reservation
+	associatedtype AllocationType: Allocation
 
 	var probabilities: [ProbabilityType] { get }
-	var reservation: ReservationType? { get }
+	var allocations: [AllocationType] { get }
 }

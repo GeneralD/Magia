@@ -1,4 +1,6 @@
 public protocol Allocation {
-	var name: String { get }
-	var weight: Double { get }
+	associatedtype SubjectType: Subject
+
+	var target: SubjectType { get }
+	var quantity: Int { get }
 }

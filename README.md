@@ -400,32 +400,45 @@ randomization:
 
 
 
-### 確率に左右されない数量の確約
+### 確率に左右されない数量の確約（確定抽選枠）
 
 当選確率の設定に依存して抽選されるパーツの出現は偏るのが常である。
 
 そのため、出現するキャラクターや背景の数量を正確に設定することは上記の設定だけでは実現できない。
 
-そこで、以下のような設定を追加することができる。
+そこで、以下のように `allocations` という設定を追加することができる。
 
 ```yaml
 randomization:
-  reservation:
-    layer: Background
+  allocations:
+  - target:
+      layer: Background
+      name: ^Spaceship$
     quantity: 1000
-    allocations:
-    - name: Spaceship
-      weight: 3
-    - name: Heaven
-      weight: 3
-    - name: Inferno
-      weight: 3
+  - target:
+      layer: Background
+      name: ^Heaven$
+    quantity: 1000
+  - target:
+      layer: Background
+      name: ^Inferno$
+    quantity: 1000
   probabilities:
 ```
 
+この場合、各 `target` に対応するパーツが `quantity` で指定した枚数分選ばれる。
+
+留意すべきは、この設定では `quantity` の合計である3,000丁度の生成でなければ超過分(3,001以降)は `probabilities` の設定に依存して抽選され、不足分は `quantity` で設定した確定抽選枠を使い切らずに完了してしまう。なので、通常はこの設定においては、`summon` コマンドを実行する際、 `-q` の引数には3,000を渡すのが基本的な利用方法となる。
 
 
 
+また、`combinations` の設定によって候補に制約があるレイヤーを`allocations` にて指定した場合、必ずしも指定した数量だけ選択されない事例が発生する。
+
+そのため、一切抽選が制約されないレイヤーのみを `allocations` で指定することを強く推奨する。
+
+
+
+このような意図しない設定を防ぐため、確定抽選枠を設定するレイヤーの抽選順序を可能な限り序盤にしておくことが望ましい。(`order` > `selection` の設定にて)
 
 
 

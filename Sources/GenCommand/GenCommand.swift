@@ -153,7 +153,7 @@ private extension GenCommand {
 		let config = loadAssetConfig()
 		let serialText = serialText(from: config.drawSerial)
 		let constraintFactory = LayerConstraintFactory(layerStrictions: config.combinations)
-		let randomManager = RandomizationController(config: config.randomization)
+		var randomManager = RandomizationController(config: config.randomization)
 		let layerFolders = sort(subjects: inputFolder.subfolders, where: \.nameExcludingExtension, order: config.order.selection)
 
 		func inputData<F: Location, S: Sequence>(locations: (Folder) -> S) -> InputData where F: Hashable, S.Element == F {

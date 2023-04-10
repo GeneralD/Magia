@@ -38,7 +38,8 @@ struct AssetConfigCodable: AssetConfig, Codable, Equatable, DefaultValueProvider
 
 		struct ReservationCodable: Reservation, Codable, Equatable {
 			let layer: String
-			@Default<Empty> var allocations: [AllocationCodable]
+			let quantity: Int
+			let allocations: [AllocationCodable]
 
 			struct AllocationCodable: Allocation, Codable, Equatable {
 				let name: String

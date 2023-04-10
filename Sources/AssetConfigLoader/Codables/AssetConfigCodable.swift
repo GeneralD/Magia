@@ -28,11 +28,22 @@ struct AssetConfigCodable: AssetConfig, Codable, Equatable, DefaultValueProvider
 		static let `default`: Self = .init(probabilities: .init())
 
 		@Default<Empty> var probabilities: [ProbabilityCodable]
+		@Default<Nil> var reservation: ReservationCodable?
 
 		struct ProbabilityCodable: Probability, Codable, Equatable {
 			let target: SubjectCodable
 			@Default<OneDouble> var weight: Double
 			@Default<False> var divideByMatches: Bool
+		}
+
+		struct ReservationCodable: Reservation, Codable, Equatable {
+			let layer: String
+			@Default<Empty> var allocations: [AllocationCodable]
+
+			struct AllocationCodable: Allocation, Codable, Equatable {
+				let name: String
+				let weight: Double
+			}
 		}
 	}
 

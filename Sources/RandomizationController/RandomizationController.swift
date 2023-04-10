@@ -41,10 +41,11 @@ public struct RandomizationController {
 
 public extension RandomizationController {
 	mutating func elect<F: Location>(from candidates: [F], targetLayer: String) -> (element: F, probability: Double)? where F: Hashable {
-		guard targetLayer != config.reservation?.layer || reserved.isEmpty else {
-			guard let (head, tail) = reserved.splat,
-				  let candidate = candidates.first(where: { $0.nameExcludingExtension == head }),
-				  let weight = reservedWeight[head] else { return nil }
+		if targetLayer == config.reservation?.layer,
+		   !reserved.isEmpty,
+		   let (head, tail) = reserved.splat,
+		   let candidate = candidates.first(where: { $0.nameExcludingExtension == head }),
+		   let weight = reservedWeight[head] {
 			reserved = tail.array
 			return (candidate, weight)
 		}

@@ -400,6 +400,35 @@ randomization:
 
 
 
+### 確率に左右されない数量の確約
+
+当選確率の設定に依存して抽選されるパーツの出現は偏るのが常である。
+
+そのため、出現するキャラクターや背景の数量を正確に設定することは上記の設定だけでは実現できない。
+
+そこで、以下のような設定を追加することができる。
+
+```yaml
+randomization:
+  reservation:
+    layer: Background
+    quantity: 1000
+    allocations:
+    - name: Spaceship
+      weight: 3
+    - name: Heaven
+      weight: 3
+    - name: Inferno
+      weight: 3
+  probabilities:
+```
+
+
+
+
+
+
+
 
 ## パーツの組み合わせの制約
 
@@ -620,7 +649,7 @@ metadata:
   - 2023年3月
 - 準備数
   - 50 (初回)
-![FOS - Ancient Alpha OpenSea](Images/fos.gif)
+  ![FOS - Ancient Alpha OpenSea](Images/fos.gif)
 
 ### [ANIM.JP](https://opensea.io/collection/anim-jp)
 - リリース元
@@ -629,7 +658,7 @@ metadata:
   - 2022年7月
 - 準備数
   - 10,000
-![ANIM.JP OpenSea](Images/animjp.gif)
+  ![ANIM.JP OpenSea](Images/animjp.gif)
 
 
 

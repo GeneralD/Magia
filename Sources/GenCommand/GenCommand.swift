@@ -160,11 +160,11 @@ private extension GenCommand {
 		func inputData<F: Location, S: Sequence>(locations: (Folder) -> S) -> InputData where F: Hashable, S.Element == F {
 			let layers = layerFolders
 				.reduce(into: [InputData.ImageLayer<F>]()) { layers, layerFolder in
-					let constraint = constraintFactory.constraint(forLayer: layerFolder.name, conditionLayers: layers.map(\.layerConstraintSubject))
+					let targetLayer = layerFolder.name
+					let constraint = constraintFactory.constraint(forLayer: targetLayer, conditionLayers: layers.map(\.layerConstraintSubject))
 					let validCandidates = locations(layerFolder).filter { f in
 						constraint.isValidItem(name: f.nameExcludingExtension)
 					}
-					let targetLayer = layerFolder.name
 					let candidates = reservationManager.dealNext(originalCandidates: validCandidates, targetLayer: targetLayer)
 					guard let elected = randomManager.elect(from: candidates, targetLayer: targetLayer) else { return }
 					layers.append(.init(imageLocation: elected.element, layer: targetLayer, name: elected.element.nameExcludingExtension, probability: elected.probability))

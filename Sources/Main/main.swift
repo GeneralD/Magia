@@ -5,7 +5,7 @@ import Foundation
 import GenCommand
 import SwiftCLI
 
-let cli = CLI(name: "magia", version: "1.0.4", description: "Ultimate NFT generator")
+let cli = CLI(name: "magia", version: "1.0.5", description: "Ultimate NFT generator")
 
 cli.commands = [
 	GenCommand(name: "summon"),

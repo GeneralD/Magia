@@ -3,26 +3,14 @@ import Files
 
 public struct RandomizationController {
 	private let config: any Randomization
-	private var reserved: [Subject] = []
 
 	public init(config: some Randomization) {
 		self.config = config
-
-		reserved = config.allocations
-			.filter { allocation in allocation.quantity > .zero }
-			.flatMap { allocation in (0..<allocation.quantity).map { _ in allocation.target } }
-			.shuffled()
 	}
 }
 
 public extension RandomizationController {
-	mutating func elect<F: Location>(from candidates: [F], targetLayer: String) -> (element: F, probability: Double)? where F: Hashable {
-		if let (index, subject) = reserved.enumerated().first(where: { _, sub in sub.layer == targetLayer }),
-		   let candidate = candidates.first(where: { $0.nameExcludingExtension.contains(subject.name) }) {
-			reserved.remove(at: index) // mutate
-			return (candidate, 1)
-		}
-
+	func elect<F: Location>(from candidates: some Sequence<F>, targetLayer: String) -> (element: F, probability: Double)? where F: Hashable {
 		let defaultProbability: Double = 1
 		let initDict = candidates.reduce(into: [:]) { accum, candidate in
 			accum[candidate] = defaultProbability

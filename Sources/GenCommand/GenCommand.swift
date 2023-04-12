@@ -153,18 +153,21 @@ private extension GenCommand {
 		let config = loadAssetConfig()
 		let serialText = serialText(from: config.drawSerial)
 		let constraintFactory = LayerConstraintFactory(layerStrictions: config.combinations)
-		var randomManager = RandomizationController(config: config.randomization)
+		let randomManager = RandomizationController(config: config.randomization)
+		var reservationManager = ReservedAllocationManager(config: config.randomization.allocations)
 		let layerFolders = sort(subjects: inputFolder.subfolders, where: \.nameExcludingExtension, order: config.order.selection)
 
 		func inputData<F: Location, S: Sequence>(locations: (Folder) -> S) -> InputData where F: Hashable, S.Element == F {
 			let layers = layerFolders
 				.reduce(into: [InputData.ImageLayer<F>]()) { layers, layerFolder in
 					let constraint = constraintFactory.constraint(forLayer: layerFolder.name, conditionLayers: layers.map(\.layerConstraintSubject))
-					let candidates = locations(layerFolder).filter { f in
+					let validCandidates = locations(layerFolder).filter { f in
 						constraint.isValidItem(name: f.nameExcludingExtension)
 					}
-					guard let elected = randomManager.elect(from: candidates, targetLayer: layerFolder.name) else { return }
-					layers.append(.init(imageLocation: elected.element, layer: layerFolder.name, name: elected.element.nameExcludingExtension, probability: elected.probability))
+					let targetLayer = layerFolder.name
+					let candidates = reservationManager.dealNext(originalCandidates: validCandidates, targetLayer: targetLayer)
+					guard let elected = randomManager.elect(from: candidates, targetLayer: targetLayer) else { return }
+					layers.append(.init(imageLocation: elected.element, layer: targetLayer, name: elected.element.nameExcludingExtension, probability: elected.probability))
 				}
 
 			// arrange layers in the order of depth configured in json

@@ -2,8 +2,6 @@ import Foundation
 
 public protocol Metadata {
 	associatedtype TraitDataType: TraitData
-	associatedtype AITraitDataType: AITraitData
-	associatedtype AITraitListingType: AITraitListing
 
 	var baseUrl: URL { get }
 	var nameFormat: String { get }
@@ -12,8 +10,4 @@ public protocol Metadata {
 	var backgroundColor: String { get }
 	var traitData: [TraitDataType] { get }
 	var traitOrder: [String] { get }
-
-	// refered in enchant command
-	var aiTraitData: [AITraitDataType] { get }
-	var aiTraitListing: AITraitListingType { get }
 }

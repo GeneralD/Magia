@@ -3,6 +3,7 @@ import Files
 import Foundation
 import RegexBuilder
 import UniformTypeIdentifiers
+import protocol AssetConfig.AIMetadata
 import protocol AssetConfig.Metadata
 import enum AssetConfig.Trait
 
@@ -18,7 +19,7 @@ public struct MetadataFactory {
 
 public extension MetadataFactory {
 	@discardableResult
-	func generateMetadata(from subject: MetadataSubject, as name: String, serial: Int, config: some AssetConfig.Metadata, imageType: UTType, embededImage: Data? = nil) -> Result<File, MetadataFactoryError> {
+	func generateMetadata(from subject: MetadataSubject, as name: String, serial: Int, config: some AssetConfig.Metadata & AssetConfig.AIMetadata, imageType: UTType, embededImage: Data? = nil) -> Result<File, MetadataFactoryError> {
 		guard let jsonFile = try? outputFolder.createFileIfNeeded(withName: "\(name).json") else { return .failure(.creatingFileFailed) }
 
 		let attributes = attributes(subject: subject, config: config)
@@ -72,7 +73,7 @@ private extension MetadataFactory {
 		}
 	}
 
-	func attributes(subject: MetadataSubject, config: some AssetConfig.Metadata) -> [Metadata.Attribute] {
+	func attributes(subject: MetadataSubject, config: some AssetConfig.Metadata & AssetConfig.AIMetadata) -> [Metadata.Attribute] {
 		switch subject {
 		case let .generativeAssets(layers):
 			return attributes(layers: layers, config: config)
@@ -106,7 +107,7 @@ private extension MetadataFactory {
 			.compactMap(\.metadata)
 	}
 
-	func attributes(spells: some Sequence<String>, config: some AssetConfig.Metadata) -> [Metadata.Attribute] {
+	func attributes(spells: some Sequence<String>, config: some AIMetadata) -> [Metadata.Attribute] {
 		let filteredSpells = spells.filter { spell in
 			let isAllowlist = config.aiTraitListing.intent == .allowlist
 			let isSpellListed = config.aiTraitListing.list.contains { regex in

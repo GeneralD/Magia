@@ -2,7 +2,7 @@ import AssetConfig
 import DefaultCodable
 import Foundation
 
-struct AssetConfigCodable: AssetConfig, Codable, Equatable, DefaultValueProvider {
+struct AssetConfigCodable: AssetConfig, AIAssetConfig, Codable, Equatable, DefaultValueProvider {
 	static let `default`: Self = .init()
 
 	@Default<OrderCodable> var order: OrderCodable
@@ -84,7 +84,7 @@ struct AssetConfigCodable: AssetConfig, Codable, Equatable, DefaultValueProvider
 		@Default<ZeroFloat> var offsetY: CGFloat
 	}
 
-	struct MetadataCodable: Metadata, Codable, Equatable, DefaultValueProvider {
+	struct MetadataCodable: Metadata, AIMetadata, Codable, Equatable, DefaultValueProvider {
 		static let `default`: Self = .init()
 
 		@Default<BlankURL> var baseUrl: URL

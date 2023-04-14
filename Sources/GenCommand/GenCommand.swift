@@ -259,7 +259,7 @@ private extension GenCommand {
 	}
 
 	@discardableResult
-	func generateMetadata(input: InputData, index: Int, config: any Metadata, embededImage data: Data? = nil) -> GenResult {
+	func generateMetadata(input: InputData, index: Int, config: any Metadata & AIMetadata, embededImage data: Data? = nil) -> GenResult {
 		guard !noMetadata else { return .nothing }
 		let imageData = embedDecodedImageInMetadata ? data : nil
 

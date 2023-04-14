@@ -6,7 +6,7 @@ import Yams
 public struct AssetConfigLoader {
 	public init() {}
 	
-	public func loadAssetConfig(from file: File) -> Result<any AssetConfig, AssetConfigLoaderError> {
+	public func loadAssetConfig(from file: File) -> Result<any AssetConfig & AIAssetConfig, AssetConfigLoaderError> {
 		do {
 			switch file.extension {
 			case "yml", "yaml":
@@ -21,7 +21,7 @@ public struct AssetConfigLoader {
 		}
 	}
 
-	public var defaultConfig: some AssetConfig {
+	public var defaultConfig: some AssetConfig & AIAssetConfig {
 		AssetConfigCodable.default
 	}
 }

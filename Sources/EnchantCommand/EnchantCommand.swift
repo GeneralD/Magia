@@ -145,7 +145,7 @@ private extension EnchantCommand {
 	}
 
 	@discardableResult
-	func generateMetadata(assetFile: File, index: Int, config: any Metadata) -> Bool {
+	func generateMetadata(assetFile: File, index: Int, config: any Metadata & AIMetadata) -> Bool {
 		guard !noMetadata else { return true }
 		let imageData = embedDecodedImageInMetadata ? try? assetFile.read() : nil
 
@@ -194,7 +194,7 @@ private extension EnchantCommand {
 
 	// MARK: - Load Config File
 
-	func loadAssetConfig() -> any AssetConfig {
+	func loadAssetConfig() -> any AssetConfig & AIAssetConfig {
 		let loader = AssetConfigLoader()
 
 		guard let file = inputFolder.files.first(where: { $0.nameExcludingExtension == "config" }) else {

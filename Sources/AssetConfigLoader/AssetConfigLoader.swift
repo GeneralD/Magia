@@ -6,7 +6,7 @@ import Yams
 public struct AssetConfigLoader {
 	public init() {}
 	
-	public func loadAssetConfig(from file: File) -> Result<any AssetConfig & AIAssetConfig, AssetConfigLoaderError> {
+	public func load(from file: File) -> Result<any AssetConfig & AIAssetConfig, AssetConfigLoaderError> {
 		do {
 			switch file.extension {
 			case "yml", "yaml":

@@ -203,7 +203,7 @@ private extension EnchantCommand {
 			return loader.defaultConfig
 		}
 
-		switch loader.loadAssetConfig(from: file) {
+		switch loader.load(from: file) {
 			case .success(let config):
 				return config
 			case .failure(.incompatibleFileExtension):

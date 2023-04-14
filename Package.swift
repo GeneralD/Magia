@@ -26,10 +26,20 @@ let package = Package(
 		.executableTarget(
 			name: "Main",
 			dependencies: [
+				"BoilerplateCommand",
 				"CleanCommand",
 				"CompletionCommand",
 				"EnchantCommand",
 				"SummonCommand",
+			]),
+		.target(
+			name: "BoilerplateCommand",
+			dependencies: [
+				"AssetConfigWriter",
+				"CommandCommon",
+				"Files",
+				"SwiftCLI",
+				"Yams",
 			]),
 		.target(
 			name: "CleanCommand",
@@ -84,6 +94,13 @@ let package = Package(
 			dependencies: [
 				"AssetConfig",
 				"DefaultCodable",
+				"Files",
+				"Yams",
+			]),
+		.target(
+			name: "AssetConfigWriter",
+			dependencies: [
+				"Files",
 				"Yams",
 			]),
 		.target(

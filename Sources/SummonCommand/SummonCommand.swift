@@ -96,6 +96,7 @@ public class SummonCommand: Command {
 private extension SummonCommand {
 
 	// MARK: - Configure Default Values
+	
 	func configureArguments() {
 		configureOutputFolder()
 		configureImageFolderName()
@@ -293,7 +294,7 @@ private extension SummonCommand {
 			return loader.defaultConfig
 		}
 
-		switch loader.loadAssetConfig(from: file) {
+		switch loader.load(from: file) {
 			case .success(let config):
 				return config
 			case .failure(.incompatibleFileExtension):

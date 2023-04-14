@@ -1,4 +1,4 @@
-import GenCommandCommon
+import SummonCommandCommon
 import MetadataFactory
 
 extension InputData.Assets {

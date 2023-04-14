@@ -29,7 +29,7 @@ let package = Package(
 				"CleanCommand",
 				"CompletionCommand",
 				"EnchantCommand",
-				"GenCommand",
+				"SummonCommand",
 			]),
 		.target(
 			name: "CleanCommand",
@@ -61,14 +61,14 @@ let package = Package(
 				"TokenFileNameFactory",
 			]),
 		.target(
-			name: "GenCommand",
+			name: "SummonCommand",
 			dependencies: [
 				"AssetConfig",
 				"AssetConfigLoader",
 				"CollectionKit",
 				"CommandCommon",
 				"Files",
-				"GenCommandCommon",
+				"SummonCommandCommon",
 				"ImageFactory",
 				"LayerConstraint",
 				"MetadataFactory",
@@ -94,14 +94,14 @@ let package = Package(
 			]),
 		.target(name: "ExifReader"),
 		.target(
-			name: "GenCommandCommon",
+			name: "SummonCommandCommon",
 			dependencies: [
 				"Files",
 			]),
 		.target(
 			name: "ImageFactory",
 			dependencies: [
-				"GenCommandCommon",
+				"SummonCommandCommon",
 				"CollectionKit",
 				"Files",
 			]),
@@ -127,7 +127,7 @@ let package = Package(
 		.target(
 			name: "RecipeStore",
 			dependencies: [
-				"GenCommandCommon",
+				"SummonCommandCommon",
 				"Files",
 				.product(name: "GRDB", package: "GRDB.swift"),
 			]),

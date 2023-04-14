@@ -1,7 +1,7 @@
 import AssetConfig
 import AssetConfigLoader
 import CommandCommon
-import GenCommandCommon
+import SummonCommandCommon
 import ImageFactory
 import LayerConstraint
 import MetadataFactory
@@ -16,7 +16,7 @@ import SwiftCLI
 import SwiftHEXColors
 import UniformTypeIdentifiers
 
-public class GenCommand: Command {
+public class SummonCommand: Command {
 
 	// MARK: - Arguments
 
@@ -93,7 +93,7 @@ public class GenCommand: Command {
 	}
 }
 
-private extension GenCommand {
+private extension SummonCommand {
 
 	// MARK: - Configure Default Values
 	func configureArguments() {

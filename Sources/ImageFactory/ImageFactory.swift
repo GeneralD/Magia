@@ -1,4 +1,4 @@
-import GenCommandCommon
+import SummonCommandCommon
 import CollectionKit
 import CoreImage
 import Files

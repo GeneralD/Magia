@@ -365,7 +365,7 @@ private extension SummonCommand {
 		return isStillAssetEmpty
 	}
 
-	/// Indices of images to create. They start from 1, not 0.
+	/// Indices of images to create.
 	var indices: [Int] {
 		let skips = forceOverwrite
 		? []

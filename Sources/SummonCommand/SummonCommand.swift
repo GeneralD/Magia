@@ -155,18 +155,17 @@ private extension SummonCommand {
 		let serialText = serialText(from: config.drawSerial)
 		let constraintFactory = LayerConstraintFactory(layerStrictions: config.combinations)
 		let randomManager = RandomizationController(config: config.randomization)
-		var reservationManager = ReservedAllocationManager(config: config.randomization.allocations)
 		let layerFolders = sort(subjects: inputFolder.subfolders, where: \.nameExcludingExtension, order: config.order.selection)
 
-		func inputData<F: Location, S: Sequence>(locations: (Folder) -> S) -> InputData where F: Hashable, S.Element == F {
-			let layers = layerFolders
-				.reduce(into: [InputData.ImageLayer<F>]()) { layers, layerFolder in
+		func inputData<F: Location, S: Sequence>(locations: (Folder) -> S, reservedAllocationManager: ReservedAllocationManager) -> (InputData, ReservedAllocationManager) where F: Hashable, S.Element == F {
+			let (layers, allocationManager) = layerFolders
+				.reduce(into: [InputData.ImageLayer<F>](), reservedAllocationManager) { layers, reservation, layerFolder in
 					let targetLayer = layerFolder.name
 					let constraint = constraintFactory.constraint(forLayer: targetLayer, conditionLayers: layers.map(\.layerConstraintSubject))
 					let validCandidates = locations(layerFolder).filter { f in
 						constraint.isValidItem(name: f.nameExcludingExtension)
 					}
-					let candidates = reservationManager.dealNext(originalCandidates: validCandidates, targetLayer: targetLayer)
+					let candidates = reservation.dealNext(originalCandidates: validCandidates, targetLayer: targetLayer)
 					guard let elected = randomManager.elect(from: candidates, targetLayer: targetLayer) else { return }
 					layers.append(.init(imageLocation: elected.element, layer: targetLayer, name: elected.element.nameExcludingExtension, probability: elected.probability))
 				}
@@ -183,47 +182,60 @@ private extension SummonCommand {
 				default:
 					exit(1)
 			}
-			return InputData(assets: assets, serialText: serialText, isSampleMode: isSampleMode)
+			return (InputData(assets: assets, serialText: serialText, isSampleMode: isSampleMode), allocationManager)
 		}
-
-		let animated = isAnimatedAsset
 
 		let recipeStore = try RecipeStore(inputDatabaseFile: sqliteFile, outputDatabaseFolder: outputFolder)
 		defer { try? recipeStore.close() }
 
-		return try indices.map { index -> Bool in
-			// measure time
-			let startDate = Date()
-			defer { stdout <<< "Generating an image took \(Date().timeIntervalSince(startDate)) seconds." }
+		let animated = isAnimatedAsset
+		let reservedAllocationManager = ReservedAllocationManager(config: config.randomization.allocations)
 
-			let storedAssets = try recipeStore.storedAssets(for: index, isAnimated: animated, animationDuration: animationDuration, inputFolder: inputFolder)
-			let reprintData = storedAssets.map { InputData(assets: $0, serialText: serialText, isSampleMode: isSampleMode) }
+		let (results, _) = try indices
+			.reduce(into: [Bool](), reservedAllocationManager) { results, reservation, index in
+				// measure time
+				let startDate = Date()
+				defer { stdout <<< "Generating an image took \(Date().timeIntervalSince(startDate)) seconds." }
 
-			// use reprint data or create new
-			let input = reprintData ?? (animated ? inputData(locations: \.subfolders) : inputData(locations: \.files))
+				let storedAssets = try recipeStore.storedAssets(for: index, isAnimated: animated, animationDuration: animationDuration, inputFolder: inputFolder)
+				let reprintData = storedAssets.map { InputData(assets: $0, serialText: serialText, isSampleMode: isSampleMode) }
 
-			try recipeStore.storeAssets(for: index, source: input, inputFolder: inputFolder)
+				let input: InputData
+				(input, reservation) = {
+					// use reprint data?
+					guard let reprintData else {
+						// or create new
+						return animated
+						? inputData(locations: \.subfolders, reservedAllocationManager: reservation)
+						: inputData(locations: \.files, reservedAllocationManager: reservation)
+					}
+					return (reprintData, reservation)
+				} ()
 
-			// apply some arguments
-			func generateMetadata(embededImage data: Data?) -> Bool {
-				switch self.generateMetadata(input: input, index: index, config: config.metadata, embededImage: data) {
-					case .nothing, .success:
-						return true
+				try recipeStore.storeAssets(for: index, source: input, inputFolder: inputFolder)
+
+				// apply some arguments
+				func generateMetadata(embededImage data: Data?) -> Bool {
+					switch self.generateMetadata(input: input, index: index, config: config.metadata, embededImage: data) {
+						case .nothing, .success:
+							return true
+						case .failure:
+							return false
+					}
+				}
+
+				// generate image and metadata
+				switch generateImage(input: input, index: index) {
+					case .nothing:
+						results.append(generateMetadata(embededImage: nil))
+					case let .success(file):
+						results.append(generateMetadata(embededImage: try? file.read()))
 					case .failure:
-						return false
+						results.append(false)
 				}
 			}
 
-			// generate image and metadata
-			switch generateImage(input: input, index: index) {
-				case .nothing:
-					return generateMetadata(embededImage: nil)
-				case let .success(file):
-					return generateMetadata(embededImage: try? file.read())
-				case .failure:
-					return false
-			}
-		}
+		return results
 	}
 
 	enum GenResult {

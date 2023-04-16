@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/generald/CollectionKit",
       "state" : {
-        "branch" : "master",
-        "revision" : "91cd3cd52a121fe4068c5f7a29f1f69b9a11550f"
+        "revision" : "e1ae3fef8fd3be72c309fd20d7e56e9db30827db",
+        "version" : "1.0.1"
       }
     },
     {

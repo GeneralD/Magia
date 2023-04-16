@@ -12,7 +12,7 @@ let package = Package(
 		.executable(name: "magia", targets: ["Main"])
 	],
 	dependencies: [
-		.package(url: "https://github.com/generald/CollectionKit", branch: "master"),
+		.package(url: "https://github.com/generald/CollectionKit", from: "1.0.1"),
 		.package(url: "https://github.com/gonzalezreal/DefaultCodable", from: "1.2.1"),
 		.package(url: "https://github.com/JohnSundell/Files", from: "4.2.0"),
 		.package(url: "https://github.com/groue/GRDB.swift", from: "5.25.0"),

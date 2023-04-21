@@ -272,11 +272,11 @@ private extension SummonCommand {
 	}
 
 	@discardableResult
-	func generateMetadata(input: InputData, index: Int, config: any Metadata & AIMetadata, embededImage data: Data? = nil) -> GenResult {
+	func generateMetadata(input: InputData, index: Int, config: any Metadata, embededImage data: Data? = nil) -> GenResult {
 		guard !noMetadata else { return .nothing }
 		let imageData = embedDecodedImageInMetadata ? data : nil
 
-		switch metadataFactory.generateMetadata(from: input.assets.metadataSubject, as: nameFactory.fileName(from: index), serial: index, config: config, imageType: imageType, embededImage: imageData) {
+		switch metadataFactory.generateMetadata(from: input.assets.metadataSubject(config: config), as: nameFactory.fileName(from: index), serial: index, imageType: imageType, embededImage: imageData) {
 			case let .success(file):
 				stdout <<< "Created: \(file.path)"
 				return .success(file: file)

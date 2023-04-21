@@ -3,7 +3,7 @@ public protocol AssetConfig {
 	associatedtype CombinationType: Combination
 	associatedtype RandomizationType: Randomization
 	associatedtype DrawSerialType: DrawSerial
-	associatedtype MetadataType: Metadata & AIMetadata
+	associatedtype MetadataType: Metadata
 
 	var order: OrderType { get }
 	var combinations: [CombinationType] { get }

@@ -155,7 +155,7 @@ private extension EnchantCommand {
 		let exifReader = ExifReader(fileURL: assetFile.url)
 		let spells = exifReader.spells.map(\.phrase)
 
-		switch metadataFactory.generateMetadata(from: .completedAsset(name: assetFile.nameExcludingExtension, spells: spells), as: nameFactory.fileName(from: index), serial: index, config: config, imageType: fileType, embededImage: imageData) {
+		switch metadataFactory.generateMetadata(from: .completedAsset(name: assetFile.nameExcludingExtension, spells: spells, config: config), as: nameFactory.fileName(from: index), serial: index, imageType: fileType, embededImage: imageData) {
 		case let .success(file):
 			stdout <<< "Created: \(file.path)"
 			return true

@@ -19,15 +19,17 @@ public struct MetadataFactory {
 
 public extension MetadataFactory {
 	@discardableResult
-	func generateMetadata(from subject: MetadataSubject, as name: String, serial: Int, config: some AssetConfig.Metadata & AssetConfig.AIMetadata, imageType: UTType, embededImage: Data? = nil) -> Result<File, MetadataFactoryError> {
+	func generateMetadata(from subject: MetadataSubject, as name: String, serial: Int, imageType: UTType, embededImage: Data? = nil) -> Result<File, MetadataFactoryError> {
 		guard let jsonFile = try? outputFolder.createFileIfNeeded(withName: "\(name).json") else { return .failure(.creatingFileFailed) }
 
-		let attributes = attributes(subject: subject, config: config)
+		let attributes = attributes(subject: subject)
 			.unique(where: \.identity) { lhs, rhs in
 				// if 2 or more rankedNumbers with same traitType, integrate the value by +
 				guard case let (.rankedNumber(_, lhsValue), .rankedNumber(rhsType, rhsValue)) = (lhs, rhs) else { return rhs }
 				return .rankedNumber(traitType: rhsType, value: lhsValue + rhsValue)
 			}
+
+		let config = subject.config
 
 		// sort attributes
 		guard let sortedAttribute = sort(attributes: attributes, traitOrder: config.traitOrder) else {
@@ -73,11 +75,11 @@ private extension MetadataFactory {
 		}
 	}
 
-	func attributes(subject: MetadataSubject, config: some AssetConfig.Metadata & AssetConfig.AIMetadata) -> [Metadata.Attribute] {
+	func attributes(subject: MetadataSubject) -> [Metadata.Attribute] {
 		switch subject {
-		case let .generativeAssets(layers):
+		case let .generativeAssets(layers, config):
 			return attributes(layers: layers, config: config)
-		case let .completedAsset(name, spells):
+		case let .completedAsset(name, spells, config):
 			// merge attributes come from asset's name and AI spells
 			return attributes(assetName: name, config: config) + attributes(spells: spells, config: config)
 		}

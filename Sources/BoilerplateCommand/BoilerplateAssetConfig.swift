@@ -84,20 +84,3 @@ struct BoilerplateAssetConfig: AssetConfig, Encodable {
 		}
 	}
 }
-
-
-// ignore in encoding
-extension BoilerplateAssetConfig.BoilerplateMetadata: AIMetadata {
-	var aiTraitData: [BoilerplateAITraitData] { [] }
-	var aiTraitListing: BoilerplateAITraitListing { .init(intent: .allowlist, list: []) }
-
-	struct BoilerplateAITraitData: AITraitData {
-		let spell: Regex<AnyRegexOutput>
-		let traits: [Trait]
-	}
-
-	struct BoilerplateAITraitListing: AITraitListing {
-		let intent: AITraitListingIntent
-		let list: [Regex<AnyRegexOutput>]
-	}
-}

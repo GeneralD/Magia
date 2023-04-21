@@ -1,40 +1,40 @@
 import AssetConfig
 import Foundation
 
-struct BoilerplateAssetConfig: AssetConfig, Encodable {
+struct BoilerplateAssetConfig: CommonAssetConfig, Encodable {
 	let order: BoilerplateOrder
 	let combinations: [BoilerplateCombination]
 	let randomization: BoilerplateRandomization
 	let drawSerial: BoilerplateDrawSerial
 	let metadata: BoilerplateMetadata
 
-	struct BoilerplateOrder: Order, Encodable {
+	struct BoilerplateOrder: SummonOrder, Encodable {
 		let selection: [String]?
 		let layerDepth: [String]?
 	}
 
-	struct BoilerplateCombination: Combination, Encodable {
+	struct BoilerplateCombination: SummonCombination, Encodable {
 		let target: BoilerplateSubject
 		let dependencies: [BoilerplateSubject]
 	}
 
-	struct BoilerplateRandomization: Randomization, Encodable {
+	struct BoilerplateRandomization: SummonRandomization, Encodable {
 		let probabilities: [BoilerplateProbability]
 		let allocations: [BoilerplateAllocation]
 
-		struct BoilerplateProbability: Probability, Encodable {
+		struct BoilerplateProbability: SummonProbability, Encodable {
 			let target: BoilerplateSubject
 			let weight: Double
 			let divideByMatches: Bool
 		}
 
-		struct BoilerplateAllocation: Allocation, Encodable {
+		struct BoilerplateAllocation: SummonAllocation, Encodable {
 			let target: BoilerplateSubject
 			let quantity: Int
 		}
 	}
 
-	struct BoilerplateDrawSerial: DrawSerial, Encodable {
+	struct BoilerplateDrawSerial: SummonDrawSerial, Encodable {
 		let enabled: Bool
 		let format: String
 		let font: String
@@ -44,7 +44,7 @@ struct BoilerplateAssetConfig: AssetConfig, Encodable {
 		let offsetY: CGFloat
 	}
 
-	struct BoilerplateMetadata: Metadata, Encodable {
+	struct BoilerplateMetadata: CommonMetadata, Encodable {
 		let baseUrl: URL
 		let nameFormat: String
 		let descriptionFormat: String
@@ -53,13 +53,13 @@ struct BoilerplateAssetConfig: AssetConfig, Encodable {
 		let traitData: [BoilerplateTraitData]
 		let traitOrder: [String]
 
-		struct BoilerplateTraitData: TraitData, Encodable {
-			let traits: [Trait]
+		struct BoilerplateTraitData: CommonTraitData, Encodable {
+			let traits: [CommonTrait]
 			let conditions: [BoilerplateSubject]
 		}
 	}
 
-	struct BoilerplateSubject: Subject, Encodable {
+	struct BoilerplateSubject: CommonSubject, Encodable {
 		/// default: empty
 		let layer: String
 		/// default: #/^(?!)$/#

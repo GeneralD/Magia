@@ -1,4 +1,4 @@
-public enum SingleAssetElection: Equatable {
+public enum EnchantSingleAssetElection: Equatable {
 	case alphabetical
 	case shuffle(_: ShuffleOption)
 

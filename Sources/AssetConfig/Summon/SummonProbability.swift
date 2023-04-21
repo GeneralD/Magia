@@ -1,5 +1,5 @@
-public protocol Probability {
-	associatedtype SubjectType: Subject
+public protocol SummonProbability {
+	associatedtype SubjectType: CommonSubject
 
 	var target: SubjectType { get }
 	var weight: Double { get }

@@ -1,7 +1,7 @@
 import AssetConfig
 import Foundation
 
-extension Trait: Encodable {
+extension CommonTrait: Encodable {
 	enum CodingKeys: CodingKey {
 		case type, trait, value, max
 	}

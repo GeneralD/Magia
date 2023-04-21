@@ -1,9 +1,8 @@
-import protocol AssetConfig.AIMetadata
-import protocol AssetConfig.Metadata
+import AssetConfig
 
 public enum MetadataSubject {
-	case completedAsset(name: String, spells: any Sequence<String>, config: any AssetConfig.Metadata & AssetConfig.AIMetadata)
-	case generativeAssets(layers: any Sequence<LayerSubject>, config: any AssetConfig.Metadata)
+	case completedAsset(name: String, spells: any Sequence<String>, config: any EnchantMetadata)
+	case generativeAssets(layers: any Sequence<LayerSubject>, config: any CommonMetadata)
 
 	public struct LayerSubject {
 		let layer: String
@@ -19,7 +18,7 @@ public enum MetadataSubject {
 }
 
 extension MetadataSubject {
-	var config: any AssetConfig.Metadata {
+	var config: any CommonMetadata {
 		switch self {
 			case .completedAsset(_, _, let config):
 				return config

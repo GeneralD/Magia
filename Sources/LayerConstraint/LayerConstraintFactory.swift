@@ -2,9 +2,9 @@ import AssetConfig
 
 public struct LayerConstraintFactory {
 
-	private let layerStrictions: any Sequence<any Combination>
+	private let layerStrictions: any Sequence<any SummonCombination>
 
-	public init(layerStrictions: any Sequence<any Combination>) {
+	public init(layerStrictions: any Sequence<any SummonCombination>) {
 		self.layerStrictions = layerStrictions
 	}
 

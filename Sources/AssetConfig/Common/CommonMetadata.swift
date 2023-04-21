@@ -1,7 +1,7 @@
 import Foundation
 
-public protocol Metadata {
-	associatedtype TraitDataType: TraitData
+public protocol CommonMetadata {
+	associatedtype TraitDataType: CommonTraitData
 
 	var baseUrl: URL { get }
 	var nameFormat: String { get }

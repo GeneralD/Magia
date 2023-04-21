@@ -2,9 +2,9 @@ import AssetConfig
 import Files
 
 public struct RandomizationController {
-	private let config: any Randomization
+	private let config: any SummonRandomization
 
-	public init(config: some Randomization) {
+	public init(config: some SummonRandomization) {
 		self.config = config
 	}
 }

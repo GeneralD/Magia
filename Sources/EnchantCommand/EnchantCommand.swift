@@ -145,7 +145,7 @@ private extension EnchantCommand {
 	}
 
 	@discardableResult
-	func generateMetadata(assetFile: File, index: Int, config: any Metadata & AIMetadata) -> Bool {
+	func generateMetadata(assetFile: File, index: Int, config: any CommonMetadata & EnchantMetadata) -> Bool {
 		guard !noMetadata else { return true }
 		let imageData = embedDecodedImageInMetadata ? try? assetFile.read() : nil
 
@@ -174,7 +174,7 @@ private extension EnchantCommand {
 		}
 	}
 
-	func assetSequence(election: SingleAssetElection) throws -> SingleAssetSequence {
+	func assetSequence(election: EnchantSingleAssetElection) throws -> SingleAssetSequence {
 		let assetFiles = inputFolder.files.recursive
 			.filter { file in file.nameExcludingExtension != "config" }
 		do {
@@ -194,7 +194,7 @@ private extension EnchantCommand {
 
 	// MARK: - Load Config File
 
-	func loadAssetConfig() -> any AssetConfig & AIAssetConfig {
+	func loadAssetConfig() -> any EnchantAssetConfig {
 		let loader = AssetConfigLoader()
 
 		guard let file = inputFolder.files.first(where: { $0.nameExcludingExtension == "config" }) else {

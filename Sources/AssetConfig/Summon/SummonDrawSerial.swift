@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol DrawSerial {
+public protocol SummonDrawSerial {
 	var enabled: Bool { get }
 	var format: String { get }
 	var font: String { get }

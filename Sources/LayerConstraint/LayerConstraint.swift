@@ -1,9 +1,9 @@
 import AssetConfig
 
 public struct LayerConstraint {
-	private let subjects: any Sequence<any Subject>
+	private let subjects: any Sequence<any CommonSubject>
 
-	init(subjects: any Sequence<any Subject>) {
+	init(subjects: any Sequence<any CommonSubject>) {
 		self.subjects = subjects
 	}
 

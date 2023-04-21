@@ -2,7 +2,7 @@ import AssetConfig
 import DefaultCodable
 import Foundation
 
-struct AssetConfigCodable: AssetConfig, AIAssetConfig, Codable, Equatable, DefaultValueProvider {
+struct AssetConfigCodable: CommonAssetConfig, SummonAssetConfig, EnchantAssetConfig, Codable, Equatable, DefaultValueProvider {
 	static let `default`: Self = .init()
 
 	@Default<OrderCodable> var order: OrderCodable
@@ -10,39 +10,39 @@ struct AssetConfigCodable: AssetConfig, AIAssetConfig, Codable, Equatable, Defau
 	@Default<RandomizationCodable> var randomization: RandomizationCodable
 	@Default<DrawSerialCodable> var drawSerial: DrawSerialCodable
 	@Default<MetadataCodable> var metadata: MetadataCodable
-	@Default<SingleAssetElection> var singleAsset: SingleAssetElection
+	@Default<EnchantSingleAssetElection> var singleAsset: EnchantSingleAssetElection
 
-	struct OrderCodable: Order, Codable, Equatable, DefaultValueProvider {
+	struct OrderCodable: SummonOrder, Codable, Equatable, DefaultValueProvider {
 		static let `default`: Self = .init()
 
 		@Default<Nil> var selection: [String]?
 		@Default<Nil> var layerDepth: [String]?
 	}
 
-	struct CombinationCodable: Combination, Codable, Equatable {
+	struct CombinationCodable: SummonCombination, Codable, Equatable {
 		let target: SubjectCodable
 		let dependencies: [SubjectCodable]
 	}
 
-	struct RandomizationCodable: Randomization, Codable, Equatable, DefaultValueProvider {
+	struct RandomizationCodable: SummonRandomization, Codable, Equatable, DefaultValueProvider {
 		static let `default`: Self = .init(probabilities: .init())
 
 		@Default<Empty> var probabilities: [ProbabilityCodable]
 		@Default<Empty> var allocations: [AllocationCodable]
 
-		struct ProbabilityCodable: Probability, Codable, Equatable {
+		struct ProbabilityCodable: SummonProbability, Codable, Equatable {
 			let target: SubjectCodable
 			@Default<OneDouble> var weight: Double
 			@Default<False> var divideByMatches: Bool
 		}
 
-		struct AllocationCodable: Allocation, Codable, Equatable {
+		struct AllocationCodable: SummonAllocation, Codable, Equatable {
 			let target: SubjectCodable
 			let quantity: Int
 		}
 	}
 
-	struct SubjectCodable: Subject, Codable, Equatable {
+	struct SubjectCodable: CommonSubject, Codable, Equatable {
 		/// default: empty
 		let layer: String
 		/// default: #/^(?!)$/#
@@ -72,7 +72,7 @@ struct AssetConfigCodable: AssetConfig, AIAssetConfig, Codable, Equatable, Defau
 		}
 	}
 
-	struct DrawSerialCodable: DrawSerial, Codable, Equatable, DefaultValueProvider {
+	struct DrawSerialCodable: SummonDrawSerial, Codable, Equatable, DefaultValueProvider {
 		static let `default`: Self = .init(enabled: .init(wrappedValue: false))
 
 		@Default<True> var enabled: Bool
@@ -84,7 +84,7 @@ struct AssetConfigCodable: AssetConfig, AIAssetConfig, Codable, Equatable, Defau
 		@Default<ZeroFloat> var offsetY: CGFloat
 	}
 
-	struct MetadataCodable: Metadata, AIMetadata, Codable, Equatable, DefaultValueProvider {
+	struct MetadataCodable: CommonMetadata, EnchantMetadata, Codable, Equatable, DefaultValueProvider {
 		static let `default`: Self = .init()
 
 		@Default<BlankURL> var baseUrl: URL
@@ -94,17 +94,17 @@ struct AssetConfigCodable: AssetConfig, AIAssetConfig, Codable, Equatable, Defau
 		@Default<WhiteHexCode> var backgroundColor: String
 		@Default<Empty> var traitData: [TraitDataCodable]
 		@Default<Empty> var traitOrder: [String]
-		@Default<Empty> var aiTraitData: [AITraitDataCodable]
-		@Default<AITraitListingCodable> var aiTraitListing: AITraitListingCodable
+		@Default<Empty> var aiTraitData: [EnchantTraitDataCodable]
+		@Default<EnchantTraitListingCodable> var aiTraitListing: EnchantTraitListingCodable
 
-		struct TraitDataCodable: TraitData, Codable, Equatable {
-			let traits: [Trait]
+		struct TraitDataCodable: CommonTraitData, Codable, Equatable {
+			let traits: [CommonTrait]
 			let conditions: [SubjectCodable]
 		}
 
-		struct AITraitDataCodable: AITraitData, Codable, Equatable {
+		struct EnchantTraitDataCodable: EnchantTraitData, Codable, Equatable {
 			/// default: empty
-			let traits: [Trait]
+			let traits: [CommonTrait]
 			/// default: #/^(?!)$/#
 			let spell: Regex<AnyRegexOutput>
 			/// to just keep original string to compare 2 objects
@@ -122,7 +122,7 @@ struct AssetConfigCodable: AssetConfig, AIAssetConfig, Codable, Equatable, Defau
 
 			init(from decoder: Decoder) throws {
 				let container = try decoder.container(keyedBy: CodingKeys.self)
-				traits = try container.decodeIfPresent([Trait].self, forKey: .traits) ?? []
+				traits = try container.decodeIfPresent([CommonTrait].self, forKey: .traits) ?? []
 				spellExpression = try container.decodeIfPresent(String.self, forKey: .spell) ?? "^(?!)$"
 				spell = try Regex(spellExpression)
 			}
@@ -132,10 +132,10 @@ struct AssetConfigCodable: AssetConfig, AIAssetConfig, Codable, Equatable, Defau
 			}
 		}
 
-		struct AITraitListingCodable: AITraitListing, Codable, Equatable, DefaultValueProvider {
+		struct EnchantTraitListingCodable: EnchantTraitListing, Codable, Equatable, DefaultValueProvider {
 			static let `default`: Self = .init()
 
-			let intent: AITraitListingIntent
+			let intent: EnchantTraitListingIntent
 			let list: [Regex<AnyRegexOutput>]
 			private let listExpressions: [String]
 
@@ -157,7 +157,7 @@ struct AssetConfigCodable: AssetConfig, AIAssetConfig, Codable, Equatable, Defau
 
 			init(from decoder: Decoder) throws {
 				let container = try decoder.container(keyedBy: CodingKeys.self)
-				intent = try container.decode(AITraitListingIntent.self, forKey: .intent)
+				intent = try container.decode(EnchantTraitListingIntent.self, forKey: .intent)
 				listExpressions = try container.decode([String].self, forKey: .list)
 				list = try listExpressions.map(Regex.init)
 			}

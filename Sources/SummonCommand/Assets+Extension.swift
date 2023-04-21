@@ -1,9 +1,9 @@
+import AssetConfig
 import SummonCommandCommon
 import MetadataFactory
-import protocol AssetConfig.Metadata
 
 extension InputData.Assets {
-	func metadataSubject(config: any AssetConfig.Metadata) -> MetadataSubject {
+	func metadataSubject(config: any CommonMetadata) -> MetadataSubject {
 		switch self {
 			case let .animated(layers, _):
 				return .generativeAssets(layers: layers.map(\.metadataLayerSubject), config: config)

@@ -2,7 +2,7 @@ import AssetConfig
 import DefaultCodable
 import Foundation
 
-extension SingleAssetElection: Codable {
+extension EnchantSingleAssetElection: Codable {
 	public func encode(to encoder: Encoder) throws {
 		var container = encoder.singleValueContainer()
 		switch self {
@@ -33,6 +33,6 @@ extension SingleAssetElection: Codable {
 	}
 }
 
-extension SingleAssetElection: DefaultValueProvider {
+extension EnchantSingleAssetElection: DefaultValueProvider {
 	public static let `default`: Self = .shuffle(.unique)
 }

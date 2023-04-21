@@ -1,6 +1,6 @@
 import Foundation
 
-public enum Trait: Equatable {
+public enum CommonTrait: Equatable {
 	case simple(value: String)
 	case label(trait: String, value: LabelValueType)
 	case rankedNumber(trait: String, value: Decimal)

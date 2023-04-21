@@ -2,9 +2,9 @@ import AssetConfig
 import Files
 
 public struct ReservedAllocationManager {
-	private var reserved: [Subject] = []
+	private var reserved: [CommonSubject] = []
 
-	public init(config: some Sequence<any Allocation>) {
+	public init(config: some Sequence<any SummonAllocation>) {
 		reserved = config
 			.filter { allocation in allocation.quantity > .zero }
 			.flatMap { allocation in (0..<allocation.quantity).map { _ in allocation.target } }

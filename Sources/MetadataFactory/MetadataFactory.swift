@@ -1,11 +1,9 @@
+import AssetConfig
 import CollectionKit
 import Files
 import Foundation
 import RegexBuilder
 import UniformTypeIdentifiers
-import protocol AssetConfig.AIMetadata
-import protocol AssetConfig.Metadata
-import enum AssetConfig.Trait
 
 public struct MetadataFactory {
 	let outputFolder: Folder
@@ -85,7 +83,7 @@ private extension MetadataFactory {
 		}
 	}
 
-	func attributes(layers: some Sequence<MetadataSubject.LayerSubject>, config: some AssetConfig.Metadata) -> [Metadata.Attribute] {
+	func attributes(layers: some Sequence<MetadataSubject.LayerSubject>, config: some CommonMetadata) -> [Metadata.Attribute] {
 		return layers.reduce([Metadata.Attribute]()) { accum, layer in
 			accum + config.traitData
 				.filter { trait in
@@ -98,7 +96,7 @@ private extension MetadataFactory {
 		}
 	}
 
-	func attributes(assetName: String, config: some AssetConfig.Metadata) -> [Metadata.Attribute] {
+	func attributes(assetName: String, config: some CommonMetadata) -> [Metadata.Attribute] {
 		config.traitData
 			.filter { trait in
 				trait.conditions.contains { condition in
@@ -109,7 +107,7 @@ private extension MetadataFactory {
 			.compactMap(\.metadata)
 	}
 
-	func attributes(spells: some Sequence<String>, config: some AIMetadata) -> [Metadata.Attribute] {
+	func attributes(spells: some Sequence<String>, config: some EnchantMetadata) -> [Metadata.Attribute] {
 		let filteredSpells = spells.filter { spell in
 			let isAllowlist = config.aiTraitListing.intent == .allowlist
 			let isSpellListed = config.aiTraitListing.list.contains { regex in
@@ -119,7 +117,7 @@ private extension MetadataFactory {
 		}
 
 		let traits = filteredSpells
-			.flatMap { spell -> [AssetConfig.Trait] in
+			.flatMap { spell -> [CommonTrait] in
 				let matched = config.aiTraitData.filter { data in spell.contains(data.spell) }
 				guard !matched.isEmpty else {
 					return [.simple(value: spell.capitalized)]
@@ -194,7 +192,7 @@ private let integerFormatRegex = Regex {
 	"d"
 }
 
-private extension AssetConfig.Trait {
+private extension CommonTrait {
 	var metadata: Metadata.Attribute? {
 		metadata()
 	}

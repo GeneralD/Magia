@@ -272,7 +272,7 @@ private extension SummonCommand {
 	}
 
 	@discardableResult
-	func generateMetadata(input: InputData, index: Int, config: any Metadata, embededImage data: Data? = nil) -> GenResult {
+	func generateMetadata(input: InputData, index: Int, config: any CommonMetadata, embededImage data: Data? = nil) -> GenResult {
 		guard !noMetadata else { return .nothing }
 		let imageData = embedDecodedImageInMetadata ? data : nil
 
@@ -297,7 +297,7 @@ private extension SummonCommand {
 
 	// MARK: - Load Config File
 
-	func loadAssetConfig() -> any AssetConfig {
+	func loadAssetConfig() -> any SummonAssetConfig {
 		let loader = AssetConfigLoader()
 		
 		guard let file = inputFolder.files.first(where: { $0.nameExcludingExtension == "config" }) else {
@@ -322,7 +322,7 @@ private extension SummonCommand {
 
 	// MARK: - SerialText from config
 
-	func serialText(from config: some DrawSerial) -> InputData.SerialText? {
+	func serialText(from config: some SummonDrawSerial) -> InputData.SerialText? {
 		guard config.enabled, !config.format.isEmpty else { return nil }
 
 		let font = loadFont(fontName: config.font, folder: inputFolder, size: config.size)

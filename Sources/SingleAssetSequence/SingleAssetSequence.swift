@@ -5,7 +5,7 @@ import Files
 public struct SingleAssetSequence {
 	private let elements: [File]
 
-	public init(assetFiles: [File], election: SingleAssetElection, quantity: Int? = nil) throws {
+	public init(assetFiles: [File], election: EnchantSingleAssetElection, quantity: Int? = nil) throws {
 		switch election {
 		case .alphabetical:
 			let sorted = assetFiles.sorted(at: \.name, by: <)

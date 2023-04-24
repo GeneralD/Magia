@@ -62,7 +62,7 @@ mint install GeneralD/Magia
 
 ## ドキュメント
 
-[Wiki](wiki)を参照
+[Wiki](https://github.com/GeneralD/Magia/wiki)を参照
 
 
 

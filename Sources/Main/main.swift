@@ -6,7 +6,7 @@ import BoilerplateCommand
 import SummonCommand
 import SwiftCLI
 
-let cli = CLI(name: "magia", version: "1.0.6", description: "Ultimate NFT generator")
+let cli = CLI(name: "magia", version: "1.0.7", description: "Ultimate NFT generator")
 
 cli.commands = [
 	SummonCommand(name: "summon"),

@@ -1,9 +1,10 @@
 import AssetConfig
 import Foundation
 
-struct BoilerplateAssetConfig: CommonAssetConfig, Encodable {
+struct BoilerplateAssetConfig: SummonAssetConfig, Encodable {
 	let order: BoilerplateOrder
 	let combinations: [BoilerplateCombination]
+	let specials: [BoilerplateSpecial]
 	let randomization: BoilerplateRandomization
 	let drawSerial: BoilerplateDrawSerial
 	let metadata: BoilerplateMetadata
@@ -15,6 +16,11 @@ struct BoilerplateAssetConfig: CommonAssetConfig, Encodable {
 
 	struct BoilerplateCombination: SummonCombination, Encodable {
 		let target: BoilerplateSubject
+		let dependencies: [BoilerplateSubject]
+	}
+
+	struct BoilerplateSpecial: SummonSpecial, Encodable {
+		let index: Int
 		let dependencies: [BoilerplateSubject]
 	}
 

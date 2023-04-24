@@ -39,14 +39,31 @@ extension BoilerplateAssetConfigFactory {
 					}
 			}
 
+		let subjectSample = try layerFolders
+			.first
+			.flatMap { folder in
+				try folder.files.first.map { file in
+					try BoilerplateAssetConfig.BoilerplateSubject(layerExpression: folder.name, nameExpression: file.nameExcludingExtension)
+				}
+			}
+
+		let dependenciesSample = [subjectSample]
+			.compactMap { $0 }
+
+		let allocationsSample = dependenciesSample
+			.map { BoilerplateAssetConfig.BoilerplateRandomization.BoilerplateAllocation(target: $0, quantity: 10) }
+
 		return .init(
 			order: .init(
 				selection: layerNames,
 				layerDepth: layerNames),
 			combinations: combinations,
+			specials: [.init(
+				index: 0,
+				dependencies: dependenciesSample)],
 			randomization: .init(
 				probabilities: probabilities,
-				allocations: []),
+				allocations: allocationsSample),
 			drawSerial: .init(
 				enabled: false,
 				format: "#%05d",

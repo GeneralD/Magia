@@ -153,15 +153,15 @@ private extension SummonCommand {
 
 		let config = loadAssetConfig()
 		let serialText = serialText(from: config.drawSerial)
-		let constraintFactory = LayerConstraintFactory(layerStrictions: config.combinations)
+		let constraintFactory = LayerConstraintFactory(layerStrictions: config.combinations, specials: config.specials)
 		let randomManager = RandomizationController(config: config.randomization)
 		let layerFolders = sort(subjects: inputFolder.subfolders, where: \.nameExcludingExtension, order: config.order.selection)
 
-		func inputData<F: Location, S: Sequence>(locations: (Folder) -> S, reservedAllocationManager: ReservedAllocationManager) -> (InputData, ReservedAllocationManager) where F: Hashable, S.Element == F {
+		func inputData<F: Location, S: Sequence>(forIndex index: Int, locations: (Folder) -> S, reservedAllocationManager: ReservedAllocationManager) -> (InputData, ReservedAllocationManager) where F: Hashable, S.Element == F {
 			let (layers, allocationManager) = layerFolders
 				.reduce(into: [InputData.ImageLayer<F>](), reservedAllocationManager) { layers, reservation, layerFolder in
 					let targetLayer = layerFolder.name
-					let constraint = constraintFactory.constraint(forLayer: targetLayer, conditionLayers: layers.map(\.layerConstraintSubject))
+					let constraint = constraintFactory.constraint(forIndex: index, forLayer: targetLayer, conditionLayers: layers.map(\.layerConstraintSubject))
 					let validCandidates = locations(layerFolder).filter { f in
 						constraint.isValidItem(name: f.nameExcludingExtension)
 					}
@@ -206,8 +206,8 @@ private extension SummonCommand {
 					guard let reprintData else {
 						// or create new
 						return animated
-						? inputData(locations: \.subfolders, reservedAllocationManager: reservation)
-						: inputData(locations: \.files, reservedAllocationManager: reservation)
+						? inputData(forIndex: index, locations: \.subfolders, reservedAllocationManager: reservation)
+						: inputData(forIndex: index, locations: \.files, reservedAllocationManager: reservation)
 					}
 					return (reprintData, reservation)
 				} ()

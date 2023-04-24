@@ -7,6 +7,7 @@ struct AssetConfigCodable: CommonAssetConfig, SummonAssetConfig, EnchantAssetCon
 
 	@Default<OrderCodable> var order: OrderCodable
 	@Default<Empty> var combinations: [CombinationCodable]
+	@Default<Empty> var specials: [SpecialCodable]
 	@Default<RandomizationCodable> var randomization: RandomizationCodable
 	@Default<DrawSerialCodable> var drawSerial: DrawSerialCodable
 	@Default<MetadataCodable> var metadata: MetadataCodable
@@ -21,6 +22,11 @@ struct AssetConfigCodable: CommonAssetConfig, SummonAssetConfig, EnchantAssetCon
 
 	struct CombinationCodable: SummonCombination, Codable, Equatable {
 		let target: SubjectCodable
+		let dependencies: [SubjectCodable]
+	}
+
+	struct SpecialCodable: SummonSpecial, Codable, Equatable {
+		let index: Int
 		let dependencies: [SubjectCodable]
 	}
 

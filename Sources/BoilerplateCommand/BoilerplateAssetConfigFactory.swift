@@ -9,33 +9,33 @@ struct BoilerplateAssetConfigFactory {
 }
 
 extension BoilerplateAssetConfigFactory {
-	func generate() -> BoilerplateAssetConfig {
+	func generate() throws -> BoilerplateAssetConfig {
 		let layerFolders = assetFolder.subfolders.filter { !$0.isEmpty() }
 		let layerNames = layerFolders.map(\.name).sorted(by: <)
 
-		let combinations = layerFolders
+		let combinations = try layerFolders
 			.flatMap { layerFolder in
 				let names = layerFolder.files.map(\.nameExcludingExtension) + layerFolder.subfolders.map(\.name)
-				return names
-					.map { BoilerplateAssetConfig.BoilerplateCombination(target: .init(layer: layerFolder.name, nameExpression: "^\($0)$"), dependencies: []) }
+				return try names
+					.map { BoilerplateAssetConfig.BoilerplateCombination(target: try .init(layerExpression: layerFolder.name, nameExpression: "^\($0)$"), dependencies: []) }
 			}
 
-		let probabilities = layerFolders
+		let probabilities = try layerFolders
 			.flatMap { layerFolder in
 				let names = layerFolder.files.map(\.nameExcludingExtension) + layerFolder.subfolders.map(\.name)
-				return names
-					.map { BoilerplateAssetConfig.BoilerplateSubject(layer: layerFolder.name, nameExpression: "^\($0)$") }
+				return try names
+					.map { try BoilerplateAssetConfig.BoilerplateSubject(layerExpression: layerFolder.name, nameExpression: "^\($0)$") }
 					.map { BoilerplateAssetConfig.BoilerplateRandomization.BoilerplateProbability(target: $0, weight: 1, divideByMatches: false) }
 			}
 
-		let traits = layerFolders
+		let traits = try layerFolders
 			.flatMap { layerFolder in
 				let names = layerFolder.files.map(\.nameExcludingExtension) + layerFolder.subfolders.map(\.name)
-				return names
+				return try names
 					.map {
 						BoilerplateAssetConfig.BoilerplateMetadata.BoilerplateTraitData(
 							traits: [.label(trait: layerFolder.name, value: .string($0))],
-							conditions: [.init(layer: layerFolder.name, nameExpression: "^\($0)$")])
+							conditions: [try .init(layerExpression: layerFolder.name, nameExpression: "^\($0)$")])
 					}
 			}
 

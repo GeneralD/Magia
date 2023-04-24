@@ -17,7 +17,7 @@ public extension RandomizationController {
 		}
 
 		let dict = config.probabilities
-			.filter { probability in probability.target.layer == targetLayer }
+			.filter { probability in targetLayer.contains(probability.target.layer) }
 			.reduce(into: initDict) { accum, probability in
 				let matches = candidates.filter { candidate in
 					candidate.nameExcludingExtension.contains(probability.target.name)

@@ -88,7 +88,7 @@ private extension MetadataFactory {
 			accum + config.traitData
 				.filter { trait in
 					trait.conditions.contains { condition in
-						condition.layer == layer.layer && layer.name.contains(condition.name)
+						layer.layer.contains(condition.layer) && layer.name.contains(condition.name)
 					}
 				}
 				.flatMap(\.traits)

@@ -1,4 +1,4 @@
 public protocol CommonSubject {
-	var layer: String { get }
+	var layer: Regex<AnyRegexOutput> { get }
 	var name: Regex<AnyRegexOutput> { get }
 }

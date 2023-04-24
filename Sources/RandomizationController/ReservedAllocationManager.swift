@@ -12,7 +12,7 @@ public struct ReservedAllocationManager {
 	}
 
 	public mutating func dealNext<F: Location>(originalCandidates candidates: some Sequence<F>, targetLayer: String) -> any Sequence<F> {
-		guard let (index, subject) = reserved.enumerated().first(where: { _, sub in sub.layer == targetLayer }) else { return candidates }
+		guard let (index, subject) = reserved.enumerated().first(where: { _, sub in targetLayer.contains(sub.layer) }) else { return candidates }
 		defer { reserved.remove(at: index) }
 		return candidates.filter( { $0.nameExcludingExtension.contains(subject.name) })
 	}

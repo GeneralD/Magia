@@ -60,17 +60,19 @@ struct BoilerplateAssetConfig: CommonAssetConfig, Encodable {
 	}
 
 	struct BoilerplateSubject: CommonSubject, Encodable {
-		/// default: empty
-		let layer: String
+		/// default: #/^(?!)$/#
+		let layer: Regex<AnyRegexOutput>
 		/// default: #/^(?!)$/#
 		let name: Regex<AnyRegexOutput>
 		/// to just keep original string to compare 2 objects
+		private let layerExpression: String
 		private let nameExpression: String
 
-		init(layer: String, nameExpression: String) {
-			self.layer = layer
+		init(layerExpression: String, nameExpression: String) throws {
+			self.layerExpression = layerExpression
 			self.nameExpression = nameExpression
-			self.name = (try? .init(nameExpression)) ?? (try! .init("^(?!)$"))
+			layer = try Regex(layerExpression)
+			name = try Regex(nameExpression)
 		}
 
 		enum CodingKeys: CodingKey {
@@ -79,7 +81,7 @@ struct BoilerplateAssetConfig: CommonAssetConfig, Encodable {
 
 		func encode(to encoder: Encoder) throws {
 			var container = encoder.container(keyedBy: CodingKeys.self)
-			try container.encode(layer, forKey: .layer)
+			try container.encode(layerExpression, forKey: .layer)
 			try container.encode(nameExpression, forKey: .name)
 		}
 	}

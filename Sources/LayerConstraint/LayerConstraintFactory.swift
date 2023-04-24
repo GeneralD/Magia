@@ -13,11 +13,11 @@ public struct LayerConstraintFactory {
 		// pick up all related strictions with current layer selections
 			.flatMap { conditionLayer in
 				layerStrictions.filter { combination in
-					combination.target.layer == conditionLayer.layer && conditionLayer.name.contains(combination.target.name)
+					conditionLayer.layer.contains(combination.target.layer) && conditionLayer.name.contains(combination.target.name)
 				}
 			}
 			.flatMap { $0.dependencies } // keypath \.dependencies triggers a fatal error at runtime by compiler bug
-			.filter { dependency in dependency.layer == layer }
+			.filter { dependency in layer.contains(dependency.layer) }
 		return .init(subjects: dependencies)
 	}
 }

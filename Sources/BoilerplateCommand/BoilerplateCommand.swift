@@ -27,7 +27,7 @@ public class BoilerplateCommand: Command {
 	}
 
 	public func execute() throws {
-		generate()
+		try generate()
 	}
 }
 
@@ -35,11 +35,11 @@ private extension BoilerplateCommand {
 
 	// MARK: - Generate
 
-	func generate() {
+	func generate() throws {
 		switch subject {
 			case .config:
 				let factory = BoilerplateAssetConfigFactory(assetFolder: inputFolder)
-				let config = factory.generate()
+				let config = try factory.generate()
 				let writer = AssetConfigWriter(format: .yaml)
 				switch writer.write(config: config, in: inputFolder, overwrite: forceOverwrite) {
 					case .success(let file):

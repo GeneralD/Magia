@@ -51,7 +51,7 @@ struct BoilerplateAssetConfig: SummonAssetConfig, Encodable {
 	}
 
 	struct BoilerplateMetadata: CommonMetadata, Encodable {
-		let baseUrl: URL
+		let baseUrl: URL?
 		let nameFormat: String
 		let descriptionFormat: String
 		let externalUrlFormat: String?

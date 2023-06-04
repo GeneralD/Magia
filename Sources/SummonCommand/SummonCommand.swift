@@ -50,6 +50,9 @@ public class SummonCommand: Command {
 	@Key("-t", "--type", description: "Type to generate image (default is gif)", completion: .values([(name: "gif", description: ""), (name: "png", description: "")]), validation: [.custom("unsupported image type") { $0 == .gif || $0 == .png }])
 	var imageType: UTType!
 
+	@Key("--baseurl", description: "Base URL to place metadata (default is difined in config.json)", completion: .none)
+	var baseURL: URL?
+
 	@Flag("-e", "--embedded", description: "Embed encoded image in metadata")
 	var embedDecodedImageInMetadata: Bool
 
@@ -276,7 +279,13 @@ private extension SummonCommand {
 		guard !noMetadata else { return .nothing }
 		let imageData = embedDecodedImageInMetadata ? data : nil
 
-		switch metadataFactory.generateMetadata(from: input.assets.metadataSubject(config: config), as: nameFactory.fileName(from: index), serial: index, imageType: imageType, embededImage: imageData) {
+		switch metadataFactory.generateMetadata(
+			from: input.assets.metadataSubject(config: config),
+			as: nameFactory.fileName(from: index),
+			serial: index,
+			imageType: imageType,
+			overrideBaseURL: baseURL,
+			embededImage: imageData) {
 			case let .success(file):
 				stdout <<< "Created: \(file.path)"
 				return .success(file: file)
@@ -290,6 +299,8 @@ private extension SummonCommand {
 						stderr <<< "backgroundColor in metadata should be 3 or 6 hex code without # prefix."
 					case .writingFileFailed:
 						stderr <<< "Writing metadata failed."
+					case .undifinedBaseURL:
+						stderr <<< "BaseURL is not defined."
 				}
 				return .failure
 		}

@@ -95,7 +95,7 @@ struct AssetConfigCodable: CommonAssetConfig, SummonAssetConfig, EnchantAssetCon
 	struct MetadataCodable: CommonMetadata, EnchantMetadata, Codable, Equatable, DefaultValueProvider {
 		static let `default`: Self = .init()
 
-		@Default<BlankURL> var baseUrl: URL
+		@Default<Nil> var baseUrl: URL?
 		@Default<Empty> var nameFormat: String
 		@Default<Empty> var descriptionFormat: String
 		@Default<Nil> var externalUrlFormat: String?

@@ -29,10 +29,6 @@ enum FontMidiumSize: DefaultValueProvider {
 	public static let `default`: CGFloat = 14
 }
 
-enum BlankURL: DefaultValueProvider {
-	public static let `default` = URL(fileURLWithPath: "")
-}
-
 enum Nil<T>: DefaultValueProvider where T: Equatable, T: Codable {
 	public static var `default`: T? { nil }
 }

@@ -41,6 +41,9 @@ public class EnchantCommand: Command {
 	@Key("-r", "--reprint", description: "Pickup assets based on data.sqlite file", completion: .filename)
 	var sqliteFile: File?
 
+	@Key("--baseurl", description: "Base URL to place metadata (default is difined in config.json)", completion: .none)
+	var baseURL: URL?
+
 	@Flag("-e", "--embedded", description: "Embed encoded image in metadata")
 	var embedDecodedImageInMetadata: Bool
 
@@ -155,22 +158,30 @@ private extension EnchantCommand {
 		let exifReader = ExifReader(fileURL: assetFile.url)
 		let spells = exifReader.spells.map(\.phrase)
 
-		switch metadataFactory.generateMetadata(from: .completedAsset(name: assetFile.nameExcludingExtension, spells: spells, config: config), as: nameFactory.fileName(from: index), serial: index, imageType: fileType, embededImage: imageData) {
-		case let .success(file):
-			stdout <<< "Created: \(file.path)"
-			return true
-		case let .failure(error):
-			switch error {
-			case .creatingFileFailed:
-				stderr <<< "Couldn't create file to write metadata."
-			case .invalidMetadataSortConfig:
-				stderr <<< "Sorting metadata config should cover all trait you defined."
-			case .invalidBackgroundColorCode:
-				stderr <<< "backgroundColor in metadata should be 3 or 6 hex code without # prefix."
-			case .writingFileFailed:
-				stderr <<< "Writing metadata failed."
-			}
-			return false
+		switch metadataFactory.generateMetadata(
+			from: .completedAsset(name: assetFile.nameExcludingExtension, spells: spells, config: config),
+			as: nameFactory.fileName(from: index),
+			serial: index,
+			imageType: fileType,
+			overrideBaseURL: baseURL,
+			embededImage: imageData) {
+			case let .success(file):
+				stdout <<< "Created: \(file.path)"
+				return true
+			case let .failure(error):
+				switch error {
+					case .creatingFileFailed:
+						stderr <<< "Couldn't create file to write metadata."
+					case .invalidMetadataSortConfig:
+						stderr <<< "Sorting metadata config should cover all trait you defined."
+					case .invalidBackgroundColorCode:
+						stderr <<< "backgroundColor in metadata should be 3 or 6 hex code without # prefix."
+					case .writingFileFailed:
+						stderr <<< "Writing metadata failed."
+					case .undifinedBaseURL:
+						stderr <<< "BaseURL is not defined."
+				}
+				return false
 		}
 	}
 

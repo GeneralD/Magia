@@ -3,4 +3,5 @@ public enum MetadataFactoryError: Error {
 	case invalidMetadataSortConfig
 	case invalidBackgroundColorCode
 	case writingFileFailed
+	case undifinedBaseURL
 }

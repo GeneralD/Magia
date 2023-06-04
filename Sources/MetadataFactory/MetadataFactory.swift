@@ -17,7 +17,7 @@ public struct MetadataFactory {
 
 public extension MetadataFactory {
 	@discardableResult
-	func generateMetadata(from subject: MetadataSubject, as name: String, serial: Int, imageType: UTType, embededImage: Data? = nil) -> Result<File, MetadataFactoryError> {
+	func generateMetadata(from subject: MetadataSubject, as name: String, serial: Int, imageType: UTType, overrideBaseURL: URL? = nil, embededImage: Data? = nil) -> Result<File, MetadataFactoryError> {
 		guard let jsonFile = try? outputFolder.createFileIfNeeded(withName: "\(name).json") else { return .failure(.creatingFileFailed) }
 
 		let attributes = attributes(subject: subject)
@@ -28,6 +28,10 @@ public extension MetadataFactory {
 			}
 
 		let config = subject.config
+		guard let baseURL = overrideBaseURL ?? config.baseUrl else {
+			try? jsonFile.delete()
+			return .failure(.undifinedBaseURL)
+		}
 
 		// sort attributes
 		guard let sortedAttribute = sort(attributes: attributes, traitOrder: config.traitOrder) else {
@@ -35,7 +39,7 @@ public extension MetadataFactory {
 			return .failure(.invalidMetadataSortConfig)
 		}
 
-		let imageURLType = embededImage.map(ImageURLType.dataURL(data: )) ?? .locationURL(baseURL: config.baseUrl, name: name)
+		let imageURLType = embededImage.map(ImageURLType.dataURL(data: )) ?? .locationURL(baseURL: baseURL, name: name)
 		let imageURL = imageURL(urlType: imageURLType, imageType: imageType)
 
 		let name = replace(in: config.nameFormat, attributes: attributes, serial: serial)

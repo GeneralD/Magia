@@ -61,7 +61,10 @@ public class EnchantCommand: Command {
 	}
 
 	public var options: [OptionGroup] {
-		[.atMostOne($noMetadata, $noImage, $embedDecodedImageInMetadata)]
+		[
+			// embedDecodedImageInMetadata needs to make source image files, so noImage is unavailable.
+			.atMostOne($noImage, $embedDecodedImageInMetadata),
+		]
 	}
 
 	public func execute() throws {
@@ -164,7 +167,7 @@ private extension EnchantCommand {
 			serial: index,
 			imageType: fileType,
 			overrideBaseURL: baseURL,
-			embededImage: imageData) {
+			embeddedImage: imageData) {
 			case let .success(file):
 				stdout <<< "Created: \(file.path)"
 				return true

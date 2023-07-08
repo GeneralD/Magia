@@ -82,9 +82,8 @@ public class SummonCommand: Command {
 
 	public var optionGroups: [OptionGroup] {
 		[
-			// if both noMetadata and noImage are true, nothing happens.
 			// embedDecodedImageInMetadata needs to make source image files, so noImage is unavailable.
-			.atMostOne($noMetadata, $noImage, $embedDecodedImageInMetadata),
+			.atMostOne($noImage, $embedDecodedImageInMetadata),
 		]
 	}
 
@@ -285,7 +284,7 @@ private extension SummonCommand {
 			serial: index,
 			imageType: imageType,
 			overrideBaseURL: baseURL,
-			embededImage: imageData) {
+			embeddedImage: imageData) {
 			case let .success(file):
 				stdout <<< "Created: \(file.path)"
 				return .success(file: file)

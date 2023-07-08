@@ -17,7 +17,7 @@ public struct MetadataFactory {
 
 public extension MetadataFactory {
 	@discardableResult
-	func generateMetadata(from subject: MetadataSubject, as name: String, serial: Int, imageType: UTType, overrideBaseURL: URL? = nil, embededImage: Data? = nil) -> Result<File, MetadataFactoryError> {
+	func generateMetadata(from subject: MetadataSubject, as name: String, serial: Int, imageType: UTType, overrideBaseURL: URL? = nil, embeddedImage: Data? = nil) -> Result<File, MetadataFactoryError> {
 		guard let jsonFile = try? outputFolder.createFileIfNeeded(withName: "\(name).json") else { return .failure(.creatingFileFailed) }
 
 		let attributes = attributes(subject: subject)
@@ -28,10 +28,6 @@ public extension MetadataFactory {
 			}
 
 		let config = subject.config
-		guard let baseURL = overrideBaseURL ?? config.baseUrl else {
-			try? jsonFile.delete()
-			return .failure(.undifinedBaseURL)
-		}
 
 		// sort attributes
 		guard let sortedAttribute = sort(attributes: attributes, traitOrder: config.traitOrder) else {
@@ -39,7 +35,22 @@ public extension MetadataFactory {
 			return .failure(.invalidMetadataSortConfig)
 		}
 
-		let imageURLType = embededImage.map(ImageURLType.dataURL(data: )) ?? .locationURL(baseURL: baseURL, name: name)
+		let imageURLType: ImageURLType?
+		switch (embeddedImage, overrideBaseURL ?? config.baseUrl) {
+			case let (.some(data), _):
+				// if embeddedImage is not nil, use data url
+				imageURLType = .dataURL(data: data)
+			case let (_, .some(baseURL)):
+				// if base url is not nil, use location url
+				imageURLType = .locationURL(baseURL: baseURL, name: name)
+			default:
+				imageURLType = nil
+		}
+
+		guard let imageURLType else {
+			try? jsonFile.delete()
+			return .failure(.undifinedBaseURL)
+		}
 		let imageURL = imageURL(urlType: imageURLType, imageType: imageType)
 
 		let name = replace(in: config.nameFormat, attributes: attributes, serial: serial)
@@ -79,11 +90,11 @@ private extension MetadataFactory {
 
 	func attributes(subject: MetadataSubject) -> [Metadata.Attribute] {
 		switch subject {
-		case let .generativeAssets(layers, config):
-			return attributes(layers: layers, config: config)
-		case let .completedAsset(name, spells, config):
-			// merge attributes come from asset's name and AI spells
-			return attributes(assetName: name, config: config) + attributes(spells: spells, config: config)
+			case let .generativeAssets(layers, config):
+				return attributes(layers: layers, config: config)
+			case let .completedAsset(name, spells, config):
+				// merge attributes come from asset's name and AI spells
+				return attributes(assetName: name, config: config) + attributes(spells: spells, config: config)
 		}
 	}
 
@@ -149,18 +160,18 @@ private extension MetadataFactory {
 			let trait = match.attr.description
 			return attributes.lazy.compactMap { attr in
 				switch attr {
-				case .textLabel(traitType: trait, value: let value):
-					return value
-				case .numberLabel(traitType: trait, value: let value):
-					return value.description
-				case .boostNumber(traitType: trait, value: let value, maxValue: _):
-					return value.description
-				case .boostPercentage(traitType: trait, value: let value):
-					return value.description
-				case .rankedNumber(traitType: trait, value: let value):
-					return value.description
-				case _:
-					return nil
+					case .textLabel(traitType: trait, value: let value):
+						return value
+					case .numberLabel(traitType: trait, value: let value):
+						return value.description
+					case .boostNumber(traitType: trait, value: let value, maxValue: _):
+						return value.description
+					case .boostPercentage(traitType: trait, value: let value):
+						return value.description
+					case .rankedNumber(traitType: trait, value: let value):
+						return value.description
+					case _:
+						return nil
 				}
 			}.first ?? ""
 		}
@@ -203,23 +214,23 @@ private extension CommonTrait {
 
 	func metadata(probability: Double? = nil) -> Metadata.Attribute? {
 		switch self {
-		case let .simple(value):
-			return .simple(value: value)
-		case let .label(trait, .string(value)):
-			return .textLabel(traitType: trait, value: value)
-		case let .label(trait, value: .date(value)):
-			return .dateLabel(traitType: trait, value: value)
-		case let .label(trait, value: .number(value)):
-			return .numberLabel(traitType: trait, value: value)
-		case let .rankedNumber(trait, value):
-			return .rankedNumber(traitType: trait, value: value)
-		case let .boostNumber(trait, value, max):
-			return .boostNumber(traitType: trait, value: value, maxValue: max)
-		case let .boostPercentage(trait, value):
-			return .boostPercentage(traitType: trait, value: value)
-		case let .rarityPercentage(trait):
-			guard let probability else { return nil }
-			return  .boostPercentage(traitType: trait, value: .init(probability * 100, digitsAfterPoint: 2))
+			case let .simple(value):
+				return .simple(value: value)
+			case let .label(trait, .string(value)):
+				return .textLabel(traitType: trait, value: value)
+			case let .label(trait, value: .date(value)):
+				return .dateLabel(traitType: trait, value: value)
+			case let .label(trait, value: .number(value)):
+				return .numberLabel(traitType: trait, value: value)
+			case let .rankedNumber(trait, value):
+				return .rankedNumber(traitType: trait, value: value)
+			case let .boostNumber(trait, value, max):
+				return .boostNumber(traitType: trait, value: value, maxValue: max)
+			case let .boostPercentage(trait, value):
+				return .boostPercentage(traitType: trait, value: value)
+			case let .rarityPercentage(trait):
+				guard let probability else { return nil }
+				return  .boostPercentage(traitType: trait, value: .init(probability * 100, digitsAfterPoint: 2))
 		}
 	}
 }
